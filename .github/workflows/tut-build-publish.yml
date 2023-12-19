@@ -36,6 +36,7 @@ jobs:
             any::rmarkdown
             any::magick
             any::pdftools
+            any::quarto
 
       # install quarto
       - name: Install quarto
