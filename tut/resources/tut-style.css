@@ -1,0 +1,360 @@
+/* /\* cabin-sketch-regular - latin *\/ */
+/* @font-face { */
+/*   font-display: swap; /\* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. *\/ */
+/*   font-family: 'Cabin Sketch'; */
+/*   font-style: normal; */
+/*   font-weight: 400; */
+/*   src: url('../tut/resources/cabin-sketch-v21-latin-regular.woff2') format('woff2'); /\* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ *\/ */
+/* } */
+/* cabin-sketch-700 - latin */
+/* @font-face { */
+/*   font-display: swap; /\* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. *\/ */
+/*   font-family: 'Cabin Sketch'; */
+/*   font-style: normal; */
+/*   font-weight: 700; */
+/*   src: url('https://fonts.googleapis.com/css?family=Cabin-Sketch:wght@700') format("woff2"); */
+/*   /\* src: url('https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&display=swap') format('woff2'); /\\* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ *\\/ *\/ */
+/* } */
+
+/* /\* @import url('https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@700&display=swap'); *\\/ *\/ */
+
+
+/* /\* .title { *\/ */
+/* /\*     font-family: Cabin Sketch; *\/ */
+/* /\* } *\/ */
+
+body {
+	//background-color: antiquewhite;
+	background-color: #62ABFE;
+	counter-reset: section;
+	font-size: 11pt !important;
+	/* font: 100% Verdana, sans-serif !important; */
+	color: #666;
+        padding-top: 0px;
+}
+#quarto-sidebar {
+    background-image: url(https://reefcloud.ai/static/media/mainAimsLogo.0b1e652909de41753d95ec26946b582c.svg);
+    background-repeat: no-repeat;
+    background-position: bottom;
+    //background-image: ../tut/resources/partner-logo-ausgvt-aims.png
+}
+#quarto-document-content {
+    background-color: white;
+    box-shadow: 0px 3px 20px #333;
+    padding: 25px;
+    left: 10px;
+    margin-top: 0px;
+}
+
+.callout {
+    margin-left: 0px !important;
+}
+
+div.sourceCode {
+    margin-left: calc(calc(0em + -2px) + 2px);
+}
+div.sourceCode:has(> .r) {
+    margin: 0 0 1px;
+    padding: 0;
+    padding-top: 2px;
+    padding-left: 3px;
+    border: 1px solid #d6d6d6;
+    border-left: 5px solid #3E769A;
+    background: #FFFFE4 !important;
+    overflow: hidden;
+    width: auto;
+    color: var(--bs-body-color);
+}
+pre.r {
+    color: var(--bs-body-color) !important;
+}
+.code-copy-button {
+    margin-top: 0px;
+    margin-right: 0px;
+}
+
+/* .sidebar.toc-left, .sidebar.margin-sidebar { */
+/*     top: 0px; */
+/*     padding-top: 1em; */
+/*     background-color: white; */
+/*     box-shadow: 0px 3px 20px #333; */
+/* } */
+
+
+#TOC {
+    /* margin: 85px 0px 20px 0px; */
+    box-shadow: 0px 3px 20px #333;
+    width: 20%;
+    max-height: 90%;
+    overflow: auto;
+    margin-left: 0.1%;
+    position: fixed;
+    border-radius: 6px;
+    background-color: white;
+}
+
+h1 {
+    counter-reset: subsection;
+    /* font-family: 'Trebuchet MS', Arial, sans-serif; */
+    font-weight: bold;
+    font-size: 2em;
+    color: #3E769A;
+}
+/* section:not(.unnumbered) > h1:not(.title):before { */
+/*     counter-increment: section 1; */
+/*     content: "Section " counter(section, decimal) ": "; */
+/* } */
+
+h1>.header-section-number {
+    color: #3E769A;
+}
+h1>.header-section-number:before {
+    content: "Section ";
+    color: #3E769A;
+}
+h1>.header-section-number:after {
+    content: ": ";
+    color: #3E769A;
+}
+
+pre.numberSource {
+    margin-left: 2em;
+    padding-left: 4px;
+    color: #3E769A;
+}
+
+code.r>span>a {
+    color: #aaa;
+}
+
+
+/* div.sourceCode pre.sourceCode { */
+/*     color: inherit; */
+/* } */
+/*
+pre.sourceCode {
+    border-left: 3px;
+    border-left-style: solid;
+    border-left-color: #ccc; 
+    //border-left: 5px solid #3E769A;
+    padding-left: 0.6em;
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
+    font-size: .875em;
+    overflow: visible !important;
+    padding: 0.4em;
+}
+*/
+/*
+pre.sourceCode {
+    margin: 0 0 1px;
+    padding: 0;
+    padding-top: 2px;
+    padding-left: 3px;
+    border: 1px solid #d6d6d6;
+    border-left: 5px solid #3E769A;
+    background: #FFFFE4;
+    overflow: hidden;
+    width: auto;
+}
+*/
+
+
+
+
+@media(min-width: 992px) {
+    body .page-columns {
+        display:grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset] 35px [body-start-outset] 35px [body-start] 0em [body-content-start] minmax(500px, calc( 850px - 3em )) [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 145px) [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.fullcontent:not(.floating):not(.docked) .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset] 35px [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(500px, calc( 850px - 3em )) [body-content-end] 1.5em [body-end] 35px [body-end-outset] 35px [page-end-inset page-end] 5fr [screen-end-inset] 1.5em
+    }
+
+    body.slimcontent:not(.floating):not(.docked) .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset] 35px [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(500px, calc( 850px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(0px, 200px) [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.listing:not(.floating):not(.docked) .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start] minmax(50px, 100px) [page-start-inset] 50px [body-start-outset] 50px [body-start] 1.5em [body-content-start] minmax(500px, calc( 850px - 3em )) [body-content-end] 3em [body-end] 50px [body-end-outset] minmax(0px, 250px) [page-end-inset] minmax(50px, 100px) [page-end] 1fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body:not(.floating):not(.docked) .page-columns.toc-left {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start] 35px [page-start-inset] minmax(0px, 175px) [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(450px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(0px, 200px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body:not(.floating):not(.docked) .page-columns.toc-left .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start] 35px [page-start-inset] minmax(0px, 175px) [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(450px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(0px, 200px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.floating .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start] minmax(25px, 50px) [page-start-inset] minmax(50px, 150px) [body-start-outset] minmax(25px, 50px) [body-start] 1.5em [body-content-start] minmax(500px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end] minmax(25px, 50px) [body-end-outset] minmax(50px, 150px) [page-end-inset] minmax(25px, 50px) [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.docked .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start] minmax(50px, 100px) [page-start-inset] 50px [body-start-outset] 50px [body-start] 0em [body-content-start] minmax(500px, calc( 1000px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(50px, 150px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end];
+    }
+
+    body.docked.fullcontent .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start] minmax(50px, 100px) [page-start-inset] 50px [body-start-outset] 50px [body-start] 1.5em [body-content-start] minmax(500px, calc( 1000px - 3em )) [body-content-end] 1.5em [body-end body-end-outset page-end-inset page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.floating.fullcontent .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start] 50px [page-start-inset] minmax(50px, 150px) [body-start-outset] 50px [body-start] 1.5em [body-content-start] minmax(500px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end body-end-outset page-end-inset page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.docked.slimcontent .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start] minmax(50px, 100px) [page-start-inset] 50px [body-start-outset] 50px [body-start] 1.5em [body-content-start] minmax(450px, calc( 750px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(0px, 200px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.docked.listing .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start] minmax(50px, 100px) [page-start-inset] 50px [body-start-outset] 50px [body-start] 1.5em [body-content-start] minmax(500px, calc( 1000px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(0px, 200px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.floating.slimcontent .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start] 50px [page-start-inset] minmax(50px, 150px) [body-start-outset] 50px [body-start] 1.5em [body-content-start] minmax(450px, calc( 750px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(50px, 150px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.floating.listing .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start] minmax(25px, 50px) [page-start-inset] minmax(50px, 150px) [body-start-outset] minmax(25px, 50px) [body-start] 1.5em [body-content-start] minmax(500px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end] minmax(25px, 50px) [body-end-outset] minmax(50px, 150px) [page-end-inset] minmax(25px, 50px) [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+}
+
+@media(max-width: 991.98px) {
+    body .page-columns {
+        display:grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset] 5fr [body-start] 1.5em [body-content-start] minmax(500px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 145px) [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.fullcontent:not(.floating):not(.docked) .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset] 5fr [body-start] 1.5em [body-content-start] minmax(500px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end body-end-outset page-end-inset page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.slimcontent:not(.floating):not(.docked) .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset] 5fr [body-start] 1.5em [body-content-start] minmax(500px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 145px) [page-end-inset] 35px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.listing:not(.floating):not(.docked) .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset] 5fr [body-start] 1.5em [body-content-start] minmax(500px, calc( 1250px - 3em )) [body-content-end body-end body-end-outset page-end-inset page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body:not(.floating):not(.docked) .page-columns.toc-left {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start] 35px [page-start-inset] minmax(0px, 145px) [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(450px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end body-end-outset page-end-inset page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body:not(.floating):not(.docked) .page-columns.toc-left .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start] 35px [page-start-inset] minmax(0px, 145px) [body-start-outset] 35px [body-start] 1.5em [body-content-start] minmax(450px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end body-end-outset page-end-inset page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.floating .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset body-start-outset body-start] 1.5em [body-content-start] minmax(500px, calc( 750px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(75px, 150px) [page-end-inset] 25px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.docked .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start] minmax(500px, calc( 750px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(25px, 50px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.docked.fullcontent .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start] minmax(500px, calc( 1000px - 3em )) [body-content-end] 1.5em [body-end body-end-outset page-end-inset page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.floating.fullcontent .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset body-start-outset body-start] 1em [body-content-start] minmax(500px, calc( 800px - 3em )) [body-content-end] 1.5em [body-end body-end-outset page-end-inset page-end] 4fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.docked.slimcontent .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start] minmax(500px, calc( 750px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(25px, 50px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.docked.listing .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start] minmax(500px, calc( 750px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(25px, 50px) [page-end-inset] 50px [page-end] 5fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.floating.slimcontent .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset body-start-outset body-start] 1em [body-content-start] minmax(500px, calc( 750px - 3em )) [body-content-end] 1.5em [body-end] 35px [body-end-outset] minmax(75px, 145px) [page-end-inset] 35px [page-end] 4fr [screen-end-inset] 1.5em [screen-end]
+    }
+
+    body.floating.listing .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset] 5fr [page-start page-start-inset body-start-outset body-start] 1em [body-content-start] minmax(500px, calc( 750px - 3em )) [body-content-end] 1.5em [body-end] 50px [body-end-outset] minmax(75px, 150px) [page-end-inset] 25px [page-end] 4fr [screen-end-inset] 1.5em [screen-end]
+    }
+}
+
+@media(max-width: 767.98px) {
+    body .page-columns,body.fullcontent:not(.floating):not(.docked) .page-columns,body.slimcontent:not(.floating):not(.docked) .page-columns,body.docked .page-columns,body.docked.slimcontent .page-columns,body.docked.fullcontent .page-columns,body.floating .page-columns,body.floating.slimcontent .page-columns,body.floating.fullcontent .page-columns {
+        display:grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start] minmax(0px, 1fr) [body-content-end body-end body-end-outset page-end-inset page-end screen-end-inset] 1.5em [screen-end]
+    }
+
+    body:not(.floating):not(.docked) .page-columns.toc-left {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start] minmax(0px, 1fr) [body-content-end body-end body-end-outset page-end-inset page-end screen-end-inset] 1.5em [screen-end]
+    }
+
+    body:not(.floating):not(.docked) .page-columns.toc-left .page-columns {
+        display: grid;
+        gap: 0;
+        grid-template-columns: [screen-start] 1.5em [screen-start-inset page-start page-start-inset body-start-outset body-start body-content-start] minmax(0px, 1fr) [body-content-end body-end body-end-outset page-end-inset page-end screen-end-inset] 1.5em [screen-end]
+    }
+
+    nav[role=doc-toc] {
+        display: none
+    }
+}

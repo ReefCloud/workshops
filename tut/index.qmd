@@ -1,0 +1,35 @@
+---
+title: ReefCloud R/Statistics resources 
+author: "Murray Logan"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format: 
+  html:
+    toc: true
+    toc-float: true
+    number-sections: true
+    number-depth: 3
+    embed-resources: true
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+bibliography: resources/references.bib
+output_dir: "docs"
+---
+
+# Section 1 
+
+This is some text
+I apologize in advance, this tutorial requires quite a bit of explaining and context before it can get into the code…. Good data manipulation is an art form that requires the use of many specific tools (functions) and expert data manipulation comes from the integration of these tools together. Therefore it is necessary to have an overview of the tool set before investigating any single tool.
+
+# Section 2
+
+## Section 2a
+
+
+

@@ -1,0 +1,46 @@
+project:
+  type: website
+  output-dir: ../docs
+  render:
+    - index.qmd
+    - 01_introduction_to_r.qmd
+
+website:
+  title: ReefCloud R/Statistics resources
+  sidebar:
+    background: primary
+    logo: "https://reefcloud.ai/static/media/coreLogoName.04eb209b6a92259208f9d8edb621bc4c.svg"
+    pinned: true
+    align: center
+    style: docked
+    collapse-level: 2
+    contents:
+      - href: index.qmd
+        text: Home
+        icon: house
+      - text: "---"
+      - section: Basics
+        contents:
+        - href: 01_introduction_to_r.qmd
+          text: Introduction to R
+          icon: house
+
+format:
+  html:
+    theme: [default, resources/tut-style.scss]
+    css: resources/tut-style.css
+    toc: true
+    page-layout: full
+    ## Code
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+    code-line-numbers: true
+    code-block-border-left: "#ccc"
+    code-copy: true
+    highlight-style: atom-one
+    number-sections: true
+    number-depth: 3
+
+execute:
+  freeze: auto

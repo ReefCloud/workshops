@@ -1,0 +1,944 @@
+---
+title: Introduction to R
+author: "Murray Logan"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format: 
+  html:
+    toc: true
+    toc-float: true
+    number-sections: true
+    number-depth: 3
+    embed-resources: true
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+bibliography: resources/references.bib
+output_dir: "docs"
+---
+
+# Installing R
+
+The latest version of an R installation binary (or source code) can be
+downloaded from one of the [Comprehensive R Archive Network (or CRAN)
+mirrors](https://cran.r-project.org/mirrors.html). Having selected one
+of the (Australian) mirrors, follow one of the sets of instructions
+below (depending on your operating system).
+
+::: panel-tabset 
+
+## Windows
+
+- **Download R:** 
+  - Go to the CRAN R-project website <https://cran.r-project.org/> and
+  click on "Download R for Windows".
+  - Select the "base" subdirectory
+  - Select the "Download R-X.X.X for Windows" option (where X.X.X are
+  a series of version and release numbers) to download.
+
+- **Run the installer:** Double-click the downloaded .exe file and
+  follow the installation wizard. Accept the default settings unless
+  you have specific needs.
+
+- **Optional:** Set R as the default: Check the checkbox to set R as
+  the default for R scripts during installation. This allows you to
+  run R scripts by double-clicking them.
+
+- **Verify installation:** 
+  - Open a new command prompt (Start > Run > cmd) and type `R`. If the R
+  console opens, the installation was successful.
+  - Alternatively, search for R in the Start menu
+
+## MacOSx
+
+- **Download R:** 
+  - Go to the CRAN R-project website (https://cran.r-project.org/) and
+    click on "Download R for macOS".
+  - Choose the latest stable version that is appropriate for your
+    architecture.
+- **Open the disk image:** Double-click the downloaded .pkg file and
+  drag the R application icon to your Applications folder.
+  
+- **Verify installation:**
+  - Open Terminal: Go to Applications > Utilities and open Terminal.
+  - Type `R` in the Terminal window. If the R console opens, the
+  installation was successful.
+
+## Linux
+
+- **Open Terminal:** You can access Terminal through your application
+  launcher or search bar.
+
+- **Install R:** The commands vary slightly depending on your Linux distribution. Here are common examples:
+  - Debian/Ubuntu: `sudo apt install r-base`
+  - Fedora/CentOS: `sudo yum install R`
+  - Arch Linux: `sudo pacman -S R`
+
+- **Verify installation:* Type `R` in the Terminal window. If the R
+  console opens, the installation was successful.
+
+:::
+
+# Basic Syntax
+
+## The R environment and command line
+
+Upon opening R, you are presented with the R Console along with the
+command prompt (`>`). R is a command driven application (as opposed to
+a 'point-and-click' application) and despite the steep learning curve,
+there are many very good reasons for this.
+
+Commands that you type are evaluated once the Enter key has been
+pressed
+
+Enter the following command (`5+1`) at the command prompt (`>`);
+
+```{r}
+#| label: cmd1
+5+1
+```
+
+:::{.callout-note}
+
+I have suppressed the command prompt (`<`) from almost all code blocks
+throughout these workshop and tutorial series to make it easier for
+you to cut and paste code into your own scripts or directly into R.
+
+:::
+
+:::{.callout-tip}
+
+In this tutorial series, the R code to be entered appears to the right
+hand side of the vertical bar. The number of the left side of the bar
+is a line number. For single line code snippets, such as the example
+above, line numbers are not necessary. However, for multi-line code
+snippets, line numbers help for identifying and describing different
+parts of the code.
+
+:::
+
+The above R code evaluates the command five plus one and returns the
+result (six).. The [1] before the 6 indicates that the object
+immediately to its right is the first element in the returned object.
+In this case there is only one object returned. However, when a large
+set of objects (e.g. numbers) are returned, each row will start with
+an index number thereby making it easier to count through the
+elements.
+
+::: {.callout-note collapse="true"}
+### Important definitions
+
+Object
+  : As an object oriented language, everything in R is an object.
+    Data, functions even output are objects.
+
+Vector
+  : A collection of one or more objects of the same type (e.g. all
+    numbers or all characters).
+
+Function
+  : A set of instructions carried out on one or more objects.
+    Functions are typically wrappers for a sequence of instructions
+    that perform specific and common tasks.
+
+Parameter
+  : The kind of information passed to a function.
+
+Argument
+  : The specific information passed to a function.
+
+Operator
+  : A symbol that has a pre-defined meaning. Familiar operators
+    include `+` `-` `*` and `/`.
+
+Assignment operators
+  : `<-` Assigning a name to an object (left to right)
+  : `->` Assigning a name to an object (right to left)
+  : `=` Used when defining and specifying function arguments
+
+Logical operators (return `TRUE` or `FALSE`)
+  : `<` Less than
+  : `>` Greater than
+  : `<=` Less than or equal
+  : `>=` Greater than or equal
+  : `==` Is the left hand side equal to the right hand side (a query)
+  : `!=` Is the left hand side NOT equal to the right hand side (a query)
+  : `&&` Are BOTH left hand and right hand conditions TRUE
+  : `||` Are EITHER the left hand OR right hand conditions TRUE
+
+Pipe operator
+  : `|>` piping the output of one operation to the input of the next
+:::
+
+### Expressions, Assignment and Arithmetic
+
+Instead of evaluating a statement and printing the result directly to
+the console, the results of evaluations can be stored in an object via
+a process called 'Assignment'. Assignment assigns a name to an object
+and stores the result of an evaluation in that object. The contents of
+an object can be viewed (printed) by typing the name of the object at
+the command prompt and hitting `Enter`.
+
+```{r}
+#| label: cmd2
+var1 <- 2 + 3
+var1
+```
+
+On line 1 above, the name `var1` was assigned to the result of the sum
+of 2 and 3. On line 2, the contents of this object are printed to the
+screen.
+
+A single command (statement) can spread over multiple lines. If the
+Enter key is pressed before R considers the statement complete, the
+next line in the console will begin with the prompt `+` indicating
+that the statement is not complete. For this example, I will include
+the command prompt in order to demonstrate the above point.
+
+```{r}
+#| label: cmd3
+#| prompt: true
+var2 <-
+  2 + 3
+var2
+```
+
+When the contents of an object are numbers, standard arithmetic applies;
+
+```{r}
+#| label: cmd4
+var2 - 1
+ans1 <- var1 * var2
+ans1
+```
+
+::: {.callout-tip}
+Generally, spaces are ignored in R. Hence, the above and the following
+are both equally valid.
+
+```{r}
+#| label: cmd5
+ans1<-var1*var2
+ans1
+```
+Nevertheless, the former version (with spaces) is much more readable.
+
+:::
+
+Compatible objects can be concatenated (joined together) to create
+objects with multiple entries. Object concatenation can be performed
+using the `c()` function.
+
+```{r}
+#| label: cmd6
+c(1, 2, 6)
+c(var1, var2)
+```
+
+::: {.callout-note}
+In both examples above, objects were not assigned names. As a result,
+the expressions were evaluated and directly printed to the consol
+without being stored in any way. Doing so is useful for experimenting,
+however as the results are not stored, they cannot be used in
+subsequent actions.
+:::
+
+In addition to the typical addition, subtraction, multiplication and
+division operators, there are a number of special operators, the
+simplest of which are the quotient or integer divide operator (`%/%`)
+and the remainder or modulus operator (`%%`).
+
+```{r}
+#| label: cmd7
+7 / 3
+7 %/% 3
+7 %% 3
+```
+
+### Operator precedence
+
+The rules of operator precedence are listed (highest to lowest) in the
+following table. Additionally, expressions within parentheses '`()`'
+always have highest precedence.
+
+
+| Operator                    | Description                                         |
+|-----------------------------|-----------------------------------------------------|
+| `[` `[[`                    | indexing                                            |
+| `::`                        | namespace                                           |
+| `$`                         | component                                           |
+| `^`                         | exponentiation (evaluated right to left)            |
+| `-`                         | +	sign (unary)                                   |
+| `:`                         | sequence                                            |
+| `%special%`                 | special operators (e.g. `%/%`, `%%`, `%*%`, `%in%`) |
+| `*` `/`                     | multiplication and division                         |
+| `+`                         | -	addition and subtraction                       |
+| `>` `<` `>=` `<=` `==` `!=` | ordering and comparison                             |
+| `!`                         | logical negation (not)                              |
+| `&` `&&`                    | logical AND                                         |
+| `|` `||`                    | logical OR                                          |
+| `~`                         | formula                                             |
+| `->` `->>`                  | assignment (left to right)                          |
+| `=`                         | argument assignment (right to left)                 |
+| `<-` `<<-`                  | assignment (right to left)                          |
+| `?`                         | help                                                |
+
+: {.primary .bordered .sm .paramsTable}
+
+### Command history
+
+Each time a command is entered at the R command prompt, the command is
+also added to a list known as the command history. The up and down
+arrow keys scroll backward and forward respectively through the
+session's command history list and place the top most command at the
+current R command prompt. Scrolling through the command history
+enables previous commands to be rapidly re-executed, reviewed or
+modified and executed.
+
+### Object names
+
+Everything created within R are objects. Objects are programming
+constructs that not only store values (the visible part of an object),
+they also define other properties of the object (such as the type of
+information contained in the object) and sometimes they also define
+certain routines that can be used to store, retrieve and manipulate
+data within the object.
+
+Importantly, all objects within R must have unique names to which they
+can be referred. Names given to any object in R can comprise virtually
+any sequence of letters and numbers providing that the following rules
+are adhered to:
+
+- Names must begin with a letter (names beginning with numbers or
+  operators are not permitted)
+- Names cannot contain the following characters; space `,` `-` `+` `*`
+  `/` `#` `%` `&` `[` `]` `{` `}` `(` `)` `~`
+
+Whilst the above rules are necessary, the following naming conventions
+are also recommended:
+
+- only use lowercase letters and numbers
+- use underscores (`_`) to separate words (e.g. _snake case_)
+- try to use names that are both concise and meaningful. 
+  - names should reflect the content of the object. One of the
+    powerful features of R is that there is virtually no limit to the
+    number of objects (variables, datasets, results, models, etc) that
+    can be in use at a time. However, without careful name management,
+    objects can rapidly become misplaced or ambiguous. Therefore, the
+    name of an object should reflect what it is, and what has happened
+    to it. For example, the name `log_fish_wts` might be given to an
+    object that contains log transformed fish weights. Moreover, many
+    prefer to prefix the object name with a lowercase letter that
+    denotes the type of data containing in the object. For example,
+    `d_mean_head_length` might indicate that the object contains the
+    mean head lengths stored as a double floating point (real
+    numbers).
+  - although there are no restrictions on the length of names, shorter
+    names are quicker to type and provide less scope for typographical
+    errors and are therefore recommended (of course within the
+    restrictions of the point above). 
+- where possible, avoid using names of common predefined functions and
+  variables as this can provide a source of confusion for both you and
+  R. For example, to represent the mean of a head length variable, use
+  something like `mean_head_length` rather than `mean` (which is the
+  name of a predefined function within R that calculates the mean of a
+  set of numbers).
+
+## R Sessions and Workspaces
+
+A number of objects have been created in the current session (a
+session encapsulates all the activity since the current instance of
+the R application was started). To review the names of all of the
+objects in the users current workspace (storage of user created
+objects);
+
+```{r}
+#| label: cmd8
+ls()
+```
+
+You can also refine the scope of the `ls()` function to search for
+object names that match a pattern:
+
+```{r}
+#| label: cmd9
+ls(pat = "var")
+ls(pat = "a*1")
+```
+
+The longer the session is running, the more objects will be created
+resulting in a very cluttered workspace. Unneeded objects can be
+removed using the `rm()` function. The `rm()` function only performs a
+_side effect_ (deletes objects), if the function succeeds, it does not
+return any output. If it does return anything, it will be a warning or
+error.
+
+```{r}
+#| label: cmd10
+rm(var1, var2)   #remove the VAR1 and VAR2 objects
+rm(list = ls())  #remove all user defined objects
+```
+
+::: {.callout-note}
+In the above examples, comments were appended to each line of code.
+Comments begin with a hash (`#`) character. Anything that follows a
+hash character will be ignored (until the end of the line).
+
+Comments provide a convenient way to annotate your code so as to
+provide more explanation and clarity as to the intention and purpose
+of the associated code.
+:::
+
+### Current working directory
+
+The R working directory (location from which files/data are read and
+written) is by default, either the location of the R executable (or
+execution path in Linux) or the users _home_ directory. The current
+working directory can be reviewed and changed (for the session) using
+the `getwd()` function and `setwd()` functions respectively. Note that
+R uses the Unix/Linux style directory subdivision markers. That is, R
+uses the forward slash `/` in path names rather than the regular `\`
+of Windows.
+
+When using `setwd()`, you can provide either an absolute path (the
+full path) or a relative path (relative to the current location).
+Obviously, you will get a different result to me when you issue the
+following:
+
+```{r}
+#| label: cmd11
+getwd()                    #review the current working directory
+setwd("../")               #change to the parent directory of the current working directory
+list.files(path = getwd()) #list all files (and directories) in the current working directory
+```
+
+
+### Workspaces
+
+Throughout an R session, all objects (including loaded packages, see
+@sec-packages) that have been added are stored within the R global
+environment, called the workspace. Occasionally, it is desirable to
+save the workspace and thus all those objects (vectors, functions,
+etc) that were in use during a session so that they are available
+during subsequent sessions. This can be done using the `save.image()`
+function. Note, this will save the workspace to a file called `.RData`
+in the current working directory (usually the R startup directory),
+unless a `file` (filename and path) is supplied as an argument to the
+`save.image()` function. A previously saved workspace can be loaded by
+providing a full path and filename as an argument to the `load()`
+function.
+
+Whilst saving a workspace image can sometimes be convenient, it can
+also contribute greatly to organisational problems associated with
+large numbers of obsolete or undocumented objects. Instead, it is
+usually better to specifically store each of the objects you know you
+are going to want to have access to across sessions separately.
+
+### Quitting elegantly
+
+To quit R, issue the following command; Note in Windows and MacOSX,
+the application can also be terminated using the standard Exiting
+protocols.
+
+```{r}
+#| label: cmd12
+#| eval: false
+q()
+```
+
+You will then be asked whether or not you wish to save the current
+workspace. If you do, enter 'Y' otherwise enter 'N'. **Unless you have
+a very good reason to save the workspace, I would suggest that you do
+not**. A workspace generated in a typical session will have numerous
+poorly named objects (objects created to temporarily store information
+whilst testing). Next time R starts, it could (likely will) restore
+this workspace thereby starting with a cluttered workspace, and
+becoming a potential source of confusion if you inadvertently refer to
+an object stored during a previous session. Moreover, if the workspace
+includes additional extension packages, these packages may also be
+loaded which will prevent them from being updated (often necessary
+when installing additional packages that depend on other packages).
+
+## Functions
+
+As wrappers for collections of commands used together to perform a
+task, _functions_ provide a convenient way of interacting with all of
+these commands in sequence. Most functions require one or more inputs
+(_parameters_), and while a particular function can have multiple
+parameters, not all are necessarily required (some could have default
+values). Parameters are parsed to a function as _arguments_ comprising
+the name of the parameter, an equals operator and the value of the
+parameter. Hence, arguments are specified as name/value pairs.
+
+Consider the `seq()` function, which generates a sequence of values (a
+vector) according to the values of the arguments. We can see that the
+default version of this function has the following definition:
+
+```{r}
+#| label: cmd13
+str(seq.default)
+```
+
+- if the `seq()` function is called without any arguments (e.g.
+  `seq()`), it will return a single number 1. Using the default
+  arguments for the function, it returns a vector starting at 1 (`from
+  = 1`), going up to 1 (`to = 1`) and thus having a length of 1.
+
+- we can alter this behavior by specifically providing values for the
+  named arguments. The following generates a sequence of numbers from
+  2 to 10 incrementing by 1 (default):
+  
+  ```{r}
+  #| label: cmd14
+  seq(from = 2, to = 10)
+  ```
+
+- the following generates a sequence of numbers from 2 to 10 incrementing by 2:
+
+  ```{r}
+  #| label: cmd15
+  seq(from = 2, to = 10, by = 2)
+  ```
+
+- alternatively, instead of manipulating the increment space of the
+  sequence, we could specify the desired length of the sequence:
+
+  ```{r}
+  #| label: cmd16
+  seq(from = 2, to = 10, length.out = 3)
+  ```
+
+- named arguments need not include the full name of the parameter, so
+  long as it is unambiguous which parameter is being referred to. For
+  example, length.out could be shortened to just l since there are no
+  other parameters of this function that start with 'l':
+
+  ```{r}
+  #| label: cmd17
+  seq(from = 2, to = 10, l = 4)
+  ```
+
+- parameters can also be specified as unnamed arguments provided they
+  are in the order specified in the function definition. For example
+  to generate a sequence of numbers from 2 to 10 incrementing by 2:
+
+  ```{r}
+  #| label: cmd18
+  seq(2, 10, 2)
+  ```
+
+  Note, although permittable, it is more difficult to unambiguously
+  read/interpret the code and could easily be a source of bugs.
+  
+- named and unnamed arguments can be mixed, just remember the above
+  rules about parameter order and unambiguous names:
+
+  ```{r}
+  #| label: cmd19
+  seq(2, 10, l = 4)
+  ```
+
+## Function overloading (polymorphism)
+
+Many routines can be applied to different sorts of data. That is, they
+are somewhat generic. For example, we could calculate the mean
+(arithmetic center) of a set of numbers or we could calculate the mean
+of a set of dates or times. Whilst the calculations in both cases are
+analogous to one another, they nevertheless differ sufficiently so as
+to warrant separate functions.
+
+We could name the functions that calculate the mean of a set of
+numbers and the mean of a set of dates as `mean_numbers` and
+`mean_dates` respectively. Unfortunately, as this is a relatively
+common situation, the number of functions to learn rapidly expands.
+And from the perspective of writing a function that itself contains
+such a generic function, we would have to write multiple instances of
+the function in order to handle all the types of data we might want to
+accommodate.
+
+To simplify the process of applying these generic functions, R
+provides yet another layer that is responsible for determining which
+of a series of overloaded functions is likely to be applicable
+according to the nature of the parameters and data parsed as arguments
+to the function. To see this in action, type `mean` followed by hitting
+the `TAB` key. The `TAB` key is used for auto-completion and therefore
+this procedure lists all the objects that begin with the letters
+'mean'.
+
+
+```{r}
+#| label: cmd20
+#| eval: false
+mean           mean.Date      mean.default   mean.difftime  mean.POSIXct   mean.POSIXlt
+```
+
+In addition to an object called `mean`, there are additional objects
+that are suffixed as a '.' followed by a data type. In this case, the
+objects `mean.default`, `mean.Date`, `mean.POSIXct`, `mean.POSIXlt`
+and `mean.difftime` are functions that respectively
+calculate the mean of a set of numbers, dates, times, times, time and
+differences. The `mean` function determines which
+of the other functions is appropriate for the data parsed and then
+redirects to that appropriate function. Typically, this means that it
+is only necessary to remember the one generic function (in this case,
+`mean()`) as the specific functions are abstracted away.
+
+
+```{r}
+#| label: cmd21
+# mean of a series of numbers
+mean(c(1, 2, 3, 4))
+# create a sequence of dates spaced 7 days apart between 29th Feb 2000 and 30th Apr 2000
+sample_dates <- seq(from = as.Date("2000-02-29"), to = as.Date("2000-04-30"), by = "7 days")
+# print (view) these dates
+sample_dates
+# calculate the mean of these dates
+mean(sample_dates)
+## Packages {#sec-packages}
+```
+
+In the above examples, we called the same function (mean) on both
+occasions. In the first instance, it was equivalent to calling the
+`mean.default()` function and in the second instance the `mean.Date()`
+function. Note that the `seq()` function is similarly overloaded.
+
+The above example also illustrates another important behaviour of
+function arguments. Function calls can be nested within the arguments
+of other functions and function arguments are evaluated before the
+function runs. In this way, multiple steps to be truncated together
+(although for the sake of the codes' readability and debugging, it is
+often better to break a problem up into smaller steps). 
+
+If a function argument itself contains a function (as was the case
+above with the `from =` and `to =` arguments, both of which called the
+`as.Date()` function which converts a character string into a date
+object), the value of the evaluated argument is parsed to the outside
+function. That is, evaluations are made from the inside to out. The
+above example, could have been further truncated to;
+
+```{r}
+#| label: cmd22
+# calculate the mean of a sequence of dates spaced 7 days apart between 29th Feb 2000 and 30th Apr 2000
+mean(seq(from = as.Date("2000-02-29"), to = as.Date("2000-04-30"), by = "7 days"))
+```
+
+### The pipe character
+
+As we can see from the example above, nested functions can be pretty
+awkward to read. As of version 4.1, R has had a pipe operator. The
+concept of piping dates back to the early UNIX days when separate
+programs were chained ('piped') together such that the output of one
+program became the input of the next and so on. This enabled each
+program to remain relatively simple, yet by piping sequences of
+programs together, rather complex results could be achieved.
+
+Similarly the R pipe operator (`|>`) enables nested functions to
+alternatively be expressed as a chain of functions:
+
+```{r}
+#| label: cmd23
+# calculate the mean of a sequence of dates spaced 7 days apart between 29th Feb 2000 and 30th Apr 2000
+seq(from = as.Date("2000-02-29"), to = as.Date("2000-04-30"), by = "7 days") |> mean()
+```
+
+To maximise code readability, it is good form to keep lines of code
+short (less than 80 characters). One way to do this is to place a line
+break after pipe characters. Moreover, a line break after each
+function argument allows us to have more topical and granular
+comments.
+
+```{r}
+#| label: cmd24
+seq(                              #take sequence of dates
+  from = as.Date("2000-02-29"),   #from the 29th Feb 2000
+  to = as.Date("2000-04-30"),     #to the 30th April 2000
+  by = "7 days") |>               #incrementing by 7 days
+  mean()                          #and calculate the mean
+```
+
+## External functions
+
+As R is a scripting language (rather than a compiled language), it has
+the potential to be very slow (since syntax checking, machine
+instruction interpretation, etc must all take place at runtime rather
+than at compile time). Consequently, many of the functions are
+actually containers (wrappers) for external code (link libraries)
+precompiled in either C or Fortran. In this way, the environment can
+benefit from the flexibility of a scripting language whilst still
+maintaining most of the speed of a compiled language. Tutorial ? will
+introduce how to install and load external libraries.
+
+## Getting help
+
+There are numerous ways of seeking help on R syntax and functions (the
+following all ways of finding information about a function that
+calculates the mean of a vector).
+
+- providing the name of the function as an argument to the
+  `help()` function
+
+  ```{r}
+  #| label: cmd25
+  #| eval: false
+  help(mean)
+  ```
+
+- typing the name of the function preceded by a `'?'`
+
+  ```{r}
+  #| label: cmd26
+  #| eval: false
+  ?mean
+  ```
+
+- to run the examples within the standard help files, use the
+  `example()` function
+
+  ```{r}
+  #| label: cmd27
+  #| eval: false
+  example(mean)
+  ```
+
+- some packages include demonstrations that showcase their features
+  and use cases. The `demo()` function provides a user-friendly way to
+  access these demonstrations. For example, to respectively get an
+  overview of the basic graphical procedures in R and get a list of
+  available demonstrations:
+
+  ```{r}
+  #| label: cmd28
+  #| eval: false
+  demo(graphics)  #run the graphics demo
+  demo()          #list all demos available on your system
+  ```
+
+- if you don't know the exact name of the function, the `apropos()`
+  function is useful as it returns the name of all objects from the
+  current search list that match a specific pattern:
+
+  ```{r}
+  #| label: cmd29
+  #| eval: true
+  apropos('mea')
+  ```
+
+- if you have no idea what the function is called, the `help.search()`
+  and `help.start()` functions search through the regular manuals and
+  the local HTML manuals (via a web browser) respectively for specific
+  terms:
+  
+  ```{r}
+  #| label: cmd30
+  #| eval: false
+  help.search('mean')   #search the local R manuals
+  help.start()          #search the local HTML R manuals
+  ```
+
+- to get a snapshot of the order and default values of a functions'
+  arguments, use the `args()` function:
+
+  ```{r}
+  #| label: cmd31
+  #| eval: true
+  args(mean)         #the arguments that apply to the mean function 
+  args(list.files)   #the arguments that apply to the list.files function
+  ```
+
+The `...` argument indicates that other arguments can also be provided
+that are then parsed onto other functions that may be called within
+the main function.
+
+# Data Types
+
+## Vectors
+
+Vectors are a collection of one or more entries (values) of the same
+type (class) and are the basic storage unit in R. Vectors are
+one-dimensional arrays (have a single dimension - length) and can be
+thought of as a single column of data. Each entry in a vector has a
+unique index (like a row number) to enable reference to particular
+entries in the vector.
+
+### Consecutive integers
+
+To get a vector of consecutive integers, we can specify an expression
+of the form `<first integer>:<second integer>` where `<first integer>`
+and `<second integer>` represent the start and end of the sequence of
+integers respectively:
+
+```{r}
+#| label: cmd32.1
+5:10
+5:-5
+```
+
+### The `c()` function
+
+The `c()` function concatenates values together into a vector. To
+create a vector with the numbers 1, 4, 7, 21:
+
+```{r}
+#| label: cmd32
+c(1, 4, 7, 21)
+```
+
+As an example, we could store the temperature recorded at 10 sites:
+
+```{r}
+#| label: cmd33
+temperature <- c(36.1, 30.6, 31, 36.3, 39.9, 6.5, 11.2, 12.8, 9.7, 15.9)
+temperature
+```
+
+To create a vector with the words 'Fish', 'Rock', 'Tree', 'Git':
+
+```{r}
+#| label: cmd34
+c('Fish', 'Rock', 'Tree', "Git")
+```
+
+### Regular or patterned sequences (`rep()`)
+
+We have already seen the use of the `seq()` function to create
+sequences of entries.
+
+Sequences of repeated entries are supported with the `rep()` function:
+
+```{r}
+#| label: cmd35
+rep(4,5)
+rep('Fish',5)
+```
+
+### The `paste()` function
+
+To create a sequence of quadrat labels we could use the `c()` function
+as illustrated above, e.g.
+
+```{r}
+#| label: cmd36
+quadrats <- c("Q1","Q2","Q3","Q4","Q5","Q6","Q7","Q8","Q9","Q10")
+quadrats
+```
+
+A more elegant way of doing this is to use the `paste()` function:
+
+```{r}
+#| label: cmd37
+quadrats <- paste("Q", 1:10, sep = "")
+quadrats
+```
+
+This can be useful for naming vector elements. For example, we could
+use the `names()` function to name the elements of the temperature
+variable according to the quadrat labels.
+
+```{r}
+#| label: cmd38
+names(temperature) <- quadrats
+temperature
+```
+
+The `paste()` function can also be used in conjunction with other
+functions to generate lists of labels. For example, we could combine a
+vector in which the letters A, B, C, D and E (generated with the
+LETTERS constant) are each repeated twice consecutively (using the
+`rep()` function) with a vector that contains a 1 and a 2 to produce a
+character vector that labels sites in which the quadrats may have
+occurred.
+
+```{r}
+#| label: cmd39
+site <- paste(rep(LETTERS[1:5], each = 2), 1:2, sep = "")
+site
+```
+
+Or, with the use of pipes:
+
+```{r}
+#| label: cmd40
+site <- rep(LETTERS[1:5], each = 2) |>
+  paste(1:2, sep = "")
+site
+```
+
+Rather than specify that the components are not separated by any
+character (which is what we are doing above by indicating that the
+separator character should be ""), there is a version of `paste()`
+that does this automatically. It is `paste0()`.
+
+```{r}
+#| label: cmd41
+site <- rep(LETTERS[1:5], each = 2) |>
+  paste0(1:2)
+site
+```
+
+```{r}
+#| label: cmdA
+```
+
+::: {.callout-note collapse="true"}
+
+### Major vector classes
+
+<table class='table table-primary table-bordered table-sm paramsTable' id = 'tidy-select-table'>
+<tbody>
+<tr class = 'header'>
+<th align = 'left' width="180px">_tidy-selection_</th>
+<th align = 'left'>Description</th>
+<th align = 'left' width='250px'>Examples</th>
+</tr>
+<tr class = 'odd'>
+<td align = 'left'>Bare names</td>
+<td align = 'left'>
+
+Select columns based on their names.<br>Columns can be excluded by
+prepending the name with a negative sign (`-`).
+
+</td>
+<td align = 'left'>
+```{r, eval = FALSE}
+select(data, Var1)
+```
+```{r, eval = FALSE}
+select(data, Var1, Var2)
+```
+```{r, eval = FALSE}
+select(data, c(Var1, Var2))
+```
+```{r, eval = FALSE}
+select(data, -Var1)
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+| Vector class | Example      |
+|--------------|--------------|
+| integer      | ```{r}       |
+|              | 2:4          |
+|              | ```          |
+|              | `c(1, 3, 9)` |
+|              |              |
+: {.primary .bordered .sm .paramsTable}
+
+:::
+
+
+| Header 1 | Header 2  | Header 3 |
+| -------- | --------- | -------- |
+| Cell 1   | Cell 2    | Cell 3   |
+| Cell 4   | Cell 5    | Cell 6   |
+| {.cell .r code} |
+| ```{r} |
+| # Your R code here |
+| # This code will be executed and results will be inserted in the table |
+| ``` |
