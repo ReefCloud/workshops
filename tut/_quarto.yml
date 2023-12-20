@@ -4,6 +4,7 @@ project:
   render:
     - index.qmd
     - 01_introduction_to_r.qmd
+    - 02_editors.qmd
 
 website:
   title: ReefCloud R/Statistics resources
@@ -23,6 +24,9 @@ website:
         contents:
         - href: 01_introduction_to_r.qmd
           text: Introduction to R
+          icon: house
+        - href: 02_editors.qmd
+          text: Code editors
           icon: house
 
 format:

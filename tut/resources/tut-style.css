@@ -121,7 +121,7 @@ div.cell-output>pre {
 }
 
 h1 {
-    counter-reset: subsection;
+    /* counter-reset: subsection; */
     /* font-family: 'Trebuchet MS', Arial, sans-serif; */
     font-weight: bold;
     font-size: 2em;
