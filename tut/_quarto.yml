@@ -5,6 +5,7 @@ project:
     - index.qmd
     - 01_introduction_to_r.qmd
     - 02_editors.qmd
+    - 03_data_frames.qmd
 
 website:
   title: ReefCloud R/Statistics resources
@@ -27,6 +28,9 @@ website:
           icon: house
         - href: 02_editors.qmd
           text: Code editors
+          icon: house
+        - href: 03_data_frames.qmd
+          text: Data frames
           icon: house
 
 format:

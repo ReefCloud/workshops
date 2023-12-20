@@ -39,7 +39,37 @@ $font-family: "Cabin Sketch";
     color: white;
 }
 
-
+.paperTable {
+    width: auto;
+    // border: 2px solid $primary;
+}
+.paperTable>thead>tr {
+    // background-color: $primary;
+    // --bs-table-bg: $primary;
+    // color: white;
+    font-weight: bold;
+}
+table.paperTable th {
+    padding: 3pt;
+    padding-right: 2em;
+    display: table-header;
+    color: black;
+    font-size: 1em;
+    font-weight: bold;
+    border-top: 2pt solid rgb(0,0,127);
+    border-bottom: 2pt solid rgb(0,0,127);
+    background: white;
+}
+table.paperTable tr:last-child td {
+    border-bottom: 2pt solid rgb(0,0,127);
+}
+table.paperTable td {
+    padding: 3pt;
+    padding-right: 2em;
+    border: 0pt solid rgb(0,0,127);
+    border-right: 0pt solid rgb(0,0,127);
+    border-bottom: 0pt solid rgb(0,0,127);
+}
 .title {
   font-family: 'Cabin Sketch', sans-serif;
   font-size: 300%;
