@@ -4580,10 +4580,16 @@ border-radius: 6px;
 background-color: white;
 }
 h1 {
-counter-reset: subsection;
+
 
 font-weight: bold;
 font-size: 2em;
+
+}
+h1, h2, h3, h4, h5 {
+color: #3E769A;
+}
+.header-section-number {
 color: #3E769A;
 }
 
@@ -4849,6 +4855,13 @@ display: none
  <span class="menu-text">Introduction to R</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_editors.qmd" class="sidebar-item-text sidebar-link"><i class="bi bi-house" role="img">
+</i> 
+ <span class="menu-text">Code editors</span></a>
+  </div>
+</li>
       </ul>
   </li>
     </ul>
@@ -4933,7 +4946,7 @@ display: none
   <li><a href="#apply-a-function-over-a-list" id="toc-apply-a-function-over-a-list" class="nav-link" data-scroll-target="#apply-a-function-over-a-list"><span class="header-section-number">5.7.3</span> Apply a function over a list</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#packages" id="toc-packages" class="nav-link" data-scroll-target="#packages"><span class="header-section-number">6</span> Packages</a>
+  <li><a href="#sec-packages" id="toc-sec-packages" class="nav-link" data-scroll-target="#sec-packages"><span class="header-section-number">6</span> Packages</a>
   <ul class="collapse">
   <li><a href="#listing-installed-packages" id="toc-listing-installed-packages" class="nav-link" data-scroll-target="#listing-installed-packages"><span class="header-section-number">6.1</span> Listing installed packages</a></li>
   <li><a href="#installing-packages" id="toc-installing-packages" class="nav-link" data-scroll-target="#installing-packages"><span class="header-section-number">6.2</span> Installing packages</a>
@@ -5427,7 +5440,7 @@ Note
 </section>
 <section id="workspaces" class="level3" data-number="2.2.2">
 <h3 data-number="2.2.2" class="anchored" data-anchor-id="workspaces"><span class="header-section-number">2.2.2</span> Workspaces</h3>
-<p>Throughout an R session, all objects (including loaded packages, see <strong>?@sec-packages</strong>) that have been added are stored within the R global environment, called the workspace. Occasionally, it is desirable to save the workspace and thus all those objects (vectors, functions, etc) that were in use during a session so that they are available during subsequent sessions. This can be done using the <code>save.image()</code> function. Note, this will save the workspace to a file called <code>.RData</code> in the current working directory (usually the R startup directory), unless a <code>file</code> (filename and path) is supplied as an argument to the <code>save.image()</code> function. A previously saved workspace can be loaded by providing a full path and filename as an argument to the <code>load()</code> function.</p>
+<p>Throughout an R session, all objects (including loaded packages, see <a href="#sec-packages">Section 6</a>) that have been added are stored within the R global environment, called the workspace. Occasionally, it is desirable to save the workspace and thus all those objects (vectors, functions, etc) that were in use during a session so that they are available during subsequent sessions. This can be done using the <code>save.image()</code> function. Note, this will save the workspace to a file called <code>.RData</code> in the current working directory (usually the R startup directory), unless a <code>file</code> (filename and path) is supplied as an argument to the <code>save.image()</code> function. A previously saved workspace can be loaded by providing a full path and filename as an argument to the <code>load()</code> function.</p>
 <p>Whilst saving a workspace image can sometimes be convenient, it can also contribute greatly to organisational problems associated with large numbers of obsolete or undocumented objects. Instead, it is usually better to specifically store each of the objects you know you are going to want to have access to across sessions separately.</p>
 </section>
 <section id="quitting-elegantly" class="level3" data-number="2.2.3">
@@ -7181,23 +7194,23 @@ Q10   E2      Q10  full       15.90</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb346"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb346-1"><a href="#cb346-1"></a><span class="fu">rep</span>(<span class="fu">runif</span>(<span class="dv">1</span>), <span class="at">times =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8189992 0.8189992 0.8189992 0.8189992 0.8189992</code></pre>
+<pre><code>[1] 0.1914302 0.1914302 0.1914302 0.1914302 0.1914302</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb348"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb348-1"><a href="#cb348-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.4990896 0.9402922 0.1909848 0.6312596 0.7425445</code></pre>
+<pre><code>[1] 0.4401820 0.2559070 0.7773880 0.3615057 0.7728050</code></pre>
 </div>
 </div>
 <p>When the function being run within <code>runif()</code> itself produces a vector of length &gt; 1, the <code>runif()</code> function combines each of the vectors together as separate columns in a matrix:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb350"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb350-1"><a href="#cb350-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          [,1]      [,2]       [,3]       [,4]      [,5]
-[1,] 0.1335949 0.3876122 0.05495884 0.80821923 0.4357264
-[2,] 0.8097300 0.6011235 0.07980764 0.18182418 0.5794911
-[3,] 0.2031484 0.5436776 0.85288721 0.74873157 0.9195080
-[4,] 0.8408438 0.1110886 0.83171555 0.37241480 0.8181089
-[5,] 0.6332676 0.6237973 0.42684626 0.06255711 0.1681186</code></pre>
+<pre><code>          [,1]      [,2]      [,3]      [,4]      [,5]
+[1,] 0.2291926 0.7801096 0.7914104 0.4025798 0.9167804
+[2,] 0.5583890 0.9203994 0.5402125 0.7503105 0.4832718
+[3,] 0.4253020 0.3530795 0.3417043 0.8677593 0.1838072
+[4,] 0.1334440 0.3864240 0.1620525 0.9707338 0.4777008
+[5,] 0.3632285 0.9537398 0.6730974 0.5615863 0.7136469</code></pre>
 </div>
 </div>
 <section id="apply-functions-along-matrix-margins" class="level3" data-number="5.7.1">
@@ -7274,7 +7287,7 @@ $temperature
 </section>
 </section>
 </section>
-<section id="packages" class="level1" data-number="6">
+<section id="sec-packages" class="level1" data-number="6">
 <h1 data-number="6"><span class="header-section-number">6</span> Packages</h1>
 <p>One of the great strengths of R is the ease to which it can be extended via the creation of new functions. This means that the functionality of the environment is not limited by the development priorities and economics of a comercial enterprise. Moreover, collections of related functions can be assembled together into what is called a package or library. These <em>packages</em> can be distributed to others to use or modify and thus the community and capacity grows.</p>
 <p>One of the keys to the concept of packages is that they extend the functionality when it is required. Currently (2023), there are in excess of 5000 packages available on CRAN (Comprehensive R Archive Network) and an additional 3000 packages available via other sources. If all of that functionality was available simultaneously, the environment would be impeared with bloat. In any given session, the amount of extended functionality is likely to be relatively low, therefore it makes sense to only ‘load’ the functionality into memory when it is required.</p>
@@ -9966,7 +9979,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb404-2185"><a href="#cb404-2185"></a><span class="fu">sapply</span>(experiment, length)</span>
 <span id="cb404-2186"><a href="#cb404-2186"></a><span class="in">```</span></span>
 <span id="cb404-2187"><a href="#cb404-2187"></a></span>
-<span id="cb404-2188"><a href="#cb404-2188"></a><span class="fu"># Packages</span></span>
+<span id="cb404-2188"><a href="#cb404-2188"></a><span class="fu"># Packages {#sec-packages}</span></span>
 <span id="cb404-2189"><a href="#cb404-2189"></a></span>
 <span id="cb404-2190"><a href="#cb404-2190"></a>One of the great strengths of R is the ease to which it can be</span>
 <span id="cb404-2191"><a href="#cb404-2191"></a>extended via the creation of new functions. This means that the</span>
