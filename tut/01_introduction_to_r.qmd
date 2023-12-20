@@ -2031,7 +2031,7 @@ lapply(experiment, length)
 sapply(experiment, length)
 ```
 
-# Packages
+# Packages {#sec-packages}
 
 One of the great strengths of R is the ease to which it can be
 extended via the creation of new functions. This means that the

@@ -125,6 +125,12 @@ h1 {
     /* font-family: 'Trebuchet MS', Arial, sans-serif; */
     font-weight: bold;
     font-size: 2em;
+    /* color: #3E769A; */
+}
+h1, h2, h3, h4, h5  {
+    color: #3E769A;
+}
+.header-section-number {
     color: #3E769A;
 }
 /* section:not(.unnumbered) > h1:not(.title):before { */

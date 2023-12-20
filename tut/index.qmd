@@ -22,14 +22,46 @@ bibliography: resources/references.bib
 output_dir: "docs"
 ---
 
-# Section 1 
+# Purpose
 
-This is some text
-I apologize in advance, this tutorial requires quite a bit of explaining and context before it can get into the code…. Good data manipulation is an art form that requires the use of many specific tools (functions) and expert data manipulation comes from the integration of these tools together. Therefore it is necessary to have an overview of the tool set before investigating any single tool.
+This tutorial series should be considered reference and background
+materials in support of preparation for more advanced statistical
+analyses with R. The topics covered progress from introductory and
+foundational through to more advanced and as such, the tutorials are
+intended to be consumed and worked through largely in the order laid
+out in the sidebar menu to the left.
 
-# Section 2
+# Format of tutorials 
 
-## Section 2a
+## R code
+Throughout the tutorials, R code snippets will be presented in a block such as:
 
+```{r}
+#| label: cmd1
+## construct variables
+x <- rep(1:5, times = 2)
+g <- gl(n = 2, k = 5, labels = c('High', 'Low'))
+y <- 2 + (3 * x) + (as.numeric(g) - 1) + rnorm(10, mean = 0, sd = 1)
+## compile into a data frame
+dat <- data.frame(x, g, y)
+## print out data frame
+dat
+```
+
+This format is partially reminiscent of the layout of code editors,
+albeit with a very opinionated color scheme.
+
+- the R code appears as the text over the faint yellow background.
+- any output appears below the code (white background) and in red font
+- the light gray numbers in the left hand gutter represent the line
+  numbers. These can be useful when trying to draw attention to a
+  particular line of code
+- the light gray text in the R code block beginning with two hash
+  symbols '##' are comments
+- in the upper right hand corner there is a clipboard symbol. Clicking
+  on this symbol will copy the code to the clipboard to help you
+  transfer the code to your own R session.
+
+## Bash code
 
 
