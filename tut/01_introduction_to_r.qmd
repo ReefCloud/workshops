@@ -2124,8 +2124,8 @@ workspace and stores all the user created objects (such as variables,
 dataframe etc). If the object is not found in .GlobalEnv, the search
 continues within the next search location (in my case the stats
 package) and so on. When you load an additional package (such as the
-`car` package, this package (along with any of other packages that it
-depends on) will be placed towards the start of the search que. The
+MASS` package, this package (along with any of other packages that it
+depends on) will be placed towards the start of the search queue. The
 logic being that if you have just loaded the package, then chances are
 you intend to use its functionality and therefore your statements will
 most likely be evaluated faster (because there is likely to be less to
@@ -2133,7 +2133,7 @@ search through before locating the relevant objects).
 
 ```{r}
 #| label: cmd101
-library(car)
+library(MASS)
 search()
 ```
 
@@ -2176,8 +2176,8 @@ all the functions and datasets defined within the package.
 
 ```{r}
 #| label: cmd103
-packageDescription('car')
-library(help='car')
+packageDescription('MASS')
+library(help='MASS')
 ```
 
 ## Installing packages
