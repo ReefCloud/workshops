@@ -37,6 +37,7 @@ jobs:
             any::magick
             any::pdftools
             any::quarto
+            any::tidyverse
 
       # install quarto
       - name: Install quarto
