@@ -62,6 +62,38 @@ albeit with a very opinionated color scheme.
   on this symbol will copy the code to the clipboard to help you
   transfer the code to your own R session.
 
+Occasionally (and particularly within tables) code snippets may
+alternatively be presented without the line number gutter. In such
+cases, there tends to only be a single line of code and there are
+substantial space savings if the gutter is removed.
+
+```{r}
+#| label: cmd2
+#| class: plain
+x <- rep(1:5, times = 2)
+```
+
+
 ## Bash code
+
+## Plain text
+
+The contents of plain text files will similarly be presented either as:
+
+```{txt}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+Maecenas sed metus congue risus sagittis viverra. Etiam 
+hendrerit orci arcu, et vehicula libero vulputate nec. 
+Aliquam placerat lacinia ex sit amet varius. Suspendisse 
+potenti. Nam tristique fringilla lacus id tincidunt. Donec 
+quis turpis tempus leo pharetra malesuada. Vivamus consequat 
+a quam nec vestibulum.
+```
+
+or when necessary to save space:
+
+```{txt, class = "plain"}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
+```
 
 

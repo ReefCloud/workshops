@@ -1185,7 +1185,7 @@ a more comprehensive list.
 <tr class = 'header'>
 <th align = 'left' width="180px">Function class</th>
 <th align = 'left' width="280px">Returns `TRUE`</th>
-<th align = 'left' width='250px'>Examples</th>
+<th align = 'left' width='350px'>Examples</th>
 </tr>
 </thead>
 <tbody>
@@ -1193,7 +1193,7 @@ a more comprehensive list.
 <td align = 'left'>`is.numeric(x)`</td>
 <td align = 'left'>if all elements of `x` are numeric or integers</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.numeric(c(1, -3.5, temperature))
 ```
 </td>
@@ -1202,7 +1202,7 @@ is.numeric(c(1, -3.5, temperature))
 <td align = 'left'>`is.null(x)`</td>
 <td align = 'left'>if `x` is null (the object has no length)</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.null(NULL)
 ```
 </td>
@@ -1211,7 +1211,7 @@ is.null(NULL)
 <td align = 'left'>`is.logical(x)`</td>
 <td align = 'left'>if all elements of `x` are logical</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.logical(c(TRUE, FALSE, 1))
 ```
 </td>
@@ -1220,7 +1220,7 @@ is.logical(c(TRUE, FALSE, 1))
 <td align = 'left'>`is.character(x)`</td>
 <td align = 'left'>if all elements of `x` are character strings</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.character(c("A", "Plant", quadrats))
 ```
 </td>
@@ -1230,7 +1230,7 @@ is.character(c("A", "Plant", quadrats))
 <td align = 'left'>`is.vector(x)`</td>
 <td align = 'left'>if the object `x` is a vector (has only a single dimension).  Returns `FALSE` if object has attributes other than 'names'.
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.vector(temperature)
 ```
 </td>
@@ -1239,7 +1239,7 @@ is.vector(temperature)
 <td align = 'left'>`is.factor(x)`</td>
 <td align = 'left'>if the object `x` is a factor</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.factor(shade)
 ```
 </td>
@@ -1248,7 +1248,7 @@ is.factor(shade)
 <td align = 'left'>`is.matrix(x)`</td>
 <td align = 'left'>if the object `x` is a matrix (two dimensions, yet not a`data.frame`)</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.matrix(xy)
 ```
 </td>
@@ -1257,7 +1257,7 @@ is.matrix(xy)
 <td align = 'left'>`is.list(x)`</td>
 <td align = 'left'>if the object `x` is a list</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.list(experiment)
 ```
 </td>
@@ -1266,7 +1266,7 @@ is.list(experiment)
 <td align = 'left'>`is.data.frame(x)`</td>
 <td align = 'left'>if the object `x` is a data.frame</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.data.frame(data)
 ```
 </td>
@@ -1275,7 +1275,7 @@ is.data.frame(data)
 <td align = 'left'>`is.na(x)`</td>
 <td align = 'left'>for each missing (`NA`) element in `x`</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 is.na(c(NA, 2))
 ```
 </td>
@@ -1284,7 +1284,7 @@ is.na(c(NA, 2))
 <td align = 'left'>`!`</td>
 <td align = 'left'>('not') operator as a prefix converts the above functions into 'is.not'</td>
 <td align = 'left'>
-```{r, eval = TRUE}
+```{r, eval = TRUE, class = "plain"}
 !is.factor(data)
 ```
 </td>
