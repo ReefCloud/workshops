@@ -113,6 +113,11 @@ div.cell-output>pre {
     border-radius: 0px;
 }
 
+.plain:has(>div> .txt) {
+    box-shadow: 2px 2px 12px -5px #999999;
+    border: 1pt solid black;
+    border-radius: 0px;
+}
 .plain>div.sourceCode {
     padding-left: 0px;
 }
