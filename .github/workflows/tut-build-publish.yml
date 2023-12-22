@@ -42,6 +42,15 @@ jobs:
             any::pander
             any::GGally
 
+      - name: install tinytex
+        uses: r-lib/actions/setup-tinytex@v2
+      - run: tlmgr --version
+
+      - name: Install additional LaTeX packages
+        run: |
+          tlmgr install titlesec
+          tlmgr list --only-installed
+
       # install quarto
       - name: Install quarto
         uses: quarto-dev/quarto-actions/setup@v2
