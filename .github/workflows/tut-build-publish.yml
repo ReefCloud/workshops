@@ -39,6 +39,7 @@ jobs:
             any::quarto
             any::tidyverse
             any::mvabund
+            any::pander
 
       # install quarto
       - name: Install quarto
