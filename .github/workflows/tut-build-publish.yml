@@ -51,6 +51,15 @@ jobs:
           tlmgr install titlesec
           tlmgr list --only-installed
 
+      - name: Install Google Fonts
+        run: |
+          wget -O architects_daughter.zip https://fonts.google.com/download?family=Architects%20Daughter
+          unzip -d architects_daughter/ architects_daughter.zip
+          mv architects_daughter /usr/share/fonts/
+          fc-cache -fv
+          fc-list
+          fc-list -v | grep -i archi
+
       # install quarto
       - name: Install quarto
         uses: quarto-dev/quarto-actions/setup@v2
