@@ -4778,6 +4778,49 @@ flex: 85%;
 width: 100%;
 border-top:1px solid #666;
 }
+.gallery {
+
+display: block;
+justify-content: space-between;
+}
+.gallery p {
+display: inline-flex;
+flex-direction: column;
+text-align: center;
+width: 100px;
+margin: 0;
+}
+.thumb {
+width: 100px;
+height: 100px;
+border: 1px solid #999;
+box-shadow: 2px 2px 12px -5px #999999;
+border-radius: 3px;
+padding: 2px;
+}
+.thumb-L {
+width: 150px;
+height: 150px;
+border: 1px solid #999;
+box-shadow: 2px 2px 12px -5px #999999;
+border-radius: 3px;
+padding: 2px;
+max-width: unset !important;
+}
+.thumb-s {
+width: 40px;
+height: 40px;
+
+
+
+padding: 2px;
+max-width: unset !important;
+display:block;
+}
+img::before {
+font-size:2cm;
+content: "this:";
+}
 @media(min-width: 992px) {
 body .page-columns {
 display:grid;
@@ -4954,7 +4997,7 @@ display: none
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01_introduction_to_r.html">Basics</a></li><li class="breadcrumb-item"><a href="./03_data_frames.html">Data frames</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01_introduction_to_r.html">R basics</a></li><li class="breadcrumb-item"><a href="./03_data_frames.html">Data frames</a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label onclick="window.quartoOpenSearch();">
@@ -4990,7 +5033,7 @@ display: none
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
- <span class="menu-text">Basics</span></a>
+ <span class="menu-text">R basics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -5022,6 +5065,13 @@ display: none
   <a href="./04_data_wrangling.html" class="sidebar-item-text sidebar-link"><i class="bi bi-house" role="img">
 </i> 
  <span class="menu-text">Data wrangling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05_grammar_of_graphics.html" class="sidebar-item-text sidebar-link"><i class="bi bi-house" role="img">
+</i> 
+ <span class="menu-text">The grammar of graphics</span></a>
   </div>
 </li>
       </ul>

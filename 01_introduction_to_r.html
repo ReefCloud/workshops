@@ -4759,6 +4759,49 @@ flex: 85%;
 width: 100%;
 border-top:1px solid #666;
 }
+.gallery {
+
+display: block;
+justify-content: space-between;
+}
+.gallery p {
+display: inline-flex;
+flex-direction: column;
+text-align: center;
+width: 100px;
+margin: 0;
+}
+.thumb {
+width: 100px;
+height: 100px;
+border: 1px solid #999;
+box-shadow: 2px 2px 12px -5px #999999;
+border-radius: 3px;
+padding: 2px;
+}
+.thumb-L {
+width: 150px;
+height: 150px;
+border: 1px solid #999;
+box-shadow: 2px 2px 12px -5px #999999;
+border-radius: 3px;
+padding: 2px;
+max-width: unset !important;
+}
+.thumb-s {
+width: 40px;
+height: 40px;
+
+
+
+padding: 2px;
+max-width: unset !important;
+display:block;
+}
+img::before {
+font-size:2cm;
+content: "this:";
+}
 @media(min-width: 992px) {
 body .page-columns {
 display:grid;
@@ -4935,7 +4978,7 @@ display: none
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01_introduction_to_r.html">Basics</a></li><li class="breadcrumb-item"><a href="./01_introduction_to_r.html">Introduction to R</a></li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01_introduction_to_r.html">R basics</a></li><li class="breadcrumb-item"><a href="./01_introduction_to_r.html">Introduction to R</a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
       <button type="button" class="btn quarto-search-button" aria-label onclick="window.quartoOpenSearch();">
@@ -4971,7 +5014,7 @@ display: none
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
- <span class="menu-text">Basics</span></a>
+ <span class="menu-text">R basics</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -5003,6 +5046,13 @@ display: none
   <a href="./04_data_wrangling.html" class="sidebar-item-text sidebar-link"><i class="bi bi-house" role="img">
 </i> 
  <span class="menu-text">Data wrangling</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05_grammar_of_graphics.html" class="sidebar-item-text sidebar-link"><i class="bi bi-house" role="img">
+</i> 
+ <span class="menu-text">The grammar of graphics</span></a>
   </div>
 </li>
       </ul>
@@ -7339,23 +7389,23 @@ Q10   E2      Q10  full       15.90</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb346"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb346-1"><a href="#cb346-1"></a><span class="fu">rep</span>(<span class="fu">runif</span>(<span class="dv">1</span>), <span class="at">times =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8201013 0.8201013 0.8201013 0.8201013 0.8201013</code></pre>
+<pre><code>[1] 0.1273874 0.1273874 0.1273874 0.1273874 0.1273874</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb348"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb348-1"><a href="#cb348-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.387720577 0.739011516 0.073182855 0.714293913 0.004429157</code></pre>
+<pre><code>[1] 0.1632176 0.7581983 0.1438880 0.1142779 0.3257058</code></pre>
 </div>
 </div>
 <p>When the function being run within <code>runif()</code> itself produces a vector of length &gt; 1, the <code>runif()</code> function combines each of the vectors together as separate columns in a matrix:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb350"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb350-1"><a href="#cb350-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>           [,1]      [,2]       [,3]      [,4]       [,5]
-[1,] 0.07586388 0.6754449 0.70807554 0.7262383 0.16656862
-[2,] 0.10951692 0.2749895 0.35485420 0.2613891 0.98484386
-[3,] 0.91382871 0.0225709 0.02476676 0.3929968 0.85619510
-[4,] 0.64940166 0.5213144 0.18310425 0.5381099 0.05899938
-[5,] 0.18776753 0.2354176 0.21491182 0.6211510 0.35057235</code></pre>
+<pre><code>           [,1]       [,2]       [,3]       [,4]      [,5]
+[1,] 0.31645570 0.57477583 0.56597381 0.10785776 0.1336924
+[2,] 0.94555825 0.32347902 0.10234672 0.44148808 0.9904434
+[3,] 0.92672388 0.22447530 0.66283741 0.52543872 0.5036370
+[4,] 0.75835453 0.01777219 0.01350721 0.04405199 0.6596402
+[5,] 0.03971524 0.67521189 0.59888262 0.65626805 0.1558708</code></pre>
 </div>
 </div>
 <section id="apply-functions-along-matrix-margins" class="level3" data-number="5.7.1">
