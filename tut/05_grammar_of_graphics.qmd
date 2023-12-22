@@ -1,0 +1,1889 @@
+---
+title: The grammar of graphics (ggplot2)
+author: "Murray Logan"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format: 
+  html:
+    toc: true
+    toc-float: true
+    number-sections: true
+    number-depth: 3
+    embed-resources: true
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+bibliography: resources/references.bib
+output_dir: "docs"
+---
+
+```{r setup, include=FALSE,warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE,warning=FALSE, message=FALSE, cache = TRUE, comment = "")
+options(tinytex.engine = 'xelatex')
+cleanRmdInput <- function(x) {
+#x <- gsub("```\\{r","```markdown\n`r ''```\\{r",x)
+x <- gsub("^```$","`` `",x)  # the Makefile will then change this back to ``` after pandoc
+x
+}
+library(tidyverse)
+library(pander)
+FIG_PATH <- '05_grammar_of_graphics_files/figure-html/'
+```
+ 
+
+```{r blank_template, echo=FALSE}
+blank_theme <- theme_bw() +
+    theme(plot.margin = margin(0, unit = 'cm'),
+          axis.title = element_blank(),
+          axis.text = element_blank())
+```
+ 
+This Tutorial has been thrown together a little hastily and is
+therefore not very well organised - sorry!  Graphical features are
+demonstrated either via tables of properties or as clickable graphics
+that reveal the required R code.  Click on a graphic to reveal/toggle
+the source code or to navigate to an expanded section.
+
+
+This tutorial is intended to be viewed sequentially. It begins with
+the basic ggplot framework and then progressively builds up more and
+more features as default elements are gradually replaced to yeild more
+customized graphics.
+		  
+		  
+Having said that, I am going to start with a sort of _showcase_ of
+graphics which should act as quick navigation to entire sections
+devoted to the broad series of graphs related to each of the featured
+graphics.  I have intentionally titled each graph according to the
+main feature it encapsulates rather than any specific functions that
+are used to produce the features as often a single graphic requires a
+combination of features and thus functions.  Furthermore, the grammar
+of graphics specifications are sufficiently unfamiliar to many that
+the relationships between the types of graphical features a researcher
+wishes to produce and the specific syntax required to achieve the
+desired result can be difficult to recognise.
+		  
+Each graphic is intended to encapsulate a broad series of related
+graph types.
+
+::: {.panel-tabset .tabset-faded}
+
+## Primatives
+
+<div class = "gallery">
+
+[Blank
+![](05_grammar_of_graphics_files/figure-html/ggplotBlank-1.png){class="thumb"}
+](#Gblank)
+
+[Points
+![](05_grammar_of_graphics_files/figure-html/ggplotPoint-1.png){class="thumb"}
+](#Gpoints) 
+
+[Text
+![](05_grammar_of_graphics_files/figure-html/ggplotText-1.png){class="thumb"}
+](#Gtext)
+
+[Paths
+![](05_grammar_of_graphics_files/figure-html/ggplotPath-1.png){class="thumb"}
+](#Gpaths)
+
+[Polygons
+![](05_grammar_of_graphics_files/figure-html/ggplotPolygon-1.png){class="thumb"}
+](#Gpolygons)
+
+[Area
+![](05_grammar_of_graphics_files/figure-html/ggplotArea-1.png){class="thumb"}
+](#Gareas)
+
+[Ribbons
+![](05_grammar_of_graphics_files/figure-html/ggplotRibbons-1.png){class="thumb"}
+](#Gribbons)
+
+</div>
+
+## Visualising distributions
+<div class = "gallery">
+[Boxplots
+![](05_grammar_of_graphics_files/figure-html/ggplotBoxplot-1.png){class="thumb"}
+](#Gboxplots)
+
+[Boxplots
+![](05_grammar_of_graphics_files/figure-html/ggplotBoxplotP-1.png){class="thumb"}
+](#Gboxplots)
+
+[Histograms
+![](05_grammar_of_graphics_files/figure-html/ggplotHistogram-1.png){class="thumb"}
+](#Ghistograms)
+
+[Histograms
+![](05_grammar_of_graphics_files/figure-html/ggplotHistogramP-1.png){class="thumb"}
+](#Ghistograms)
+
+[Density plots
+![](05_grammar_of_graphics_files/figure-html/ggplotDensity-1.png){class="thumb"}
+](#Gdensity-plots)
+
+[Density plots
+![](05_grammar_of_graphics_files/figure-html/ggplotDensityP-1.png){class="thumb"}
+](#Gdensity-plots)
+
+[Violin plots
+![](05_grammar_of_graphics_files/figure-html/ggplotViolin-1.png){class="thumb"}
+](#Gviolin-plots)
+
+[Violin plots
+![](05_grammar_of_graphics_files/figure-html/ggplotViolinP-1.png){class="thumb"}
+](#Gviolin-plots)
+
+[QQ plots
+![](05_grammar_of_graphics_files/figure-html/ggplotQQ-1.png){class="thumb"}
+](#Gqq-plots)
+
+[QQ plots
+![](05_grammar_of_graphics_files/figure-html/ggplotQQP-1.png){class="thumb"}
+](#Gqq-plots)
+
+[Bar plots
+![](05_grammar_of_graphics_files/figure-html/ggplotBar-1.png){class="thumb"}
+](#Gbar-plots)
+
+[Bar plots
+![](05_grammar_of_graphics_files/figure-html/ggplotBarS-1.png){class="thumb"}
+](#Gbar-plots)
+
+[Dotplots
+![](05_grammar_of_graphics_files/figure-html/ggplotDot-1.png){class="thumb"}
+](#Gdot-plots)
+
+[Dotplots
+![](05_grammar_of_graphics_files/figure-html/ggplotDotP-1.png){class="thumb"}
+](#Gdot-plots)
+
+[SPLOM
+![](05_grammar_of_graphics_files/figure-html/ggplotScatterplotMatrix-1.png){class="thumb"}
+](#Gscatterplot-matrix)
+
+</div>
+
+## Visualising trends
+<div class = "gallery">
+[Scatterplots
+![](05_grammar_of_graphics_files/figure-html/ggplotScatterplot-1.png){class="thumb"}
+](#Gscatterplots)
+
+[Line plots
+![](05_grammar_of_graphics_files/figure-html/ggplotLine-1.png){class="thumb"}
+](#Gline-plots)
+
+[Smoothers
+![](05_grammar_of_graphics_files/figure-html/ggplotSmooth-1.png){class="thumb"}
+](#Gsmoother-plots)
+
+[Tiles
+![](05_grammar_of_graphics_files/figure-html/ggplotTile-1.png){class="thumb"}
+](#Gtiles)
+
+[Rasters
+![](05_grammar_of_graphics_files/figure-html/ggplotRaster-1.png){class="thumb"}
+](#Grasters)
+
+[Contours
+![](05_grammar_of_graphics_files/figure-html/ggplotContour-1.png){class="thumb"}
+](#Gcontours)
+
+[Filled contour
+![](05_grammar_of_graphics_files/figure-html/ggplotFilledContour-1.png){class="thumb"}
+](#Gfilled-contour)
+
+</div>
+
+## Uncertainty
+<div class = "gallery">
+[Error bars
+![](05_grammar_of_graphics_files/figure-html/ggplotErrorbar-1.png){class="thumb"}
+](#Gerror-bars)
+
+[Lineranges
+![](05_grammar_of_graphics_files/figure-html/ggplotLinerange-1.png){class="thumb"}
+](#Gline-ranges)
+
+[Pointranges
+![](05_grammar_of_graphics_files/figure-html/ggplotPointrange-1.png){class="thumb"}
+](#Gpoint-ranges)
+
+[Ribbons
+![](05_grammar_of_graphics_files/figure-html/ggplotRibbon-1.png){class="thumb"}
+](#Gribbons)
+
+</div>
+
+## Other features
+<div class = "gallery">
+[Straight lines
+![](05_grammar_of_graphics_files/figure-html/ggplotVline-1.png){class="thumb"}
+](#Gstraight-lines)
+
+[Segments
+![](05_grammar_of_graphics_files/figure-html/ggplotSegment-1.png){class="thumb"}
+](#Gsegments)
+
+[Text
+![](05_grammar_of_graphics_files/figure-html/ggplotText-1.png){class="thumb"}
+](#Gtext)
+
+</div>
+:::
+ 
+# The Grammar of Graphics 
+
+The Grammar of Graphics was first introduced/presented by Wilkinson
+and Wills (2006) as a new graphics philosophy that laid down a series
+of rules to govern the production of quantitative graphics.
+Essentially the proposed graphics infrastructure considers a graphic
+as comprising a plot (defined by a <a href =
+"#coordinate-system">coordinate system</a>, <a>scales</a> and
+<a>panelling</a>) over which one or more data <a
+href="#layers-geoms-and-stats">layers</a> are applied.
+
+
+```{r plot1, echo=FALSE}
+dat <- data.frame(V1 = seq(1,4, length=6),
+                  V2 = c(1,2.1,2.6,2.3,3.1,3.9),
+                  V3 = letters[c(1,1,1,2,2,2)]
+                )
+g <- ggplot() +
+    geom_point(data=dat, aes(x=V1,y=V2,color=V3, size=V2)) +
+    coord_equal() +
+    theme_classic()
+ggsave(filename=paste0(FIG_PATH,"plot1.png"), g, width=3.2, height=2.6)
+```
+```{tikz}
+%| label: tikz_basics 
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-standalone.tex"
+%\tikzstyle{Title} = [font={\fontspec[Scale=2]{CompleteinHim}}]
+\tikzstyle{Title} = [font={\fontspec[Scale=1.5]{ArchitectsDaughter-Regular}}]
+
+\newcommand{\fplus}[1][black!20]{%
+  \tikz\draw[#1,line width=0.5em] (0,0) -- (1,0)(0.5,0.5) -- (0.5,-0.5);
+}
+\newcommand{\fequal}[1][black!20]{%
+  \tikz\draw[#1,line width=0.5em] (0,0.2) -- (1,0.2)(0,-0.2) -- (1,-0.2);
+}
+\tikzset{ 
+    table/.style={
+        matrix of nodes,
+       nodes in empty cells,
+        row sep=-\pgflinewidth,
+        column sep=-\pgflinewidth,
+        font=\ttfamily,
+        nodes={
+            rectangle,
+            draw=white,
+            align=center,
+            fill=black!20
+        },
+        minimum height=1.5em,
+        text depth=0.5ex,
+        text height=2ex,
+        nodes in empty cells,
+%%
+        %%every even row/.style={
+        %%    nodes={fill=gray!30}
+        %%},
+        column 1/.style={
+            nodes={text width=2em,font=\bfseries}
+        },
+        column 2/.style={
+            nodes={text width=2em}
+        },
+        column 3/.style={
+            nodes={text width=2em}
+        },
+        column 5/.style={
+            nodes={
+                text width=4em, 
+                fill=blue!40
+            }
+        },
+        row 1/.style={
+            nodes={
+                fill=black!40,
+                text=white,
+                font=\large\tt\bfseries
+            }
+        }
+    }
+}
+\begin{tikzpicture}
+\matrix (first) [table,text width=4em]{
+V1&V2 &V3 \\    
+   &  & \\    
+  &  &  \\    
+ &  & \\    
+ &   &  \\    
+ &  & \\    
+ &   &  \\    
+}; 
+
+\draw[->,line width = 3pt,color=orange] (first-2-1.center) -- ($(first-2-1.center) +(4,0)$) node [circle,fill=black,inner sep=0pt,minimum size=9pt, right=5pt] {};
+\draw[->,line width = 3pt,color=orange] (first-3-1.center) -- ($(first-3-1.center) +(4,0)$) node [circle,fill=black,inner sep=0pt,minimum size=9pt, right=5pt] {};
+\draw[->,line width = 3pt,color=orange] (first-4-1.center) -- ($(first-4-1.center) +(4,0)$) node [circle,fill=black,inner sep=0pt,minimum size=9pt, right=5pt] {};
+\draw[->,line width = 3pt,color=orange] (first-5-1.center) -- ($(first-5-1.center) +(4,0)$) node [circle,fill=black,inner sep=0pt,minimum size=9pt, right=5pt] {};
+\draw[->,line width = 3pt,color=orange] (first-6-1.center) -- ($(first-6-1.center) +(4,0)$) node [circle,fill=black,inner sep=0pt,minimum size=9pt, right=5pt] {};
+\draw[->,line width = 3pt,color=orange] (first-7-1.center) -- ($(first-7-1.center) +(4,0)$) node [circle,fill=black,inner sep=0pt,minimum size=9pt, right=5pt] {};
+\node [Title,above=0.25cm of first.north,anchor=south] (Data)  {Data};
+\node [Title,above right=0.0cm and 3cm of first.north,anchor=south] (geom)  {geom};
+\node [Title,above right=-1.0cm and 2cm of first.north,anchor=south] (stat)  {stat};
+\draw [
+    ultra thick,
+    decoration={
+        brace,
+        mirror,
+        raise=0.25cm,
+        amplitude = 10pt
+    },
+    decorate
+] (first.south west) -- ($(geom.east|-first.south)$) node [pos=0.5,anchor=north,yshift=-0.55cm, Title] {layer}; 
+
+
+\matrix (second) [table,text width=4em, right=4.0cm of first.south east, anchor=south west,
+style = {
+  every even column/.style={
+            nodes={text width=2em,font=\bfseries}
+        },
+every odd column/.style={
+            nodes={text width=2em,font=\bfseries}
+        },
+every even row/.style={
+            nodes={
+                fill=white,
+                draw=black!20,
+                text=black!20,
+                font=\large\tt\bfseries
+            }
+        },
+every odd row/.style={
+            nodes={
+                fill=white,
+                draw=black!20,
+                text=black!20,
+                font=\large\tt\bfseries
+            }
+        }
+}
+]{
+   &  &    & \\    
+   &  &    &\\    
+  &  &    & \\    
+  &  &    & \\    
+  &  &    & \\    
+  &  &    & \\    
+}; 
+\node [Title,above=0.6cm of second.north,anchor=south] (Data)  {\parbox[c][][t]{5cm}{\centering{Coordinate system}}};
+\node [left=0.4cm of second.west, anchor=east] {\fplus};  
+
+\node [right=0.4cm of second.east, anchor=west] {\fplus};  
+
+\node [right=2cm of second.east, anchor=west, Title] (Scales) {\parbox[c][][t]{2cm}{\centering{Scales\\[2em]theme}}};
+
+
+\draw[black] (second-6-1.south west) -- (second-6-4.south east);
+\draw[black] (second-6-1.south west) -- (second-1-1.north west);
+
+% \matrix (third) [table,text width=4em, right=2cm of second.south east, anchor=south west,
+% style = {
+%   every even column/.style={
+%             nodes={text width=2em,font=\bfseries}
+%         },
+% every odd column/.style={
+%             nodes={text width=2em,font=\bfseries}
+%         },
+% every even row/.style={
+%             nodes={
+%                 fill=white,
+%                 draw=black!20,
+%                 text=black!20,
+%                 font=\large\tt\bfseries
+%             }
+%         },
+% every odd row/.style={
+%             nodes={
+%                 fill=white,
+%                 draw=black!20,
+%                 text=black!20,
+%                 font=\large\tt\bfseries
+%             }
+%         }
+% }
+% ]{
+%    &  &    & \\    
+%    &  &    &\\    
+%   &  &    & \\    
+%   &  &    & \\    
+%   &  &    & \\    
+%   &  &    & \\    
+% };  
+% \draw[black] (third-6-1.south west) -- (third-6-4.south east);
+% \draw[black] (third-6-1.south west) -- (third-1-1.north west);
+% \node [circle,fill=black,draw=black,inner sep=0pt,minimum size=9pt] at ($(third.south west) +(1,1)$) {};
+% \node [circle,fill=black,draw=black,inner sep=0pt,minimum size=9pt] at ($(third.south west) +(1.6,2.1)$) {};
+% \node [circle,fill=black,draw=black,inner sep=0pt,minimum size=9pt] at ($(third.south west) +(2,2.6)$) {};
+% \node [circle,fill=black,draw=black,inner sep=0pt,minimum size=9pt] at ($(third.south west) +(2.8,2.3)$) {};
+% \node [circle,fill=black,draw=black,inner sep=0pt,minimum size=9pt] at ($(third.south west) +(3.3,3.1)$) {};
+% \node [circle,fill=black,draw=black,inner sep=0pt,minimum size=9pt] at ($(third.south west) +(4.0,3.9)$) {};
+
+\node [right=0.3cm of Scales.east, anchor=west] {\fequal};  
+\node [above right=0.5cm and 6cm of second.north east, anchor=north west] (third) {\includegraphics[width=6cm]{05_grammar_of_graphics_files/figure-html/plot1.png}};
+\node [Title,above=0.25cm of third.north,anchor=south] (Plot)  {Plot};
+\end{tikzpicture}
+```
+
+```{r ggplotTemplate, eval=FALSE}
+ggplot() +                          # required
+    geom_*(                         # required
+        data = <DATA>,              # required - <DATA> is a data frame
+        mapping = aes(<MAPPING>),   # required - map variables to scales
+        stat = <STAT>,              # optional - map variables to geoms
+        position = <POSITION>) +    # optional - adjustments to overlapping geoms
+    coord_*() +                     # optional - specify coordinate system
+    scale_*() +                     # optional - visual appearence of scales
+    facet_*() +                     # optional - subplots
+    theme_*()                       # optional - overal appearence
+```
+
+
+Each layer is defined as: 
+
+- the data - a data frame
+- <a>mapping</a> specifications that establish the visual aesthetics
+  (colour, line type and thickness, shapes etc) of each variable
+- statistical methods that determine how the data rows should be
+  summarised (<a>stat</a>)
+- geometric instructions (<a>geom</a>) on how each summary should be
+  represented (bar, line, point etc)
+- positional mechanism for dealing with overlapping data
+  (<a>position</a>)
+
+The visual aspects of all the graphical features are then governed by
+<a>themes</a>.
+
+Following a very short example, the next section will largely
+concentrate on describing each of the above graphical components.
+Having then established the workings of these components, we can then
+put them together to yield specific graphics.
+
+Hadley Wickham's interpretation of these principals in an R context is
+implimented via the `ggplot2` _package_.  In addition the
+following packages are also commonly used alongside _ggplot_ so as to
+expand on the flexibility etc.
+
+- `grid`
+- `gridExtra`
+- `scales`
+- `patchwork`
+- `tidyverse` - which is actually a collection of packages that make
+  up the _tidyverse_ ecosystem.
+		
+```{r libraries, cache = FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(GGally)
+library(colorspace)
+```
+
+To help illustrate graphical routines and techniques, this tutorial
+will make use of a number of data sets - most of which are distributed
+with base R or else one of the `tidyverse` _packages.  The first of
+these motivating datasets is a built in data set (`BOD`) that records
+temporal changes (days) in biochemical oxygen demand (mg/l).
+
+::: {.panel-tabset}
+
+## BOD
+
+The biochemical oxygen demand (BOD) data set comprises of just two
+variables (`demand`: a numeric vector representing biochemical oxygen
+demand (mg/l) and `Time`: a numeric vector representing the time
+associated with the demand measurement).  It was originally published
+in a master thesis in the late 1960's and has since become a standard
+example data set on which to demonstrate various statistical
+techniques.
+
+:::: {style='display:flex; place-content:
+space-between;'}
+
+::: {style='width:49%;'}
+
+```{r BOD1, results='markup', paged.print=FALSE}
+head(BOD)
+```
+:::
+
+::: {style='width:49%;'}
+
+```{r BOD2}
+glimpse(BOD)
+```
+:::
+
+::::
+
+## CO2
+
+The CO2 data set represents the CO₂ uptake (`uptake`: μmol/m²) of
+twelve individual _Echinochloa crus-galli_ plants (`Plant`) from two
+locations (`Type`) and two temperature treatments (`Treatment`) in
+response to a range of ambient carbon dioxide concentration (`conc`:
+ml/l).
+
+```{r CO2, results='markup', paged.print=FALSE}
+head(CO2)
+```
+```{r CO22, results='markup', paged.print=FALSE}
+glimpse(CO2)
+```
+
+## Diamonds
+
+The diamonds data set comprises a set of attributes from a large
+number (~54,000) of diamonds.  The most relevant attributes are:
+
+- `carat` - weight of the diamond
+- `cut` - quality of the cut
+- `clarity` - standard measurement of how clear the diamond is (on a
+  clarity scale)
+- `price` - price in $US
+
+```{r Diamonds, results='markup', paged.print=FALSE}
+head(diamonds)
+```
+```{r Diamonds2, results='markup', paged.print=FALSE}
+glimpse(diamonds)
+```
+
+## df
+
+This is a purely ficticious and fabricated example that is intended to
+provide a very small example data set.
+
+```{r data}
+df <- data.frame(x = c(3, 1, 5), y = c(2, 4, 6), z = c('a', 'b', 'c'))
+```
+```{r dataTable, echo=FALSE}
+knitr::kable(df,table.attr = "class=\'paperTable\'", format = "html")
+#paged.print = FALSE
+```
+
+## Iris
+
+The iris data set is a famous example data set that comprises the
+measurements (cm) of sepal and petal dimensions for three species of
+iris (_Iris setosa_, _versicolor_, and _virginica_).
+
+- `Sepal.Length` - length (cm) of sepals
+- `Sepal.Width` - width (cm) of sepals
+- `Petal.Length` - length (cm) of petals
+- `Petal.Width` - width (cm) of petals
+- `Species` - iris species
+
+```{r Iris, results='markup', paged.print=FALSE}
+head(iris)
+```
+```{r Iris2, results='markup', paged.print=FALSE}
+glimpse(iris)
+```
+
+## Faithfuld
+
+2d density estimate of Old Faithful data
+
+- `eruptions` - eruption time (mins)
+- `waiting` - waiting time until next eruption (mins) 
+- `density` - 2d density estimate
+
+```{r Faithfuld, results='markup', paged.print=FALSE}
+head(faithfuld)
+```
+```{r Faithfuld2, results='markup', paged.print=FALSE}
+glimpse(faithfuld)
+```
+
+## Warpbreaks
+
+The warpbreaks dataset comprises of the number of warp breaks per loom
+for two different types of wool under three different tensions.
+
+- `breaks` - the number of warp breaks
+- `wool` - the type of wool (A or B) 
+- `tension` - the level of tension (L: low, M: medium, H: high)
+
+```{r Warpbreaks, results='markup', paged.print=FALSE}
+head(warpbreaks)
+```
+```{r Warpbreaks2, results='markup', paged.print=FALSE}
+glimpse(warpbreaks)
+```
+
+:::
+
+The following very simple graphic will be used to illustrate the
+general ggplot template outlined above by explicitly stating many of
+the default specifications.  It will use a cartesian coordinate
+system, continuous axes scales, a single facet (panel) and then define
+a single layer with a dataframe (`BOD`), with red points, identity (no
+summarising) statistic visualised as a point geometric.
+
+
+:::: {style='display:flex;'}
+
+::: {style='width:72%;'}
+
+```{r template1, eval=FALSE}
+p <- ggplot() +                                # initialise ggplot 
+    layer(data = BOD,                          # data.frame
+          mapping = aes(y = demand, x = Time), # define x and y variables
+          stat = "identity",                   # use raw input data
+          geom = "point",                      # plot data as points
+          position = "identity",               # how to handle overlap data
+          params = list(na.rm = TRUE),         # additional params for stat
+          show.legend = FALSE                  # whether include a legend
+          )+ 
+    layer(data = BOD,                          # data.frame
+          mapping = aes(y = demand, x = Time), # define x and y variables
+          stat = "identity",                   # use raw input data
+          geom = "line",                       # plot data as a line
+          position = "identity",               # how to handle overlap data
+          params = list(na.rm = TRUE),         # additional params for stat
+          show.legend = FALSE                  # whether include a legend
+          ) +
+    coord_cartesian() +                        # cartesian coordinates
+    scale_x_continuous() +                     # continuous x axis
+    scale_y_continuous()                       # continuous y axis
+p                                              # print the plot
+```
+
+:::
+
+
+::: {style='width:28%;'}
+
+```{r template1, eval=TRUE, echo=FALSE, fig.width=4, fig.height = 4}
+```
+
+:::
+
+::::
+
+Conveniently, much of the default specifications can be omitted.
+Hence the above can also be entered as:
+
+:::: {style='display:flex;'}
+
+::: {style='width:72%;'}
+
+```{r template2, eval=FALSE}
+p <- ggplot(data = BOD,                        # initialise ggplot 
+            map = aes(x = Time, y = demand)) + # define x and y variables
+    geom_point() +                             # add points
+    geom_line()                                # add lines
+p                                              # print the plot
+```
+
+:::
+
+
+::: {style='width:28%;'}
+
+```{r template2, eval=TRUE, echo=FALSE, fig.width=4, fig.height = 4}
+```
+
+:::
+
+::::
+
+
+Note the following important features of the grammar of graphics as
+implemented in R:
+
+- the order in which each of the major components in the first code
+  snippet were added is unimportant. They each add additional
+  information to the overall graphical object. The object itself is
+  evaluated as a whole when it is printed.  For example, scales can be
+  defined before layers.
+  <details><summary>Explore</summary>
+  The following both alter the x axis to a log (base 10) scale. Note how
+  both expressions yield the same outcome.
+  
+  :::: {style='display:flex; place-content: space-between;'}
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExOrder1, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand)) + 
+      geom_point() +                            
+      geom_line() +
+      scale_x_log10()
+  p                                           
+  ```
+  
+  :::
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExOrder2, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand)) + 
+      scale_x_log10() +
+      geom_point() + 
+      geom_line() 
+  p                                           
+  ```
+  
+  :::
+  
+  ::::
+  
+  </details>
+- multiple layers are laid down in the order that they appear in the
+  statement.  In the example above, the lines are drawn over the top
+  of the points.
+  <details><summary>Explore</summary>
+  The following define points and lines in different orders.  Note how
+  the points appear under the line in the left hand figure and over
+  the line in the right hand figure.
+  
+  :::: {style='display:flex; place-content: space-between;'}
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExLayers1, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand)) + 
+      geom_point(color = 'red', size=5) +                            
+      geom_line()                              
+  p                                           
+  ```
+  
+  :::
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExLayers2, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand)) + 
+      geom_line() +
+      geom_point(color = 'red', size=5) 
+  p                                           
+  ```
+  
+  :::
+  
+  ::::
+  
+  </details>
+- layers can be defined either with the `layers` _function_, or more
+  conveniently (as illustrated in the shorter, second code snippet),
+  via a `geom_*` function or `stat_*` _function_.
+  <details><summary>Explore</summary> The following both specify a
+  single layer (line).  The left hand figure uses the `geom_line`
+  _function with the `stat = 'identity` _argument_ and the right hand
+  figure uses the `stat_identity` _function_ with the `geom = 'line'`
+  _argument_.  Note, _identity_ just means multiple by 1 (i.e. do
+  nothing).  The default `stat` for `geom_line` is `identity` and
+  therefore it is not necessary to provide this argument - in this
+  case it was purely used for illustrative purposes.
+  
+  :::: {style='display:flex; place-content: space-between;'}
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExLayers3, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand)) + 
+      geom_line(stat = 'identity')
+  p                                           
+  ```
+  
+  :::
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExLayers4, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand)) + 
+      stat_identity(geom = 'line')
+  p                                           
+  ```
+  
+  :::
+  
+  ::::
+  
+  </details>
+- the data and mapping used by `geom_*` and `stats_*` _functions_ can
+  inherit mapping aesthetics from the main `ggplot()` function.
+  <details><summary>Explore</summary> The following figures both
+  generate a plot with both points and a line.  In the left hand side
+  syntax, `geom_point` and `geom_line` inherit the data and aesthetic
+  mappings from the `ggplot` _function_.  In the right hand side
+  syntax, the two _geoms_ specify the data and aesthetic mappings
+  themselves.  Whilst in this case it does lead to code duplication,
+  in other cases, it does permit different sources of data to be
+  integrated together into a single graphic.
+  
+  :::: {style='display:flex; place-content: space-between;'}
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExStat1, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand)) + 
+      geom_line() +
+      geom_point()
+  p                                           
+  ```
+  
+  :::
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExStat2, fig.width=4, fig.height = 3}
+  p <- ggplot() +
+      geom_line(data = BOD,                      
+                map = aes(x = Time, y = demand)) +
+      geom_point(data = BOD,
+                 map = aes(x = Time, y = demand))
+  p                                           
+  ```
+  
+  :::
+  
+  ::::
+  
+  </details>
+- the `ggplot()` _function_ along with the other building _functions_
+  work together to create a set of instructions that determine how a
+  graph is to be constructed.  In the examples above, these
+  instructions are stored in a variable (which we arbitrarily assigned
+  the name `p`).  The graph is not actually generated until the
+  `print` method is called on this object.  Recall that in R, entering
+  the name of an object is the same as running the `print` function on
+  this object.  <details><summary>Explore</summary> In the following
+  figures, the plotting instructions will be built up in multiple
+  stages.  
+  
+  - the first stage of both examples stores the ggplot initialisation
+	(including specification of the data and aesthetic mapping).
+  - the second stage of the left hand syntax adds instructions for
+	including two data layers (line and points).  Finally, the left
+	hand syntax then uses prints the full set of plotting instructions
+	(which enacts the generation of the plot).
+  - the second stage of the right hand syntax adds instructions for
+    including a single layer (line) and in the final stage,
+    instructions for including a point layer are added to the
+    instruction set sent to `print`.
+  - note, unlike for the left hand side syntax, the stored set of
+    instructions on the right hand side do not contain the
+    instructions for including the points layer - they are only added
+    at the time of printing
+  
+  :::: {style='display:flex; place-content: space-between;'}
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExProgressive1, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand))  
+  p <- p + geom_line() +
+      geom_point()
+  p                                           
+  ```
+  
+  :::
+  
+  ::: {style='width:49%;'}
+
+  ```{r ExProgressive2, fig.width=4, fig.height = 3}
+  p <- ggplot(data = BOD,                      
+              map = aes(x = Time, y = demand))  
+  p <- p + geom_line()
+  p + geom_point()                                          
+  ```
+  
+  :::
+  
+  ::::
+  
+  </details>
+  
+In all of the examples so far, you might have noticed that we stored
+the plotting instructions in an arbitrary variable (`p`) prior to
+printing (generating the plot).  Although it is not necessary to store
+the instructions (we can just accumulate the instructions and print in
+a single expression), storing sets of instructions do allow the
+instruction set to be duplicated or altered.  This is particularly
+useful when you have a need to produce two similar and complex plots.
+
+Since this is a tutorial, it will endeavour to focus on a very small
+set of concepts at any one time.  To that end, most of the examples in
+a section will feature slight variations of a common snippet of code.
+Typically, there will be a single common code block that initialises a
+fairly generic plot followed by a series of modifications/additions
+that highlight different plotting routines or options.
+  
+
+In an attempt to illustrate the use of ggplot for elegant graphics, we
+will drill down into each of the plot and layer specifications.
+
+# Layers (geoms and stats)
+### Overview
+Although the geoms and thus layers are amongst the last features to be
+constructed by the system, the data and aesthetic features of the data
+impact on how the coordinate system, scales and panelling work.
+Therefore, we will explore the geoms first.
+
+
+Geometric objects (**geoms**) are visual representations of
+observations.  For example, there is a geom to represent points based
+on a set of x,y coordinates.  All graphics need at least one geom and
+each geom is mapped to its own layer.  Multiple geoms can be added to
+a graphic and the order that they are added to the expression
+determines the order that their respective layer is constructed.
+
+When a `ggplot` expression is being evaluated, geoms are coupled
+together with a **stat_** function.  This function is responsible for
+generating data appropriate for the geom.  For example, the
+`stat_boxplot` is responsible for generating the quantiles, whiskers
+and outliers for the `geom_boxplot` function.
+
+In addition to certain specific `stat_` functions, all geoms can be
+coupled to a `stat_identity` function.  In mathematical contexts,
+identity functions map each element to themselves - this essentially
+means that each element passes straight through the identity function
+unaltered.  Coupling a geom to an identity function is useful when the
+characteristics of the data that you wish to represent are present in
+the data frame.  For example, your dataframe may contain the x,y
+coordinates for a series of points and you wish for them to be used
+unaltered as the x,y coordinates on the graph.  Moreover, your
+dataframe may contain pre-calculated information about the quantiles,
+whiskers and outliers and you wish these to be used in the
+construction of a boxplot (rather than have the internals of ggplot
+perform the calculations on raw data).  
+
+Since `geom_` and `stats_` functions are coupled together, a geometric
+representation can be expressed from either a `geom_` function OR a
+`stats_` function.  That is, you either:
+			  
+- specify a `geom_` function that itself calls a `stat_` function to
+  provide the data for the `geom` function.
+ 
+  ```{r plotGgplotGeomSmoothA, cache=TRUE, tidy=TRUE, echo=TRUE, eval=FALSE,fig.width=4, fig.height=4, out.width=150, out.height=150, warning=FALSE, message=FALSE}
+  ggplot(CO2)+geom_smooth(aes(x=conc,y=uptake), stat="smooth")
+  ``` 
+- specify a `stat_` function that itself calls a `geom_` function to
+  visually represent the data..
+
+  ```{r plotGgplotGeomSmoothB, cache=TRUE, tidy=TRUE, echo=TRUE, eval=FALSE,fig.width=4, fig.height=4, out.width=150, out.height=150, warning=FALSE, message=FALSE}
+  ggplot(CO2)+stat_smooth(aes(x=conc,y=uptake), geom="smooth")
+  ```
+			
+It does not really make any difference which way around you do this.
+For the remainder of this tutorial, we will directly engage the
+`geom_` function for all examples.
+
+The <samp>geom_</samp> functions all have numerous arguments, many of
+which are common to all <samp>geoms_</samp>.
+
+- `data` - the data frame containing the data.  Typically
+  this is inherited from the `ggplot` function.
+- `mapping` - the aesthetic mapping instructions.  Through
+  the aesthetic mapping the aesthetic visual characteristics of the
+  geometric features can be controlled (such as colour, point sizes,
+  shapes etc).  The aesthetic mapping can be inherited from the
+  `ggplot` function.  Common aesthetic features (mapped via
+  a `aes` function) include:
+				
+  - `alpha` - transparency
+  - `colour` - colour of the geometric features
+  - `fill` - fill colour of geometric features
+  - `linetype` - type of lines used in geometric features (dotted,
+     dashed, etc)
+  - `size` - size of geometric features such as points or text
+  - `shape` - shape of geometric features such as points
+  - `weight` - weightings of values
+- `stat` - the `stat_` function coupled to the `geom_` function
+- `position` - the position adjustment for overlapping objects
+  - `identity` - leave objects were they are:
+  - `dodge` - shift objects to the side to prevent overlapping
+  - `stack` - stack objects on top of each other
+  - `fill` - stack objects on top of each other and standardize each
+    group to equal height
+- `show.legend` - whether a legend should be included
+- `inherit.aes` - whether to override any aesthetics from the `ggplot`
+  _function_
+
+The above characteristics that can be aesthetically mapped to data
+variables, can alternatively be set directly.  For example, in the
+left hand code snippet below, the colour of the points is determined
+by the value of the specified variable.  However, in the right hand
+code snippet, the colour of the points is set to be red.  Notice, that
+in this later instance, the colour is specified _outside_ of the
+aesthetic (`aes`) _function_.
+
+:::: {style='display:flex; place-content: space-between;'}
+  
+::: {style='width:49%;'}
+
+```{r ExColour1, fig.width=4, fig.height = 3}
+ggplot(data = CO2,                      
+            map = aes(x = conc, y = uptake)) +
+    geom_point(aes(colour = Type))                                  
+```
+  
+:::
+  
+::: {style='width:49%;'}
+
+```{r ExColour2, fig.width=4, fig.height = 3}
+ggplot(data = CO2,      
+            map = aes(x = conc, y = uptake)) +
+    geom_point(colour = "red")                                           
+```
+  
+:::
+  
+::::
+  
+The above figure (left side) illustrated the use of aesthetics to
+highlight different groups (or _series_) within the data (`Type` in
+that case).  For some _geoms_ it is important that they be able to
+operate on a single series of data to avoid strange artefacts.  The
+next two figures will include a layer of lines.  In the left hand
+figure, the lines are drawn across a single series (group) yielding a
+nonsense pattern.  This is addressed in the right hand figure which
+specifies that separate lines should be drawn for each `Plant` (each
+plant is its own series or _group_).
+
+:::: {style='display:flex; place-content: space-between;'}
+  
+::: {style='width:49%;'}
+
+```{r ExGroup1, fig.width=4, fig.height = 3}
+ggplot(data = CO2,                      
+            map = aes(x = conc, y = uptake)) +
+    geom_line()                                  
+```
+  
+:::
+  
+::: {style='width:49%;'}
+
+```{r ExGroup2, fig.width=4, fig.height = 3}
+ggplot(data = CO2,      
+            map = aes(x = conc, y = uptake)) +
+    geom_line(aes(group = Plant))                                           
+```
+  
+:::
+  
+::::
+
+In the above right, the series are defined by the _group_ aesthetic.
+Alternatively, we could have mapped `Plant` to one of the other
+aesthetics (such as `colour`, `linetype` etc), in which case, each
+line would have a different visual appearance and a legend would have
+also been included.
+
+Currently, there are a large number of available `geoms_` and `stat_`
+functions within the ggplot system.  This tutorial is still a work in
+progress and therefore does not include all of them - I have focused
+on the more commonly used ones.
+
+## Primitive geoms 
+
+Primitive _geoms_ are simple plotting shapes that typically represent
+direct mapping of data variables to the shapes - that is, they do not
+require specific _stat_ _functions_.  Hence, all primitive _geoms_ use
+_stat_identity_.  Nevertheless, it is possible to have the shapes
+mapped via alternative _stats_ functions is appropriate ([see
+points](#Gpoints)).
+
+
+::: {.panel-tabset}
+
+### Blank ![](05_grammar_of_graphics_files/figure-html/ggplotBlank-s-1.png){class="thumb-s" #Gblank} 
+
+Although this might seem pointless, it can be useful for forcing axes
+scales to conform to a particular format - since axes scales are
+determined by the first layer (which can be blank) defined in the
+sequence of expressions.  
+
+To help illustrate this, I will introduce a fabricated data set
+comprising the length (mm) of 10 day old frog tadpoles incubated at
+three different temperatures (Low, Medium, High).
+
+
+
+:::: {style='display:flex; place-content: space-between;'}
+  
+::: {style='width:49%;'}
+
+```{r dataFrogs}
+tadpole <- tribble(
+    ~length, ~temp,
+    2.1,     "Low",
+    2.0,     "Low",
+    1.8,     "Low",
+    2.2,     "Medium",
+    2.3,     "Medium",
+    2.3,     "Medium",
+    2.5,     "High",
+    2.7,     "High",
+    2.8,     "High",
+    ) %>%
+    mutate(temp = factor(temp))
+```
+
+:::
+
+::: {style='width:49%;'}
+
+Now imagine you wish to produce a scatterplot (with `length` mapped to
+the y-axis and `day` mapped to the x-axis) to explore these data.
+Since although `temp` is categorical, it is ordered, we would also
+like to plot a line representing the overall trend in tadpole length
+in relation to temperature.  Doing so would introduce one of two problems:
+
+- lines can only be plotted when both x and y are mapped to continuous variables
+- in order to plot a line, we would need to convert temperature into a
+  numeric variable in some way, however doing so would mean that the
+  axes labels loose their meaning.
+
+::: 
+
+::::
+
+Using a `geom_blank` allows us to define a line and maintain useful
+axes labels.  The second and third examples below will illustrate the
+problem and solution respectively.
+
+```{r ggplotBlank-s, echo=FALSE, include = FALSE, fig.height=3, fig.width=3, out.width='300px', out.height='300px', message=FALSE}
+ggplot(data = tadpole, aes(y = length, x = temp)) + geom_blank() +
+    blank_theme
+```
+
+<table class='table table-primary table-bordered table-sm paramsTable'>
+<thead>
+<tr class = 'header'>
+<th align = 'left'>Feature</th>
+<th align = 'left'>geom</th>
+<th align = 'left'>stat</th>
+<th align = 'left'>position</th>
+<th align = 'left'>Aesthetic parameters / Notes</th>
+<th align = 'left'>Example plot</th>
+</tr>
+</thead>
+<tbody>
+<tr class = 'odd'>
+<td align = 'left'>Blank layer</td>
+<td align = 'left'>`_blank`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br></td>
+<td align = 'left' rowspan = 2>
+```{r ggplotBlank, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=tadpole, aes(y = length, x = temp)) +
+    geom_blank()
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotBlank, eval=FALSE}
+```
+</td>
+</tr>
+
+<tr class = 'even'>
+<td align = 'left'>Blank layer</td>
+<td align = 'left'>`_blank`</td>
+<td align = 'left'>`_summary`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br></td>
+<td align = 'left' rowspan = 2>
+```{r ggplotBlank1, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=tadpole, aes(y = length, x = as.numeric(temp))) +
+    geom_line(stat = 'summary', fun = mean) 
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotBlank1, eval=FALSE}
+```
+</td>
+</tr>
+
+<tr class = 'odd'>
+<td align = 'left'>Blank layer</td>
+<td align = 'left'>`_blank`</td>
+<td align = 'left'>`_summary`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br></td>
+<td align = 'left' rowspan = 2>
+```{r ggplotBlank2, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=tadpole, aes(y = length, x = temp))+
+    geom_blank() +
+    geom_line(aes(x = as.numeric(temp)),
+                  stat = 'summary', fun = mean) 
+```
+</td>
+</tr>
+<tr>
+
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotBlank2, eval=FALSE}
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+
+
+### Points ![](05_grammar_of_graphics_files/figure-html/ggplotPoint-s-1.png){class="thumb-s" #Gpoints}
+
+```{r ggplotPoint-s, echo=FALSE, include = FALSE, fig.height=3, fig.width=3, out.width='300px', out.height='300px', message=FALSE}
+ggplot(data = df, aes(y = y, x = x)) + geom_point(size=8) +
+    blank_theme
+```
+
+`geom_point` draws points (scatterplot).  Typically the stat used is
+`stat_identity` as we wish to use the values in two continuous vectors
+as the coordinates of each point.
+
+The following list describes the mapping aesthetic properties
+associated with `geom_point`. The entries in bold are compulsory.
+<details><summary>Show attributes</summary>
+
+
+| Parameter                                                     | `geom_point` |
+|---------------------------------------------------------------+--------------|
+| _aesthetics_                                                  |              |
+| **`x`** - variable to map to the x-axis                       | ✔            |
+| **`y`** - variable to map to the y-axis                       | ✔            |
+| `group` - plot separate series without aesthetic differences  | ✔            |
+| `alpha` - transparency                                        | ✔            |
+| `colour` - colour of the points/lines                         | ✔            |
+| `fill` - inner colour of points/shapes                        | ✔            |
+| `linetype` - type of lines used to construct points/lines     | ✔            |
+| `size` - thickness of the line                                | ✔            |
+| `shape` - the plotting symbol/character                       | ✔            |
+| `weight` - weightings of values                               | ✔            |
+
+: {.primary .bordered .sm .paramsTable}
+
+</details>
+
+
+<table class='table table-primary table-bordered table-sm paramsTable'>
+<thead>
+<tr class = 'header'>
+<th align = 'left'>Feature</th>
+<th align = 'left'>geom</th>
+<th align = 'left'>stat</th>
+<th align = 'left'>position</th>
+<th align = 'left'>Aesthetic parameters / Notes</th>
+<th align = 'left'>Example plot</th>
+</tr>
+</thead>
+<tbody>
+<tr class = 'odd'>
+<td align = 'left'>points layer</td>
+<td align = 'left'>`_point`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br>`geom_point` forms the basis of various plots such as scatterplots, maps and others</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotPoint, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=df, aes(y = y, x = x)) +
+    geom_point()
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotPoint, eval=FALSE}
+```
+</td>
+</tr>
+
+<tr class = 'even'>
+<td align = 'left'>means points layer</td>
+<td align = 'left'>`_point`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y,fun<br><br>plots points based on the values provided</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotPoint1, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=CO2, aes(x = conc, y = uptake)) +
+    geom_point()
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotPoint1, eval=FALSE}
+```
+</td>
+</tr>
+
+<tr class = 'odd'>
+<td align = 'left'>means points layer</td>
+<td align = 'left'>`_point`</td>
+<td align = 'left'>`_summary`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y,fun<br><br>plots the result of the specified summary function</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotPoint2, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=CO2, aes(x = conc, y = uptake)) +
+    geom_point(stat = "summary", fun = mean)
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotPoint2, eval=FALSE}
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+The plotting symbols are specified by either a number (index of a
+plotting symbol - see below) or a single character (printed
+literally).
+
+```{r ggplotPoint3, echo = FALSE, eval=TRUE, fig.height = 3, fig.width = 9}
+pch_table <- expand.grid(x=0:6, y = 0:4) %>%
+    mutate(shape = 0:(n()-1)) %>%
+    filter(shape < 26)
+ggplot(data = pch_table, aes(x = x, y = y, shape = shape)) +
+    geom_blank(data = NULL, aes(x=0, y = -0.2)) +
+    geom_point(size = 5, fill = 'red', stroke = 2) +
+    geom_text(aes(label = shape, y = y + 0.4)) +
+    scale_shape_identity() +
+    coord_cartesian() +
+    theme(axis.title = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank())
+```
+
+
+### Text ![](05_grammar_of_graphics_files/figure-html/ggplotText-s-1.png){class="thumb-s" #Gtext} 
+
+```{r ggplotText-s, echo=FALSE, include = FALSE, fig.height=3, fig.width=3, out.width='300px', out.height='300px', message=FALSE}
+ggplot(data = df, aes(y = y, x = x)) + geom_text(aes(label = z), size=15) +
+    blank_theme
+```
+
+The following list describes the mapping aesthetic properties
+associated with `geom_text`. The entries in bold are compulsory.
+
+<details><summary>Show attributes</summary>
+
+
+| Parameter                                                                            | `geom_text` |
+|--------------------------------------------------------------------------------------|-------------|
+| - **`x`** - variable to map to the x-axis                                            | ✔           |
+| - **`y`** - variable to map to the y-axis                                            | ✔           |
+| - **`label`** - text to use as labels                                                | ✔           |
+| - `group` - plot separate series without aesthetic differences                       | ✔           |
+| - `alpha` - transparency                                                             | ✔           |
+| - `colour` - colour of the points/lines                                              | ✔           |
+| - `fill` - inner colour of points/shapes                                             | ✔           |
+| - `linetype` - type of lines used to construct points/lines                          | ✔           |
+| - `shape` - symbol shape for points                                                  | ✔           |
+| - `size` - size of symbol                                                            | ✔           |
+| - `family` - font family                                                             | ✔           |
+| - `fontface` - bold, italic, normal etc                                              | ✔           |
+| - `hjust` - horizontal justification                                                 | ✔           |
+| - `vjust` - vertical justification                                                   | ✔           |
+|                                                                                      |             |
+| _additional parameters_                                                              |             |
+| - `parse` - whether to parse labels into expressions (to include special characters) | FALSE       |
+| - `nudge_x` - horizontal adjustments to label positions                              | 0           |
+| - `nudge_y` - vertical adjustments to label positions                                | 0           |
+| - `check_overlap` - whether to plot text that overlaps other text in layer           | FALSE       |
+
+: {.primary .bordered .sm .paramsTable}
+
+</details>
+
+<table class='table table-primary table-bordered table-sm paramsTable'>
+<thead>
+<tr class = 'header'>
+<th align = 'left'>Feature</th>
+<th align = 'left'>geom</th>
+<th align = 'left'>stat</th>
+<th align = 'left'>position</th>
+<th align = 'left'>Aesthetic parameters / Notes</th>
+<th align = 'left'>Example plot</th>
+</tr>
+</thead>
+<tbody>
+<tr class = 'odd'>
+<td align = 'left'>Text layer</td>
+<td align = 'left'>`_text`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y,label<br><br>Text on a plot - useful for depicting the location of observations</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotText, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=df, aes(y = y, x = x)) +
+    geom_text(aes(label = z))
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotText, eval=FALSE}
+```
+</td>
+</tr>
+
+<tr class = 'odd'>
+<td align = 'left'>Text layer</td>
+<td align = 'left'>`_text`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y,label<br><br>Text on a plot - useful for depicting the location of observations</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotText1, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=CO2, aes(y = uptake, x = conc)) +
+    geom_text(aes(label = Treatment))
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotText1, eval=FALSE}
+```
+</td>
+</tr>
+
+<tr class = 'odd'>
+<td align = 'left'>Text layer</td>
+<td align = 'left'>`_text`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y,label<br><br>Text on a plot - useful for depicting the location of observations</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotText2, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=CO2, aes(y = uptake, x = conc)) +
+    geom_text(aes(label = toupper(substr(Treatment, 1, 1))))
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotText2, eval=FALSE}
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+Horizontal (`hjust`) and vertical (`vjust`) text justification
+controls are often a source of confusion and this is further
+exacerbated when combined with `angle` control.  The following
+excellent demonstration from
+[here](https://stackoverflow.com/questions/7263849/what-do-hjust-and-vjust-do-when-making-a-plot-using-ggplot)
+provides a visual aid to understanding the use of these controls.
+
+```{r ggplotText3, eval=TRUE, fig.height = 3, fig.width = 9}
+td <- expand.grid(
+    hjust=c(0, 0.5, 1),
+    vjust=c(0, 0.5, 1),
+    angle=c(0, 45, 90),
+    text="text"
+)
+
+ggplot(td, aes(x=hjust, y=vjust)) + 
+    geom_point() +
+    geom_text(aes(label=text, angle=angle, hjust=hjust, vjust=vjust)) + 
+    facet_grid(~angle) +
+    scale_x_continuous(breaks=c(0, 0.5, 1), expand=c(0, 0.2)) +
+    scale_y_continuous(breaks=c(0, 0.5, 1), expand=c(0, 0.2))
+```
+        
+
+### Paths ![](05_grammar_of_graphics_files/figure-html/ggplotPath-s-1.png){class="thumb-s" #Gpaths}
+
+```{r ggplotPath-s, echo=FALSE, include = FALSE, fig.height=3, fig.width=3, out.width='300px', out.height='300px', message=FALSE}
+ggplot(data = df, aes(y = y, x = x)) + geom_path() +
+    blank_theme
+```
+
+`geom_path` draws paths (line plots). Paths order the coordinates
+according to the order in the data frame (c.f. `geom_line` and
+`geom_step`)
+
+<details><summary>Show attributes</summary>
+
+
+| Parameter                                                      | `geom_path` |
+|----------------------------------------------------------------|-------------|
+| - **`x`** - variable to map to the x-axis                      | ✔           |
+| - **`y`** - variable to map to the y-axis                      | ✔           |
+| - `group` - plot separate series without aesthetic differences | ✔           |
+| - `alpha` - transparency                                       | ✔           |
+| - `colour` - colour of the points/lines                        | ✔           |
+| - `fill` - inner colour of points/shapes                       | ✔           |
+| - `linetype` - type of lines used to construct points/lines    | ✔           |
+| - `shape` - symbol shape for points                            | ✔           |
+| - `size` - size of symbol                                      | ✔           |
+|                                                                |             |
+| _additional parameters_                                        |             |
+| - `lineend` - line end style (round, butt, squate)             | 'butt'      |
+| - `linejoin` - line join style (round, mitre, bevel)           | 'round'     |
+| - `linemitre` - line mitre limit                               | 10          |
+| - `arrow` - arrow specification (`grid::arrow()`)              | NULL        |
+
+: {.primary .bordered .sm .paramsTable}
+
+</details>
+
+<table class='table table-primary table-bordered table-sm paramsTable'>
+<thead>
+<tr class = 'header'>
+<th align = 'left'>Feature</th>
+<th align = 'left'>geom</th>
+<th align = 'left'>stat</th>
+<th align = 'left'>position</th>
+<th align = 'left'>Aesthetic parameters / Notes</th>
+<th align = 'left'>Example plot</th>
+</tr>
+</thead>
+<tbody>
+<tr class = 'odd'>
+<td align = 'left'>paths layer</td>
+<td align = 'left'>`_path`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br>`geom_path` draws lines connecting coordinates in the order present in the data frame</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotPath, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=df, aes(y = y, x = x)) +
+    geom_path()
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotPath, eval=FALSE}
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+The simple line types available are highlighted in the following
+figure:
+
+```{r ggplotPatht3, echo = FALSE, eval=TRUE, fig.height = 3, fig.width = 9}
+linetype_table <- data.frame(y = 0:6,
+                             linetype = c('blank',
+                                          'solid',
+                                          'dashed',
+                                          'dotted',
+                                          'dotdash',
+                                          'longdash',
+                                          'twodash')) %>%
+  mutate(linetype = factor(linetype, levels = unique(linetype)))
+ggplot(data = linetype_table, aes(x = 1, y = y, linetype = linetype)) +
+    geom_blank(data = NULL, aes(x=0, y = -0.2)) +
+    geom_segment(aes(x=0, xend = 4, yend = y), show.legend = FALSE) +
+    geom_text(aes(label = linetype, y = y + 0.4, x= 0), hjust = 0) +
+    scale_linetype_identity() +
+    coord_cartesian() +
+    theme(axis.title = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank())
+```
+
+### Polygons ![](05_grammar_of_graphics_files/figure-html/ggplotPolygon-s-1.png){class="thumb-s" #Gpolygons}
+
+```{r ggplotPolygon-s, echo=FALSE, include = FALSE, fig.height=3, fig.width=3, out.width='300px', out.height='300px', message=FALSE}
+ggplot(data = df, aes(y = y, x = x)) + geom_polygon() +
+    blank_theme
+```
+
+`geom_polygon` draws polygons with the coordinates ordered
+according to the order in the data frame.
+
+<details><summary>Show attributes</summary>
+
+
+| Parameter                                                      | `geom_polygon` |
+|----------------------------------------------------------------|----------------|
+| - **`x`** - variable to map to the x-axis                      | ✔              |
+| - **`y`** - variable to map to the y-axis                      | ✔              |
+| - `group` - plot separate series without aesthetic differences | ✔              |
+| - `alpha` - transparency                                       | ✔              |
+| - `colour` - colour of the points/lines                        | ✔              |
+| - `fill` - inner colour of points/shapes                       | ✔              |
+| - `linetype` - type of lines used to construct points/lines    | ✔              |
+| - `shape` - symbol shape for points                            | ✔              |
+| - `size` - size of symbol                                      | ✔              |
+|                                                                |                |
+| _additional parameters_                                        |                |
+| - `rule` - determines how holes in polygons are treated        | 'evenodd'      |
+
+: {.primary .bordered .sm .paramsTable}
+
+</details>
+
+<table class='table table-primary table-bordered table-sm paramsTable'>
+<thead>
+<tr class = 'header'>
+<th align = 'left'>Feature</th>
+<th align = 'left'>geom</th>
+<th align = 'left'>stat</th>
+<th align = 'left'>position</th>
+<th align = 'left'>Aesthetic parameters / Notes</th>
+<th align = 'left'>Example plot</th>
+</tr>
+</thead>
+<tbody>
+<tr class = 'odd'>
+<td align = 'left'>polygon layer</td>
+<td align = 'left'>`_polygon`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br>`geom_polygon` draws polygons using coordinates in the order present in the data frame</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotPolygon, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=df, aes(y = y, x = x)) +
+    geom_polygon()
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotPolygon, eval=FALSE}
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+
+### Areas ![](05_grammar_of_graphics_files/figure-html/ggplotArea-s-1.png){class="thumb-s" #Gareas}
+
+```{r ggplotArea-s, echo=FALSE, include = FALSE, fig.height=3, fig.width=3, out.width='300px', out.height='300px', message=FALSE}
+ggplot(data = df, aes(y = y, x = x)) + geom_area() +
+    blank_theme
+```
+
+`geom_area` draws areas under curves with the coordinates ordered
+according to the order in the data frame.
+
+<details><summary>Show attributes</summary>
+
+| Parameter                                                             | `geom_area` |
+|-----------------------------------------------------------------------|-------------|
+| - **`x`** - variable to map to the x-axis                             | ✔           |
+| - **`y`** - variable to map to the y-axis                             | ✔           |
+| - `group` - plot separate series without aesthetic differences        | ✔           |
+| - `alpha` - transparency                                              | ✔           |
+| - `colour` - colour of the points/lines                               | ✔           |
+| - `fill` - inner colour of points/shapes                              | ✔           |
+| - `linetype` - type of lines used to construct points/lines           | ✔           |
+| - `shape` - symbol shape for points                                   | ✔           |
+| - `size` - size of symbol                                             | ✔           |
+|                                                                       |             |
+| _additional parameters_                                               |             |
+| - `outline.type` - determines the type of outline to draw around area | 'both'      |
+
+: {.primary .bordered .sm .paramsTable}
+
+</details>
+
+<table class='table table-primary table-bordered table-sm paramsTable'>
+<thead>
+<tr class = 'header'>
+<th align = 'left'>Feature</th>
+<th align = 'left'>geom</th>
+<th align = 'left'>stat</th>
+<th align = 'left'>position</th>
+<th align = 'left'>Aesthetic parameters / Notes</th>
+<th align = 'left'>Example plot</th>
+</tr>
+</thead>
+<tbody>
+<tr class = 'odd'>
+<td align = 'left'>area layer</td>
+<td align = 'left'>`_area`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br>`geom_area` draws areas under a curve using coordinates in the order present in the data frame</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotArea, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=df, aes(y = y, x = x)) +
+    geom_area()
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotArea, eval=FALSE}
+```
+</td>
+</tr>
+</tbody>
+</table>
+
+
+### Ribbons ![](05_grammar_of_graphics_files/figure-html/ggplotRibbon-s-1.png){class="thumb-s" #Gribbons}
+
+```{r ggplotRibbon-s, echo=FALSE, include = FALSE, fig.height=3, fig.width=3, out.width='300px', out.height='300px', message=FALSE}
+ggplot(data = df, aes(y = y, x = x)) + geom_ribbon(aes(ymin = y - 1, ymax = y + 1)) +
+    blank_theme
+```
+
+```{r ggplotRibbons, include=FALSE, echo=FALSE, fig.height=3, fig.width=3, out.width='300px', out.height='300px', message=FALSE}
+ggplot(data = df, aes(y = y, x = x))  + geom_ribbon(aes(ymin = y - 1, ymax = y + 1))
+```
+
+`geom_ribbon` draws ribbons (polygons) based on upper (max) and lower
+(min) levels of y associated with each level of x and are typically
+used to represent uncertainty in trends.
+
+<details><summary>Show attributes</summary>
+
+| Parameter                                                             | `geom_ribbon` |
+|-----------------------------------------------------------------------|---------------|
+| - **`x`** - variable to map to the x-axis                             | ✔             |
+| - **`y`** - variable to map to the y-axis                             | ✔             |
+| - `group` - plot separate series without aesthetic differences        | ✔             |
+| - `alpha` - transparency                                              | ✔             |
+| - `colour` - colour of the points/lines                               | ✔             |
+| - `fill` - inner colour of points/shapes                              | ✔             |
+| - `linetype` - type of lines used to construct points/lines           | ✔             |
+| - `shape` - symbol shape for points                                   | ✔             |
+| - `size` - size of symbol                                             | ✔             |
+|                                                                       |               |
+| _additional parameters_                                               |               |
+| - `outline.type` - determines the type of outline to draw around area | 'both'        |
+
+: {.primary .bordered .sm .paramsTable}
+
+</details>
+
+<table class='table table-primary table-bordered table-sm paramsTable'>
+<thead>
+<tr class = 'header'>
+<th align = 'left'>Feature</th>
+<th align = 'left'>geom</th>
+<th align = 'left'>stat</th>
+<th align = 'left'>position</th>
+<th align = 'left'>Aesthetic parameters / Notes</th>
+<th align = 'left'>Example plot</th>
+</tr>
+</thead>
+<tbody>
+<tr class = 'odd'>
+<td align = 'left'>ribbon layer</td>
+<td align = 'left'>`_ribbon`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br>`geom_ribbon` draws ribbons on a plot - useful for depicting uncertainty (confidence/credibility) intervals</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotRibbon, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+ggplot(data=df, aes(ymin = y -1, ymax = y + 1, x = x)) +
+    geom_ribbon()
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotRibbon, eval=FALSE}
+```
+</td>
+</tr>
+
+<tr class = 'even'>
+<td align = 'left'>ribbon layer</td>
+<td align = 'left'>`_ribbon`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br>`geom_ribbon` draws ribbons on a plot - useful for depicting uncertainty (confidence/credibility) intervals</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotRibbon1, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+BOD.lm <- lm(demand ~ Time, data = BOD)
+newdata <- with(BOD, data.frame(Time = seq(min(Time), max(Time),
+                                           length = 100)))
+newdata <- newdata %>% cbind(predict(BOD.lm, newdata = newdata,
+                                     interval = 'confidence'))
+ggplot(data=newdata) +
+    geom_ribbon(aes(x = Time, ymin = lwr, ymax = upr))
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotRibbon1, eval=FALSE}
+```
+</td>
+</tr>
+
+<tr class = 'odd'>
+<td align = 'left'>ribbon layer</td>
+<td align = 'left'>`_ribbon`</td>
+<td align = 'left'>`_identity`</td>
+<td align = 'left'>identity</td>
+<td align = 'left'>x,y<br><br>`geom_ribbon` draws ribbons on a plot - useful for depicting uncertainty (confidence/credibility) intervals</td>
+<td align = 'left' rowspan = 2>
+```{r ggplotRibbon2, echo=FALSE, fig.width=2.5, fig.height=2.5, out.extra='class="thumb-L"'}
+BOD.lm <- lm(demand ~ Time, data = BOD)
+newdata <- with(BOD, data.frame(Time = seq(min(Time), max(Time),
+                                           length = 100)))
+newdata <- newdata %>% cbind(predict(BOD.lm, newdata = newdata,
+                                     interval = 'confidence'))
+ggplot(data=newdata, aes(x = Time)) +
+    geom_ribbon(aes(x = Time, ymin = lwr, ymax = upr),
+                fill='orange') +
+    geom_line(aes(y = fit)) +
+    geom_point(data = BOD, aes(y=demand))
+```
+</td>
+</tr>
+<tr>
+<td align = 'left' font-size=2em colspan=5>
+```{r ggplotRibbon2, eval=FALSE}
+```
+</td>
+</tr>
+
+</tbody>
+</table>
+
+:::
+
+ 
+
+
