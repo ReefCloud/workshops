@@ -38,6 +38,7 @@ jobs:
             any::pdftools
             any::quarto
             any::tidyverse
+            any::mvabund
 
       # install quarto
       - name: Install quarto

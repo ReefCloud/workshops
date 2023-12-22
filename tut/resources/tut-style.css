@@ -54,9 +54,12 @@ div.sourceCode {
     margin-left: calc(calc(0em + -2px) + 2px);
     background-color: #c6c6c6;
 }
-.cell {
-    border: 1px solid #d6d6d6;  /**/
+.cell:has(>div> .r),  .cell:has(>div> .txt), .cell:has(>div> .elisp), .cell:has(>div> .bash) {
     margin-bottom: 0.5em;
+    border: 1px solid #d6d6d6;
+}
+.tikz {
+    border: 0px;  /**/
 }
 div.sourceCode:has(> .r) {
     margin: 0 0 0px;
@@ -246,8 +249,101 @@ pre.sourceCode {
 }
 */
 
+.tab-content.tabset-left {
+    display: block;
+}
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+    color: #495057;
+    background-color: #fff;
+    border-color: inherit;
+}
+.nav-tabs {
+    border-bottom: 1px solid #666;
+}
+.panel-tabset.tabset-left>.nav-tabs {
+    display: block;
+}
+.nav-tabs .nav-link {
+    margin-bottom: -1px;
+    background: none;
+    border: 1px solid #dddddd;
+    border-bottom: inherit;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+}
+.nav-tabs>li>a {
+    margin-right: 2px;
+    line-height: 1.42857143;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+    border: 1px solid #dddddd;
+    border-bottom: 1px solid #333;
+    text-align: -webkit-center;
+}
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+    color: #666666;
+    background-color: #ffffff;
+    border: 1px solid #666;
+    border-bottom-color: transparent;
+    cursor: default;
+}
 
+.tab-content {
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+    border-bottom: 1px solid #333;
+    padding:10px;
+    margin-bottom: 0px;
+}
+/* tabset-left*/
+.container-fluid.main-container{
+max-width: 85%
+}
+.panel-tabset.tabset-left{
+    display: flex;
+}
 
+.tabset-left > .nav-tabs {
+	width:100px;
+}
+
+.tabset-left>.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+	margin-right:0px;
+	border:1px solid #666;
+	border-right-color: white;
+	border-bottom:1px solid #666 !important;
+}
+
+.tabset-left > .nav-tabs > li {
+	margin-bottom:0px !important;
+}
+
+.tabset-left > .nav-tabs>li>a {
+    margin-right: -2px;
+	border-right:1px solid #666 !important;
+	/*border-bottom: none !important;*/
+	border-bottom:1px solid #dddddd;
+	border-right:none !important;
+	border-radius: 4px 0px 0px 4px;
+	width:100px;
+}
+
+.tabset-left > .nav-tabs {
+	border-bottom:none !important;
+}
+
+.nav.nav-pills {
+    flex: 15%;
+    width: 100%;
+}
+.nav.nav-pills li{
+    width: 100%;
+}
+.tabset-left > .tab-content{
+    flex: 85%;
+    width: 100%;
+	border-top:1px solid #666;
+}
 
 @media(min-width: 992px) {
     body .page-columns {

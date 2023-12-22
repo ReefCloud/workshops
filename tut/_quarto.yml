@@ -6,6 +6,7 @@ project:
     - 01_introduction_to_r.qmd
     - 02_editors.qmd
     - 03_data_frames.qmd
+    - 04_data_wrangling.qmd
 
 website:
   title: ReefCloud R/Statistics resources
@@ -31,6 +32,9 @@ website:
           icon: house
         - href: 03_data_frames.qmd
           text: Data frames
+          icon: house
+        - href: 04_data_wrangling.qmd
+          text: Data wrangling
           icon: house
 
 format:

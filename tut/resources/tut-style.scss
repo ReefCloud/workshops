@@ -41,10 +41,10 @@ $font-family: "Cabin Sketch";
 
 .paperTable {
     width: auto;
+    background-color: white;
     // border: 2px solid $primary;
 }
 .paperTable>thead>tr {
-    // background-color: $primary;
     // --bs-table-bg: $primary;
     // color: white;
     font-weight: bold;
@@ -70,9 +70,29 @@ table.paperTable td {
     border-right: 0pt solid rgb(0,0,127);
     border-bottom: 0pt solid rgb(0,0,127);
 }
+.table>:not(caption)>*:not(:last-child)>* {
+    border-bottom-color: inherit;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+}
+
 .title {
   font-family: 'Cabin Sketch', sans-serif;
   font-size: 300%;
+}
+
+details[open] {
+    border: 1px solid grey;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    background-color: wheat;
+    margin-left: -10px;
+    margin-right: 10px;
+}
+details {
+    left: 10px;
+    position: relative;
 }
 // $primary: #362ec4;
 // $secondary: #8f5325;
