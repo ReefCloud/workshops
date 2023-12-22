@@ -23,7 +23,7 @@ website:
         text: Home
         icon: house
       - text: "---"
-      - section: Basics
+      - section: R basics
         contents:
         - href: 01_introduction_to_r.qmd
           text: Introduction to R
