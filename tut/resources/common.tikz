@@ -59,8 +59,7 @@
 \node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (rmaster) {origin/main};
 }
 \newcommand{\branch}[2] {
-%\node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (#2) {#2};
-\node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,minimum height=0.8cm] (#2) {#2};
+\node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (#2) {#2};
 }
 
 \newcommand{\HEAD}[1] {
