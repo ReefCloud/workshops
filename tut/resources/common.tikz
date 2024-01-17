@@ -27,14 +27,18 @@
 }
 
 \newcommand{\commit}[5]{
-  \node [#1] (#2) {
-    \begin{tikzpicture}[#1]
-      \draw [#1] node [draw=black!40!#3,fill=#3,shape=circle,minimum width=1.5cm,line width=3pt] (x) {};
-      %\node [below,hashText] at (x.south) {#4};
-    \end{tikzpicture}
-  };
-  \node [below,hashText] at (#2.south) {#4};
-  \node [below,commentText,text=gray] at ($(#2.south) +(0,-0.5)$) {#5};
+\node [#1,inner sep=0,outer sep=0] (#2) {
+\begin{tikzpicture}[#1]
+\draw [#1] node [draw=black!40!#3,fill=#3,shape=circle,minimum width=1.0cm,line width=3pt] (x) {};
+%\node [below,hashText] at (x.south) {#4};
+\end{tikzpicture}
+};
+\ifx\notempty#4\empty
+\node [below,hashText, minimum height = 0] at (#2.south) {#4};
+\fi
+\ifx\notempty#5\empty
+\node [below,commentText,text=gray, minimum height = 0] at ($(#2.south) +(0,-0.5)$) {#5};
+\fi
 }
 
 \newcommand{\rcommit}[5]{
