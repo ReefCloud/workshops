@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Murray Logan">
-<meta name="dcterms.date" content="2023-12-22">
+<meta name="dcterms.date" content="2024-01-17">
 
 <title>ReefCloud R/Statistics resources - Introduction to R</title>
 <style>
@@ -4518,14 +4518,14 @@ div.sourceCode {
 margin-left: calc(calc(0em + -2px) + 2px);
 background-color: #c6c6c6;
 }
-.cell:has(>div> .r), .cell:has(>div> .txt), .cell:has(>div> .elisp), .cell:has(>div> .bash) {
+.cell:has(>div> .r), .cell:has(>div> .txt), .cell:has(>div> .elisp), .cell:has(>div> .bash) , .cell:has(>div> .bash1){
 margin-bottom: 0.5em;
 border: 1px solid #d6d6d6;
 }
 .tikz {
 border: 0px; 
 }
-div.sourceCode:has(> .r) {
+div.sourceCode:has(> .r, .bash, .bash1) {
 margin: 0 0 0px;
 padding: 0;
 padding-left: 3px;
@@ -4575,6 +4575,11 @@ margin-bottom: 0px;
 border-top: none;
 border-radius: 0px;
 }
+.bash>div.cell-output>pre {
+border-left: 3px;
+border-left-style: solid;
+border-left-color: #ccc;
+}
 .plain:has(>div> .txt) {
 box-shadow: 2px 2px 12px -5px #999999;
 border: 1pt solid black;
@@ -4600,6 +4605,28 @@ margin-left: 0em;
 position: relative;
 left: 0em;
 }
+pre.numberSource {
+border-radius: 0px;
+}
+div.bash>div.sourceCode {
+background-color: black !important;
+}
+div.bash>.cell-output {
+background-color: black;
+}
+div.bash>.cell-output>pre code {
+color: #c9c9c9;
+}
+pre.bash > code.sourceCode > span, pre.bash1 > code.sourceCode > span {
+color: white;
+}
+p .bash code:not(.sourceCode), li .bash code:not(.sourceCode), td .bash code:not(.sourceCode) {
+background-color: black;
+padding: 0.2em;
+}
+.bash code span.fu, .bash code span.at, .bash code span.st , .bash code span.bu, .bash code span.ex, .bash code span.op {
+color: white;
+}
 .plain>div.cell-output {
 padding-left: 0em;
 }
@@ -4609,6 +4636,9 @@ padding-left: 0em;
 
 
 
+.indented {
+margin-left: 2em;
+}
 #TOC {
 
 box-shadow: 0px 3px 20px #333;
@@ -4802,6 +4832,13 @@ img::before {
 font-size:2cm;
 content: "this:";
 }
+.img-fluid {
+max-width: inherit;
+height: auto;
+}
+.newsbox {margin:25px 5px 5px 0px;padding:5px 10px;border:1px solid #369;background:#e8f1f6;display:block;}
+.newsbox p {padding-bottom:5px}
+.newsbox img {padding-left:5px}
 @media(min-width: 992px) {
 body .page-columns {
 display:grid;
@@ -5057,6 +5094,24 @@ display: none
 </li>
       </ul>
   </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text">Reproducible research</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10_git.html" class="sidebar-item-text sidebar-link"><i class="bi bi-house" role="img">
+</i> 
+ <span class="menu-text">Introduction to git</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
@@ -5184,7 +5239,7 @@ display: none
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">December 22, 2023</p>
+      <p class="date">January 17, 2024</p>
     </div>
   </div>
   
@@ -7389,23 +7444,23 @@ Q10   E2      Q10  full       15.90</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb346"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb346-1"><a href="#cb346-1"></a><span class="fu">rep</span>(<span class="fu">runif</span>(<span class="dv">1</span>), <span class="at">times =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.1273874 0.1273874 0.1273874 0.1273874 0.1273874</code></pre>
+<pre><code>[1] 0.1432494 0.1432494 0.1432494 0.1432494 0.1432494</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb348"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb348-1"><a href="#cb348-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.1632176 0.7581983 0.1438880 0.1142779 0.3257058</code></pre>
+<pre><code>[1] 0.1210090 0.2605142 0.5561021 0.4119559 0.4015875</code></pre>
 </div>
 </div>
 <p>When the function being run within <code>runif()</code> itself produces a vector of length &gt; 1, the <code>runif()</code> function combines each of the vectors together as separate columns in a matrix:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb350"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb350-1"><a href="#cb350-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>           [,1]       [,2]       [,3]       [,4]      [,5]
-[1,] 0.31645570 0.57477583 0.56597381 0.10785776 0.1336924
-[2,] 0.94555825 0.32347902 0.10234672 0.44148808 0.9904434
-[3,] 0.92672388 0.22447530 0.66283741 0.52543872 0.5036370
-[4,] 0.75835453 0.01777219 0.01350721 0.04405199 0.6596402
-[5,] 0.03971524 0.67521189 0.59888262 0.65626805 0.1558708</code></pre>
+<pre><code>           [,1]      [,2]      [,3]       [,4]       [,5]
+[1,] 0.66839469 0.9579860 0.9664453 0.97573610 0.37463792
+[2,] 0.36670181 0.6113462 0.1383031 0.73549647 0.04388179
+[3,] 0.27462359 0.5913073 0.2359026 0.68715226 0.67930191
+[4,] 0.04293863 0.3037494 0.2098141 0.07268252 0.06705412
+[5,] 0.76624116 0.7164313 0.4272202 0.17083325 0.65658601</code></pre>
 </div>
 </div>
 <section id="apply-functions-along-matrix-margins" class="level3" data-number="5.7.1">
@@ -7749,7 +7804,7 @@ Built: R 4.3.2; x86_64-pc-linux-gnu; 2023-11-01 22:36:06 UTC; unix
   ref     type  direct directpkg status package version license needscompilation
   &lt;chr&gt;   &lt;chr&gt; &lt;lgl&gt;  &lt;lgl&gt;     &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;   &lt;chr&gt;   &lt;lgl&gt;           
 1 lattice stan… FALSE  FALSE     OK     lattice 0.22-5  GPL (&gt;… TRUE            
-2 Matrix  stan… TRUE   TRUE      OK     Matrix  1.6-4   GPL (&gt;… TRUE            
+2 Matrix  stan… TRUE   TRUE      OK     Matrix  1.6-5   GPL (&gt;… TRUE            
 # ℹ 27 more variables: priority &lt;chr&gt;, md5sum &lt;chr&gt;, sha256 &lt;chr&gt;,
 #   filesize &lt;int&gt;, built &lt;chr&gt;, platform &lt;chr&gt;, rversion &lt;chr&gt;,
 #   repotype &lt;chr&gt;, repodir &lt;chr&gt;, target &lt;chr&gt;, deps &lt;list&gt;, mirror &lt;chr&gt;,
@@ -7764,7 +7819,7 @@ Built: R 4.3.2; x86_64-pc-linux-gnu; 2023-11-01 22:36:06 UTC; unix
 <div class="cell">
 <div class="sourceCode cell-code" id="cb396"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb396-1"><a href="#cb396-1"></a>pak<span class="sc">::</span><span class="fu">pkg_deps_tree</span>(<span class="st">&quot;Matrix&quot;</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Matrix 1.6-1.1 -&gt; 1.6-4 [upd][bld][cmp][dl] (2.88 MB)
+<pre><code>Matrix 1.6-1.1 -&gt; 1.6-5 [upd][bld][cmp][dl] (2.88 MB)
 └─lattice 0.21-9 -&gt; 0.22-5 [upd][bld][cmp][dl] (599.04 kB)
 
 Key:  [upd] update | [dl] download | [bld] build | [cmp] compile</code></pre>
