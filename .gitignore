@@ -6,3 +6,9 @@
 *.log
 *.html
 .Rhistory
+tut/resources/Fig*
+*.woff2
+*.out
+*.aux
+tut/_freeze
+tut/site_libs
