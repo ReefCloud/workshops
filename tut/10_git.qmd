@@ -321,9 +321,7 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3c-1.
 %|   template: "resources/tikz-minimal.tex"
 \input{resources/common.tikz}
 
-\newcommand{\mmmaster}[1] {
-\node [#1,rectangle, refText] (master) {main};
-}
+\tikzstyle{Title} = [font={\fontspec[Scale=1.5]{ArchitectsDaughter-Regular}}]
 \begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
 \commit{}{A}{color_inactive}{}{}
 \commit{right = 1cm of A}{B}{color_inactive}{}{}
@@ -333,8 +331,7 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3c-1.
 \draw [-,line width=3pt,draw=black!60] (C) -- (B);
 \commit{above = 0.5cm of B}{D}{color_branch}{}{}
 \draw [-,line width=3pt,draw=black!60] (A.east) to[out=0,in=180] (D);
-\mmmaster{right = 0.5cm of C}
-%\node[right = 0.5cm of C, rectangle] (master) {main};
+\node[right = 0.5cm of C, rectangle, Title] (master) {main};
 %\draw[->,line width=3pt,draw=black!60] (master) -- (C);
 %\branch{right = 0.5cm of D}{Feature} 
 %\draw[->,line width=3pt,draw=black!60] (Feature) -- (D);
