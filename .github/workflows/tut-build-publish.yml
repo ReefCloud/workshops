@@ -63,7 +63,9 @@ jobs:
       # install quarto
       - name: Install quarto
         uses: quarto-dev/quarto-actions/setup@v2
-
+      - name: Change ImageMagick policy to allow pdf->png conversion.
+        run: |
+          sudo sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
       # render tutorials
       - name: Make tutorials
         run: make -i tut
