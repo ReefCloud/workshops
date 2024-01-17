@@ -60,8 +60,8 @@ jobs:
           unzip -d inconsolata/ inconsolata.zip
           mv inconsolata /usr/share/fonts/
           fc-cache -fv
-          fc-list
-          fc-list -v | grep -i archi
+          #fc-list
+          #fc-list -v | grep -i archi
           fc-list -v | grep -i inconsolata
 
       # install quarto
