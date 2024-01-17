@@ -321,7 +321,7 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3c-1.
 %|   template: "resources/tikz-minimal.tex"
 \input{resources/common.tikz}
 
-\tikzstyle{Title} = [font={\fontspec[Scale=1.5]{Inconsolata-Regular}}]
+\tikzstyle{Title} = [font={\fontspec[Scale=1.5]{Inconsolata_SemiCondensed-Regular}}]
 \begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
 \commit{}{A}{color_inactive}{}{}
 \commit{right = 1cm of A}{B}{color_inactive}{}{}
