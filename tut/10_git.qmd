@@ -144,4 +144,459 @@ common actions and git 'verbs'.
 \node [#1,rectangle,fill=color_HEAD,draw=black!20!color_HEAD,line width=2pt,refText,minimum height=0.8cm] (rHEAD) {origin/HEAD};
 }
 ```
+
+```{tikz}
+%| label: Fig0
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{white}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig0-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig0-1.pdf 10_git_files/figure-html/Fig0-1.png 
+```
+
+```{tikz}
+%| label: Fig1
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_commit!30}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig1-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig1-1.pdf 10_git_files/figure-html/Fig1-1.png
+```
+
+
+```{tikz}
+%| label: Fig2
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig2-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig2-1.pdf 10_git_files/figure-html/Fig2-1.png
+```
+
+```{tikz}
+%| label: Fig3a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\commit{right = 1cm of B}{C}{color_detached}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig3a-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3a-1.pdf 10_git_files/figure-html/Fig3a-1.png  
+```
+
+```{tikz}
+%| label: Fig3b
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\commit{right = 1cm of B}{C}{color_detached!30}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [->,dashed,line width=3pt,draw=black!60] (C) -- (B);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig3b-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3b-1.pdf 10_git_files/figure-html/Fig3b-1.png 
+```
+
+```{tikz}
+%| label: Fig3c
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_inactive}{}{}
+\commit{right = 1cm of B}{C}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [-,line width=3pt,draw=black!60] (C) -- (B);
+\draw [->,line width=3pt,draw=black!60] (A) to[out=45] (C);
+
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig3c-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3c-1.pdf 10_git_files/figure-html/Fig3c-1.png 
+```
+
+```{tikz}
+%| label: Fig4
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_inactive}{}{}
+\commit{right = 1cm of B}{C}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [-,line width=3pt,draw=black!60] (C) -- (B);
+\commit{above = 0.5cm of B}{D}{color_branch}{}{}
+\draw [-,line width=3pt,draw=black!60] (A.east) to[out=0,in=180] (D);
+\master{right = 0.5cm of C}\draw[->,line width=3pt,draw=black!60] (master) -- (C);
+\branch{right = 0.5cm of D}{Feature}\draw[->,line width=3pt,draw=black!60] (Feature) -- (D);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig4-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig4-1.pdf 10_git_files/figure-html/Fig4-1.png  
+```
  
+```{tikz}
+%| label: Fig5
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_inactive}{}{}
+\commit{right = 1cm of B}{C}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [-,line width=3pt,draw=black!60] (C) -- (B);
+\commit{above = 0.5cm of B}{D}{color_inactive}{}{}
+\draw [-,line width=3pt,draw=black!60] (A.east) to[out=0,in=180] (D);
+\master{right = 0.5cm of C}\draw[->,line width=3pt,draw=black!60] (master) -- (C);
+\branch{right = 0.5cm of D}{Feature}\draw[->,line width=3pt,draw=black!60] (Feature) -- (D);
+\draw [-,line width=3pt,draw=black!60] (D.east) to[out=0,in=180] (C);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig5-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5-1.pdf 10_git_files/figure-html/Fig5-1.png  
+```
+ 
+```{tikz}
+%| label: Fig6a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_detached!30}{}{}
+\commit{right = 1cm of B}{C}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (C) -- (A);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig6a-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig6a-1.pdf 10_git_files/figure-html/Fig6a-1.png 
+```
+
+```{tikz}
+%| label: Fig5b
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+%\commit{right = 1cm of A}{B}{color_commit}{}{}
+%\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\master{right = 0.5cm of A}\draw[->,line width=3pt,draw=black!60] (master) -- (A);
+
+\rcommit{below = 1cm of A}{rA}{color_inactive}{}{}
+\draw [-,line width=3pt,draw=black!60] (rA) -- ++(-1,0);
+\rcommit{right = 1cm of rA}{rB}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (rB) -- (rA);
+\rmaster{right = 0.5cm of rB}\draw[->,line width=3pt,draw=black!60] (rmaster) -- (rB);
+
+\draw [<-,line width=3pt, draw=black!60, dashed] (A) -- (rB);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig5b-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5b-1.pdf 10_git_files/figure-html/Fig5b-1.png
+```
+
+```{tikz}
+%| label: Fig5a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\master{right = 0.5cm of B}\draw[->,line width=3pt,draw=black!60] (master) -- (B);
+
+\rcommit{below = 1cm of A}{rA}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (rA) -- ++(-1,0);
+\rmaster{right = 0.5cm of rA}\draw[->,line width=3pt,draw=black!60] (rmaster) -- (rA);
+
+\draw [->,line width=3pt, draw=black!60, dashed] (B) -- (rA);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig5a-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5a-1.pdf 10_git_files/figure-html/Fig5a-1.png   
+```
+
+
+<table class= "table-sm table-borderless" style='border-spacing:20px;'>
+<tr>
+<td>
+<a href="#Initialize">Initialize git</a><br>
+![](10_git_files/figure-html/Fig0-1.png)
+</td>
+<td width='40%'>
+`git init`
+</td>
+<td>
+Establish a git repository (within the current path if no path provided)
+</td>
+</tr>
+<tr>
+<td>
+<a href="#Commit">Staging</a><br> 
+    ![](10_git_files/figure-html/Fig1-1.png)
+</td>
+<td>
+`git add <file>`<br>
+where `file` is one or more files to stage
+</td>
+<td>
+Staging is indicating which files and their states are to be included in the next commit.
+</td>
+</tr>
+
+<tr>
+<td>
+<a href="#Commit">Committing</a><br>
+    ![](10_git_files/figure-html/Fig2-1.png)
+</td>
+<td>
+`git commit -m "<Commit message>"`<br>
+where `<Commit message>` is a message to accompany the commit
+</td>
+<td>
+Commiting generates a 'snapshot' of the file system.
+</td>
+</tr>
+<tr>
+  <td>
+    <a href="#checkout">Checkout</a><br>
+    ![](10_git_files/figure-html/Fig3a-1.png)
+  </td>
+  <td>
+    `git checkout "<commit>"`<br>
+    where `<commit>` is a reference to a commit to be reviewed
+  </td>
+  <td>
+    Explore the state associated with a specific commit
+  </td>
+</tr>
+<tr>
+  <td>
+    <a href="#reset">Reset</a><br>
+    <!-- <img src="10_git_files/figure-html/Fig3b-1.png" class="" alt=""  style="transform: scale(0.2);"/> -->
+    ![](10_git_files/figure-html/Fig3b-1.png)
+  </td>
+  <td>
+    `git reset --hard "<commit>"`<br>
+    where `<commit>` is a reference to a commit
+  </td>
+  <td>
+    Return to a previous state, effectively erasing subsequent commits..
+  </td>
+</tr>
+<tr>
+  <td>
+    <a href="#revert">Revert</a><br>
+    ![](10_git_files/figure-html/Fig3c-1.png)
+  </td>
+  <td>
+    `git revert "<commit>"`<br>
+    where `<commit>` is a reference to a commit that should be nullified (inverted)
+  </td>
+  <td>
+    Generate a new commit that reverses the changes introduced by a commit thereby effectively rolling back to a previous state (the one prior to the nominated commit) whilst still maintaining full commit history.
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="#Branching">Branching</a><br>
+    ![](10_git_files/figure-html/Fig4-1.png)
+  </td>
+  <td>
+    `git branch <name>`<br>
+    `git checkout <name>`<br>
+    where `<name>` is a reference to a branch name (e.g. 'Feature')
+  </td>
+  <td>
+    Take edits in the project in a new direction to allow for modifications that will
+    not affect the main (master) branch.
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="#Merging">Merging</a><br>
+    ![](10_git_files/figure-html/Fig5-1.png)
+  </td>
+   <td>
+     `git checkout master`<br>
+     `git branch <name>`<br>
+     where `<name>` is a reference to a branch name (e.g. 'Feature') that
+     is to be merged back into `master`.
+  </td>
+  <td>
+    Incorporate changes in a branch into another branch (typically `master`).
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="#rebase">Rebasing</a><br>
+    ![](10_git_files/figure-html/Fig6a-1.png)
+  </td>
+   <td>
+     `git rebase -i HEAD~<number>`<br>
+     where `<number>` is the number of previous commits to
+     squash together with head.
+  </td>
+  <td>
+    Combine multiple commits together into a single larger commit.
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="#Pulling">Pulling</a><br>
+    ![](10_git_files/figure-html/Fig5b-1.png)
+  </td>
+   <td>
+     `git pull -u <remote> <branch>`<br>
+     where `<remote>` is the name of the remote (typically `origin`)
+     and `<branch>` is the branch to sync with remote (typically `master`).
+  </td>
+  <td>
+    Pull changes from a branch of a remote repository.
+  </td>
+</tr>
+
+<tr>
+  <td>
+    <a href="#Pushing">Pushing</a><br>
+    ![](10_git_files/figure-html/Fig5a-1.png)
+  </td>
+   <td>
+     `git push -u <remote> <branch>`<br>
+     where `<remote>` is the name of the remote (typically `origin`)
+     and `<branch>` is the branch to sync with remote (typically `master`).
+  </td>
+  <td>
+    Push changes up to a branch of a remote repository.
+  </td>
+</tr>
+</table>
