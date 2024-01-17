@@ -309,6 +309,38 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3b-1.
 convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3c-1.pdf 10_git_files/figure-html/Fig3c-1.png 
 ```
 
+```{tikz}
+%| label: Fig4
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_inactive}{}{}
+\commit{right = 1cm of B}{C}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [-,line width=3pt,draw=black!60] (C) -- (B);
+\commit{above = 0.5cm of B}{D}{color_branch}{}{}
+\draw [-,line width=3pt,draw=black!60] (A.east) to[out=0,in=180] (D);
+\master{right = 0.5cm of C}\draw[->,line width=3pt,draw=black!60] (master) -- (C);
+\branch{right = 0.5cm of D}{Feature}\draw[->,line width=3pt,draw=black!60] (Feature) -- (D);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig4-conv
+#| warning: false
+#| message: false
+#| include: false
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig4-1.pdf 10_git_files/figure-html/Fig4-1.png  
+```
 
 <table class= "table-sm table-borderless" style='border-spacing:20px;'>
 <tr>
