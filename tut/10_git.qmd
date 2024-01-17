@@ -433,12 +433,12 @@ V1&V2 &V3 \\
 \draw [-,line width=3pt,draw=black!60] (C) -- (B);
 \commit{above = 0.5cm of B}{D}{color_branch}{}{}
 \draw [-,line width=3pt,draw=black!60] (A.east) to[out=0,in=180] (D);
-\master{right = 0.5cm of C}
+%\master{right = 0.5cm of C}
+\node[right = 0.5cm of C, rectangle] (master) {main};
 %\draw[->,line width=3pt,draw=black!60] (master) -- (C);
 %\branch{right = 0.5cm of D}{Feature} 
 %\draw[->,line width=3pt,draw=black!60] (Feature) -- (D);
 
-\node [below = 1cm of A] {Hello};
 \end{tikzpicture}
 ```
 ```{bash}
