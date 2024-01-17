@@ -54,14 +54,14 @@ div.sourceCode {
     margin-left: calc(calc(0em + -2px) + 2px);
     background-color: #c6c6c6;
 }
-.cell:has(>div> .r),  .cell:has(>div> .txt), .cell:has(>div> .elisp), .cell:has(>div> .bash) {
+.cell:has(>div> .r),  .cell:has(>div> .txt), .cell:has(>div> .elisp), .cell:has(>div> .bash) , .cell:has(>div> .bash1){
     margin-bottom: 0.5em;
     border: 1px solid #d6d6d6;
 }
 .tikz {
     border: 0px;  /**/
 }
-div.sourceCode:has(> .r) {
+div.sourceCode:has(> .r, .bash, .bash1) {
     margin: 0 0 0px;
     padding: 0;
     padding-left: 3px;
@@ -115,6 +115,11 @@ div.cell-output>pre {
     border-top: none;
     border-radius: 0px;
 }
+.bash>div.cell-output>pre {
+    border-left: 3px;
+    border-left-style: solid;
+    border-left-color: #ccc;
+}
 
 .plain:has(>div> .txt) {
     box-shadow: 2px 2px 12px -5px #999999;
@@ -141,6 +146,31 @@ div.cell-output>pre {
     position: relative;
     left: 0em;
 }
+pre.numberSource {
+    border-radius: 0px;
+}
+div.bash>div.sourceCode {
+    background-color: black !important;
+}
+div.bash>.cell-output {
+    background-color: black;
+}
+div.bash>.cell-output>pre code {
+    color: #c9c9c9;
+}
+
+pre.bash > code.sourceCode > span, pre.bash1 > code.sourceCode > span {
+    color: white;
+}
+
+p .bash code:not(.sourceCode), li .bash code:not(.sourceCode), td .bash code:not(.sourceCode) {
+    background-color: black;
+    padding: 0.2em;
+}
+
+.bash code span.fu, .bash code span.at, .bash code span.st , .bash code span.bu, .bash code span.ex, .bash code span.op  {
+    color: white;
+}
 .plain>div.cell-output {
     padding-left: 0em;
 }
@@ -151,6 +181,9 @@ div.cell-output>pre {
 /*     box-shadow: 0px 3px 20px #333; */
 /* } */
 
+.indented {
+    margin-left: 2em;
+}
 
 #TOC {
     /* margin: 85px 0px 20px 0px; */
@@ -396,8 +429,14 @@ img::before {
     content: "this:";
 }
 
+.img-fluid {
+    max-width: inherit;
+    height: auto;
+}
 
-
+.newsbox {margin:25px 5px 5px 0px;padding:5px 10px;border:1px solid #369;background:#e8f1f6;display:block;}
+.newsbox p {padding-bottom:5px}
+.newsbox img {padding-left:5px}
 
 
 @media(min-width: 992px) {

@@ -8,6 +8,7 @@ project:
     - 03_data_frames.qmd
     - 04_data_wrangling.qmd
     - 05_grammar_of_graphics.qmd
+    - 10_git.qmd
 
 website:
   title: ReefCloud R/Statistics resources
@@ -39,6 +40,11 @@ website:
           icon: house
         - href: 05_grammar_of_graphics.qmd
           text: The grammar of graphics
+          icon: house
+      - section: Reproducible research
+        contents:
+        - href: 10_git.qmd
+          text: Introduction to git
           icon: house
 
 format:
