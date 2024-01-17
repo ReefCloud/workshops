@@ -329,7 +329,7 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3c-1.
 \draw [-,line width=3pt,draw=black!60] (C) -- (B);
 \commit{above = 0.5cm of B}{D}{color_branch}{}{}
 \draw [-,line width=3pt,draw=black!60] (A.east) to[out=0,in=180] (D);
-%\master{right = 0.5cm of C}
+\master{right = 0.5cm of C}
 %\draw[->,line width=3pt,draw=black!60] (master) -- (C);
 %\branch{right = 0.5cm of D}{Feature}
 %\draw[->,line width=3pt,draw=black!60] (Feature) -- (D);
