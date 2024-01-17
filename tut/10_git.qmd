@@ -163,6 +163,8 @@ common actions and git 'verbs'.
 ```
 ```{bash}
 #| label: Fig0-conv
+#| warning: false
+#| message: false
 #| echo: false
 convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig0-1.pdf 10_git_files/figure-html/Fig0-1.png 
 ```
@@ -185,6 +187,8 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig0-1.p
 ```
 ```{bash}
 #| label: Fig1-conv
+#| warning: false
+#| message: false
 #| echo: false
 convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig1-1.pdf 10_git_files/figure-html/Fig1-1.png
 ```
@@ -208,6 +212,8 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig1-1.p
 ```
 ```{bash}
 #| label: Fig2-conv
+#| warning: false
+#| message: false
 #| echo: false
 convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig2-1.pdf 10_git_files/figure-html/Fig2-1.png
 ```
@@ -233,6 +239,8 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig2-1.p
 ```
 ```{bash}
 #| label: Fig3a-conv
+#| warning: false
+#| message: false
 #| echo: false
 convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3a-1.pdf 10_git_files/figure-html/Fig3a-1.png  
 ```
@@ -259,6 +267,8 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3a-1.
 ```
 ```{bash}
 #| label: Fig3b-conv
+#| warning: false
+#| message: false
 #| echo: false
 convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3b-1.pdf 10_git_files/figure-html/Fig3b-1.png 
 ```
@@ -287,6 +297,8 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3b-1.
 ```
 ```{bash}
 #| label: Fig3c-conv
+#| warning: false
+#| message: false
 #| echo: false
 convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig3c-1.pdf 10_git_files/figure-html/Fig3c-1.png 
 ```
