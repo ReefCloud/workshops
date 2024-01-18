@@ -1076,3 +1076,180 @@ child { node {file 1}};
 \end{tikzpicture}
 ```
  
+
+Now if we add another file (`file 3`) to our
+_workspace_, add this file to the _staging area_ and then
+commit the change, the resulting committed snapshot in the _local
+repository_ will resemble the _workspace_. Note, although the
+_staging area_ contains all three files, only `file 3`
+points to any new internal content - since `file 1` and
+`file 2` have unmodified, their instances in the _staging
+area_ point to the same instances as previous. Similarly, the
+second commit in the _Local repository_ will point to one new
+representation (associated with `file 3`) and two previous
+representations (associated with `file 1` and `file
+2`).
+
+```{tikz}
+%| label: Fig14
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\usetikzlibrary{arrows.meta}
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}]
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1]{InconsolataSemiCondensed-Regular}}] 
+
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_index}{rgb}{0.78,0.86,0.27}
+\definecolor{color_local}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{rgb}{0.26,0.65,0.91}
+
+% A template for making the storage symbol
+\newcommand{\state}[3]{
+\draw (#1) node [draw=none,fill=#2,shape=circle,minimum width=2cm] (#3) {
+\begin{tikzpicture}
+\node [draw=white, fill=white,shape=cylinder,shape aspect=1.3 ,shape border rotate=90,minimum height=1.6cm,minimum width=1.5cm] at (0,0) (Cylinder) {};				\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.1cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.5cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.9cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\end{tikzpicture}
+};
+}
+
+% Define dirtree
+\makeatletter
+\newcount\dirtree@lvl
+\newcount\dirtree@plvl
+\newcount\dirtree@clvl
+\def\dirtree@growth{%
+\ifnum\tikznumberofcurrentchild=1\relax
+\global\advance\dirtree@plvl by 1
+\expandafter\xdef\csname dirtree@p@\the\dirtree@plvl\endcsname{\the\dirtree@lvl}
+\fi
+\global\advance\dirtree@lvl by 1\relax
+\dirtree@clvl=\dirtree@lvl
+\advance\dirtree@clvl by -\csname dirtree@p@\the\dirtree@plvl\endcsname
+\pgf@xa=0.25cm\relax
+\pgf@ya=-0.5cm\relax
+\pgf@ya=\dirtree@clvl\pgf@ya
+\pgftransformshift{\pgfqpoint{\the\pgf@xa}{\the\pgf@ya}}%
+\ifnum\tikznumberofcurrentchild=\tikznumberofchildren
+\global\advance\dirtree@plvl by -1
+\fi
+}
+
+\tikzset{
+dirtree/.style={
+growth function=\dirtree@growth,
+every node/.style={anchor=north},
+every child node/.style={anchor=west},
+edge from parent path={(\tikzparentnode\tikzparentanchor) |- (\tikzchildnode\tikzchildanchor)}
+}
+}
+\makeatother
+
+\newcommand{\file}[3] {
+\coordinate (#3) at (#1);
+\draw [anchor=top left](#1) rectangle ++(1.5,-2);
+\draw [fill=color_workspace]($(#1) +(1.5,0)$) -- ++(0,-0.5) --++(-0.5,0.5) -- cycle; 
+\node [anchor=north west,fileText] at ($(#1) +(0,-0.5)$) {#2};
+}
+\begin{tikzpicture}
+\state{0,0}{color_workspace}{W}
+\node[TARGET,fill=white] at ($(W.north) +(0,0.5cm)$) {Workspace};
+\state{6,0}{color_index}{I}
+\node[TARGET,fill=white] at ($(I.north) +(0,0.5cm)$) {Staging Area};
+\state{12,0}{color_local}{L}
+\node[TARGET,fill=white] at ($(L.north) +(0,0.5cm)$) {Local Repository};
+
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_index] ($(W.east) + (0.1cm,0)$) -- ($(I.west) + (-0.1cm,0)$) node[anchor=center,pos=0.5, text=black,align=center,CODE] {add};
+
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_local] ($(I.east) + (0.1cm,0)$) -- ($(L.west) + (-0.1cm,0)$) node[anchor=center,pos=0.5, text=black,align=center,CODE] {commit};
+
+\node [anchor=north west] at ($(W) +(-1cm,-1cm)$)  (W0) {
+\begin{tikzpicture}[dirtree,TREE]
+\node {} 
+child { node {file 3}}
+child [text=color_workspace]{node {file 2}}
+child [text=color_workspace]{ node {file 1}};
+\end{tikzpicture}
+};
+%\draw[decorate,decoration={brace,amplitude=5pt},very thick] ($(W0.north) + (-1cm,-1cm)$)  -- ($(W0.south) + (-1cm,0.2cm)$);
+
+\node [anchor=north west] at ($(I) +(-1cm,-1cm)$)  (W0) {
+\begin{tikzpicture}[dirtree,TREE,color=gray,text=gray]
+\node {} 
+child { node {file 3}}
+child {node {file 2}}
+child {node {file 1}};
+\end{tikzpicture}
+};
+
+
+\node [anchor=north west] at ($(L) +(-1cm,-1cm)$)  (L0) {
+\begin{tikzpicture}[dirtree,TREE]
+\node {} 
+child { node {file 3}}
+child {node {file 2}}
+child { node {file 1}};
+\end{tikzpicture}
+};
+\draw[decorate,decoration={brace,amplitude=5pt},very thick] ($(L0.north) + (1.3cm,-0.4cm)$)  -- ($(L0.south) + (1.3cm,0.2cm)$);
+\node [TREE,anchor=west] at ($(L0) +(1.5,-0.1)$) {committed snapshot 2}; 
+ 
+\node [anchor=north west] at ($(L0) +(-1.2cm,-1cm)$)  (L1) {
+\begin{tikzpicture}[dirtree,TREE]
+\node {} 
+child {node {file 2}}
+child { node {file 1}};
+\end{tikzpicture}
+};
+\draw[decorate,decoration={brace,amplitude=5pt},very thick] ($(L1.north) + (1.3cm,-0.4cm)$)  -- ($(L1.south) + (1.3cm,0.2cm)$);
+\node [TREE,anchor=west] at ($(L1) +(1.5,-0.1)$) {committed snapshot 1};  
+\end{tikzpicture}
+```
+
+Initially, it might seem that there is an awful lot of duplication
+going on. For example, if we make a minor alteration to a file, why
+not just commit the change (delta) instead of an entirely new copy?
+Well, periodically, git will perform **garbage collection** on the
+repository. This process **repacks** the objects together into a
+single object that comprises only the original blobs and their
+subsequent deltas - thereby gaining efficiency. The process of garbage
+collection can also be forced at any time via:
+
+```{bash}
+#| label: gitgc
+#| echo: true
+#| eval: false
+#| classes: bash
+#| highlight-style: zenburn
+git gc
+```
+
+During the evolution of most projects, situations arise in which we
+wish to start work on new components or features that might represent
+a substantial deviation from the main line of evolution. Often, we
+would very much like to be able to quarantine the main thread of the
+project from these new developments. For example, we may wish to be
+able to continue tweaking the main project files (in order to address
+minor issues and bugs), while at the same time, performing major edits
+that take the project in a different direction.
+
+This is called _branching_. The main evolutionary thread of the
+project is referred to as the **main** _branch_. Deviations
+from the _main branch_ are generally called **branches** and
+can be given any name (other than 'main' or 'HEAD'). For example, we
+could start a new _branch_ called 'Feature' where we can evolve
+the project in one direction whilst still being able to actively
+develop the _main branch_ at the same time. 'Feature' and
+'main' _branches_ are depicted in the left hand sequence of
+circles of the schematic below.
