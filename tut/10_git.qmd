@@ -381,6 +381,27 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig4-1.p
 convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5-1.pdf 10_git_files/figure-html/Fig5-1.png   
 ```
 
+```{tikz}
+%| label: Fig6a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_detached!30}{}{}
+\commit{right = 1cm of B}{C}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (C) -- (A);
+\end{tikzpicture}
+```
+
 <table class= "table-sm table-borderless" style='border-spacing:20px;'>
 <tr>
 <td>
