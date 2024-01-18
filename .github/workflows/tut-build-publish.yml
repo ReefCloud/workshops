@@ -26,6 +26,10 @@ jobs:
       # Restore the timestamps - I am going to try to use these to work out what is new and what is not    
       - name: Restore Timestamps
         uses: chetan/git-restore-mtime-action@v1
+
+      # install graphviz
+      - name: Install Graphviz
+        run: apt-get install graphviz
         
       # install R
       - uses: r-lib/actions/setup-r@v2
