@@ -73,7 +73,8 @@ jobs:
       # render tutorials
       - name: Make tutorials
         #run: make -i tut
-        run: echo "library(quarto); quarto_render(\"tut/10_git.qmd\")" | R --no-save --no-restore;
+        #run: echo "library(quarto); quarto_render(\"tut/10_git.qmd\")" | R --no-save --no-restore;
+        run: echo "library(quarto); quarto_render(\"tut/index.qmd\")" | R --no-save --no-restore;
 
         
       # Deploy site to gh-pages branch
