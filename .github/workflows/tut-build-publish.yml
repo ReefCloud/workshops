@@ -77,7 +77,7 @@ jobs:
         with:
           path: doc  # Specify the target folder for checkout
           ref: gh-pages  
-      -name: check that the docs folder is there and populated
+      - name: check that the docs folder is there and populated
         run: | 
           ls -la
           ls -la docs
