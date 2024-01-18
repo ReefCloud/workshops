@@ -83,9 +83,9 @@ jobs:
           path: docs  # Specify the target folder for checkout
           ref: gh-pages  
           
-      - name: Diffs
+      - name: Touch those files that have changed since the last commit
         run: |
-          git diff --name-only HEAD HEAD~1 | xards touch
+          git diff --name-only HEAD HEAD~1 | xargs touch
         
       - name: Check that the docs folder is there and populated
         run: | 

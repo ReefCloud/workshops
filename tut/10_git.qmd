@@ -401,6 +401,7 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5-1.p
 \draw [-,line width=3pt,draw=black!60] (C) -- (A);
 \end{tikzpicture}
 ```
+
 ```{bash}
 #| label: Fig6a-conv
 #| echo: false
