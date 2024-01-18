@@ -81,6 +81,8 @@ jobs:
         run: | 
           ls -la
           ls -la doc
+          ls -la tut
+          
       # render tutorials
       - name: Make tutorials
         run: make -i tut
