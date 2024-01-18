@@ -61,13 +61,20 @@ jobs:
           wget -O architects_daughter.zip https://fonts.google.com/download?family=Architects%20Daughter
           unzip -d architects_daughter/ architects_daughter.zip
           mv architects_daughter /usr/share/fonts/
+          
           wget -O inconsolata.zip https://fonts.google.com/download?family=Inconsolata
           unzip -d inconsolata/ inconsolata.zip
           mv inconsolata /usr/share/fonts/
+
+          wget -O noto_sans.zip https://fonts.google.com/download?family=Noto%20Sans
+          unzip -d noto_sans/ noto_sans.zip
+          mv noto_sans /usr/share/fonts/
+
           fc-cache -fv
           #fc-list
           #fc-list -v | grep -i archi
-          fc-list -v | grep -i inconsolata
+          #fc-list -v | grep -i inconsolata
+          fc-list -v | grep -i noto
 
       # install quarto
       - name: Install quarto

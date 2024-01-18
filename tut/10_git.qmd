@@ -1075,3 +1075,4 @@ child { node {file 1}};
 \node [TREE,anchor=west] at ($(L0) +(1.5,-0.1)$) {committed snapshot 1}; 
 \end{tikzpicture}
 ```
+ 
