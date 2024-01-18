@@ -1584,11 +1584,590 @@ terminal and issue the following:
 git --version
 ```
 
-Pay particular attention to the number of hyphens in the above
-command - there are two in a row and no spaces between the `--` and
-the word `version`.
+::: {.callout-tip collapse="true"}
+## Unsure how to open a terminal?
+
+**Windows:**
+
+On Windows, you can access a terminal via one of the following: 
+
+- via the command Prompt:
+  - Press `Win + R` to open the Run dialog.
+  - Type `cmd` and press `Enter`.
+
+- via PowerShell:
+  - Press `Win + X` and select "Windows PowerShell."
+
+- Git Bash (Optional):
+  - if Git is installed (which we are hoping it is!), open "Git Bash" for a Unix-like terminal experience.
+
+**MacOS:**
+
+- via Terminal:
+  - Press `Cmd + Space` to open Spotlight.
+  - Type `terminal` and press `Enter`.
+
+**Linux:**
+
+Oh please. You cannot seriously tell me that you are using Linux and
+don't know how to access a terminal.
+:::
+
+In the command above, pay particular attention to the number of
+hyphens in the above command - there are two in a row and no spaces
+between the `--` and the word `version`.
 
 If you get output similar to above (an indication of what version of
 git you have on your system), then it is likely to be properly
 installed. If instead you get an error message, then it is likely that
 git is not properly installed and you should try again.
+
+# Getting started
+
+
+Before using git, it is a good idea to define some global (applied to
+all your gits) settings. These include your name and email address and
+whilst not essential, they are applied to all actions you perform so
+the it is easier for others to track the route of changes etc.
+
+```{bash}
+#| label: git-config
+#| echo: true
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash
+git config --global user.name "Your Name"
+git config --global user.email "your_email@whatever.com"
+```
+
+::: {.callout-note}
+In the above, you should replace "Your Name" with your actual name.
+This need not be a username (or even a real name) it is not cross
+referenced anywhere. It is simply to use in collaboration so that your
+collaborators know who is responsible for your commits.
+
+Similarly, you should replace "your_email@whatever.com" with an email
+that you are likely to monitor. This need not be the same email
+address you have used to register a Github account etc, it is just so
+that collaborators have a way of contacting you.
+:::
+
+
+The remaining sections go through the major git versioning concepts.
+As previously indicated, git is a command driven program (technically
+a family of programs). Nevertheless, many other applications (such as
+RStudio) are able to interface directly with git for some of the more
+commonly used features. Hence, in addition to providing the command
+line syntax for performing each task, where possible, this tutorial
+will also provide instructions (with screen captures) for RStudio and
+emacs.
+
+# Setting up (initializing) a new repository
+
+For the purpose of this tutorial, I will create a temporary folder the
+`tmp` _folder_ of my `home` _directory_ into which to create and
+manipulate repositories. To follow along with this tutorial, you are
+encouraged to do similarly.
+
+
+## Initialize local repository
+
+```{tikz}
+%| label: Fig1a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| dependson: common
+%| include: false
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
+\begin{tikzpicture}
+\commit{}{A}{white}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\master{right = 0.5cm of A}\draw[->,line width=3pt,draw=black!60] (master) -- (A);
+\HEAD{right = 0.5cm of master}\draw[->,line width=3pt,draw=black!60] (HEAD) -- (master);
+\end{tikzpicture} 
+```
+```{bash}
+#| label: Fig1a-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig1a-1.pdf 10_git_files/figure-html/Fig1a-1.png 
+```
+
+![](10_git_files/figure-html/Fig1a-1.png)
+
+::: {.panel-tabset}
+
+## Terminal
+
+We will start by creating a new directory (folder) which we will call
+`Repo1` in which to place our repository. All usual directory naming
+rules apply since it is just a regular directory.
+
+```{R}
+#| label: makedirectory1
+#| cache: false
+#| echo: false
+unlink('~/tmp/Repo1', recursive=TRUE, force=TRUE)
+```
+
+```{bash}
+#| label: makedirectory
+#| echo: true
+#| cache: false
+#| engine: bash
+#| classes: bash
+mkdir ~/tmp/Repo1
+```
+
+To create (or initialize) a new local repository, issue the `git
+init` _command_ in the root of the working directory you
+wish to contain the git repository. This can be either an empty
+directory or contain an existing directory/file structure. The
+`git init` _command_ will add a folder called
+`.git` to the directory. <b>This is a one time
+operation</b>.
+
+```{bash}
+#| label: git-init
+#| echo: true
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git init 
+```
+
+The `.git` _folder_ contains all the necessary
+_metadata_ to manage the repository.
+
+```{bash}
+#| label: git-initD
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1	
+ls -al
+```
+```{bash}
+#| label: git-initD2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1	
+tree -a --charset unicode
+```
+
+config
+: this file stores settings such as the location of a remote
+  repository that this repository is linked to.
+
+description
+: lists the name (and version) of a repository
+
+HEAD
+: lists a reference to the current checked out commit.
+
+hooks
+: a directory containing scripts that are executed at various stages
+  (e.g. `pre-push.sample` is an example of a script executed prior to
+  pushing)
+
+info
+: contains a file `exclude` that lists exclusions (files not to be
+  tracked). This is like `.gitignore`, except is not versioned.
+
+objects
+: this directory contains SHA indexed files being tracked
+
+refs
+: a master copy of all the repository refs
+
+logs
+: contains a history of each branch
+
+## RStudio
+
+The repository that we are going to create in this demonstration could
+be considered to be a new standalone analysis. In Rstudio, this would
+be considered a **project**. So, we will initialise the git repository
+while we create a new Rstudio project.  To do so:
+
+1. click on the `Project` selector in the top right of the Rstudio
+   window (as highlighted by the red ellipse in the image below.
+
+   ![](resources/rstudio_init1a.png){width=100%}
+
+2. select `New Project` from the dropdown menu
+3. select `New Directory` form the Create Project panel
+4. select `New Project` from the Project Type panel
+5. Provide a name for the new directory to be created and use the
+   `Browse` button to locate a suitable position for this new
+   directory. **Ensure that the `Create a git repository` checkbox is
+   checked**
+
+   ![](resources/rstudio_init2.png){width=50%}
+6. Click the `Create Project` button
+
+If successful, you should notice a couple of changes - these are
+highlighted in the following figure:
+
+![](resources/rstudio_init3a.png){width=60%}
+
+- a new `Git` tab will appear in the top right panel
+- the contents of this newly created project/repository will appear in
+  the `Files` tab of the bottom right panel
+  
+If the files and directories that begin with a `.` do not appear,
+click on the `More file commands` cog and make sure the `Show Hidden
+Files` option is ticked.
+
+The newly created files/folders are:
+
+- `.git` - this directory houses the repository information and should
+  not generally be edited directly
+- `.gitignore` - this file defines files/folders to be excluded from
+  the repository. We will discuss this file more later
+- `.Rhistory` - this file will accrue a history of the commands you
+  have evaluated in R within this project
+- `.Rproj.user` - this folder stores some project-specific temporary
+  files
+- `Repo1.Rproj` - contains the project specific settings
+
+**Note that on the left side of the Rstudio window there are two
+panels - one called "Console", the other called "Terminal". The
+console window is for issuing R commands and the terminal window is
+for issuing system (bash, shell) commands. Throughout this tutorial,
+as an alternative to using the point and click Rstudio methods, you
+could instead issue the `Terminal` instructions into the "Terminal"
+panel. Indeed, there are some git commands that are not supported
+directly by Rstudio and can only be entered into the terminal**
+
+## Emacs (magit)
+
+:::
+
+
+Note, at this stage, no files are being tracked, that is, they are not
+part of the repository.
+
+To assist in gaining a greater understanding of the workings of git,
+we will use a series of schematics diagrams representing the contents
+of four important sections of the repository. Typically, these figures
+will be contained within callout panels that expand/collapse upon
+clicking.  However, for this first time, they will be standalone.
+
+In the first figure below, the left hand panel represents the contents
+of the root directory (excluding the `.git` folder) - this is the
+_workspace_ and is currently empty.
+
+The three white panels represent three important parts of the inner
+structure of the `.git` folder. A newly initialized repository is
+relatively devoid of any specific metadata since there are no staged
+or committed files. In the root of the `.git` folder, there is a file
+called `HEAD`.
+
+The figure is currently very sparse. However, as the repository grows,
+so the figure will become more complex.
+
+```{tikz}
+%| label: Fig-advanced1
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+
+\usetikzlibrary{arrows.meta}
+
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_tree}{HTML}{9ACD32} %\definecolor{color_tree}{rgb}{0.78,0.86,0.27}
+\definecolor{color_commit}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED}
+\definecolor{color_index}{HTML}{E0FFFF} %\definecolor{color_index}{rgb}{1,1,1}
+\definecolor{color_file}{rgb}{0.8,0.8,0.8}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+%Define a file 
+\newcommand{\file}[4] {
+\def\corner{0.15in};
+\def\cornerradius{0.02in};
+\def\lwidth{0.02in};
+\def\h{0.5in};
+\def\w{0.85in};
+\def\nline{0};
+\def\iconmargin{0.1in};
+\def\topmargin{0.3in};
+\node at (#1) {\begin{tikzpicture}
+\coordinate (nw) at ($(-0.05in*1,-0.15in*1)$);
+\coordinate (#3) at (#1); 
+\coordinate (ne0) at ($(nw) + (\w, 0)$);
+\coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+\coordinate (ne2) at ($(ne0) - (0, \corner)$);
+\coordinate (se) at ($(ne0) + (0, -\h)$); 
+\filldraw [-, line width = \lwidth, fill=#4] (nw) -- (ne1) -- (ne2)
+[rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+\draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+\node [anchor=north west,TREE] at (nw) {#2};
+\foreach \k in {0,...,\nline}
+{
+\draw [-, line width = \lwidth, line cap=round] 
+($(nw|-se) + (\iconmargin,\iconmargin) + (0,{(\k-1)/(\nline-1)*(\h - \iconmargin - \topmargin)})$)
+-- ++ ($(\w,0) - 2*(\iconmargin,0)$);
+}
+\end{tikzpicture}};
+}
+% end of file definition
+
+\begin{tikzpicture}
+
+\coordinate (G_ul) at (0,0);
+\coordinate (G_ll) at ($(G_ul) +(0,-10)$);
+\coordinate (G_lr) at ($(G_ll) +(4,0)$);
+\coordinate (G_ur) at ($(G_ul) +(4,0)$);
+
+\node[TREE,anchor=west] at ($(G_ul) +(0,-0.5)$) (git) {.git/};
+\file{$(git.west) +(1.5,-2)$}{HEAD}{HEAD}{color_head}
+
+\draw (G_ul) -- (G_ll) -- (G_lr) -- (G_ur) -- cycle;
+
+
+%refs
+\node[TREE,anchor=west] at ($(G_ul) +(-5,-0.5)$) (git_ref) {.git/refs/};
+\draw[] ($(G_ul) +(-5,0)$) -- ++(0,-10) -- ++(4.9,0) -- ++(0,10) -- cycle;
+
+%objects
+\node[TREE,anchor=west] at ($(G_ul) +(-17,-0.5)$) (git_object) {.git/objects/};
+\draw[] ($(G_ul) +(-17,0)$) -- ++(0,-10) -- ++(11.9,0) -- ++(0,10) -- cycle;
+
+%files
+\node[TREE,anchor=west] at ($(G_ul) +(-21,-0.5)$) (root) {/};
+\begin{pgfonlayer}{background}
+\draw[fill=color_workspace!20] ($(G_ul) +(-21,0)$) -- ++(0,-10) -- ++(3.9,0) -- ++(0,10) -- cycle;
+\end{pgfonlayer}
+
+\end{tikzpicture}
+```
+
+The second figure provides the same information, yet via a network
+diagram. Again, this will not be overly meaningful until the
+repository contains some content.
+
+```{bash}
+#| label: gitDraw1
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit1.png 
+```
+
+![](10_git_files/figure-html/drawGit1.png)
+
+## Initializing other types of repositories
+
+The above demonstrated how to initialise a new local repository from
+scratch.  However, there are times when we instead want to:
+
+- create a git repository from an existing directory or project
+- collaborate with someone on an existing repository
+- create a remote repository
+
+These situations are briefly demonstrated in the following sections.
+
+### Initializing a shared (remote) repository
+
+```{tikz}
+%| label: Fig1b
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| dependson: common
+%| include: false
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
+\begin{tikzpicture}
+\rcommit{}{A}{white}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\master{right = 0.5cm of A}\draw[->,line width=3pt,draw=black!60] (master) -- (A);
+\HEAD{right = 0.5cm of master}\draw[->,line width=3pt,draw=black!60] (HEAD) -- (master);
+\end{tikzpicture} 
+```
+```{bash}
+#| label: Fig1b-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig1b-1.pdf 10_git_files/figure-html/Fig1b-1.png 
+```
+
+![](10_git_files/figure-html/Fig1b-1.png)
+
+The main repository for sharing should not contain the working
+directory as such - only the `.git` tree and the
+`.gitignore` file. Typically the point of a remote
+repository is to act as a perminantly available repository from which
+multiple uses can exchange files. Consequently, those accessing this
+repository should only be able to interact with the .git
+_metadata_ - they do not directly modify any files.
+
+Since a remote repository is devode of the working files and
+directories, it is referred to as _bare_. 
+
+::: {.panel-tabset}
+
+#### Terminal
+To create a _bare_ remote repository, issue the `git init --bare`
+_command_ after logging in to the remote location.
+
+```{bash}
+#| label: git-initB
+#| echo: true
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash
+git init --bare
+```
+
+#### Rstudio
+
+Use the instructions for the `Terminal`
+
+:::
+
+
+### Cloning an existing repository
+
+
+```{tikz}
+%| label: Fig1c
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| dependson: common
+%| include: false
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
+\begin{tikzpicture}
+
+\state{0,0}{color_local}{L}
+\node[TARGET,fill=white] at ($(L.north) +(0,0.5cm)$) {Local Repository};
+
+\commit{right = 0.5 cm of L}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- (L.east);
+\draw [<-,line width=3pt,draw=black!60] (A) -- (B);
+\master{right = 0.5cm of B}\draw[->,line width=3pt,draw=black!60] (master) -- (B);
+\HEAD{right = 0.5cm of master}\draw[->,line width=3pt,draw=black!60] (HEAD) -- (master);
+
+\state{$(HEAD) +(3,0)$}{color_remote}{R}
+\node[TARGET,fill=white] at ($(R.north) +(0,0.5cm)$) {Remote Repository};
+\rcommit{right = 1cm of R}{rA}{color_inactive}{}{}
+\commit{right = 1cm of rA}{rB}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (rA) -- (R.east);
+\draw [<-,line width=3pt,draw=black!60] (rA) -- (rB);
+\rmaster{right = 0.5cm of rB}\draw[->,line width=3pt,draw=black!60] (rmaster) -- (rB);
+\rHEAD{right = 0.5cm of rmaster}\draw[->,line width=3pt,draw=black!60] (rHEAD) -- (rmaster);
+
+\draw [->,line width=3pt,draw=black!60] (rB.south west) to [out=220,in=300] (B.south east);
+\end{tikzpicture} 
+```
+```{bash}
+#| label: Fig1c-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig1c-1.pdf 10_git_files/figure-html/Fig1c-1.png 
+```
+
+![](10_git_files/figure-html/Fig1c-1.png)
+
+To get your own local copy of an existing repository, issue the `git
+clone <repo url>` _command_ in the root of the working directory you
+wish to contain the git repository. The `repo url` points to the
+location of the existing repository to be cloned. This is also a **one
+time operation** and should be issued in an otherwise empty directory.
+
+The `repo url` can be located on any accessible filesytem (local or
+remote). The cloning process also stores a link back to the original
+location of the repository (called **origin**). This provides a
+convenient way for the system to keep track of where the local
+repository should exchange files.
+
+Many git repositories are hosted on sites such as github, gitlab or
+bitbucket. Within an online git repository, these sites provide url
+links for cloning.
+
+::: {.panel-tabset}
+
+#### Terminal
+
+```{bash}
+#| label: git-clone
+#| echo: true
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash
+git clone "url.git"
+```
+
+where `"url.git"` is the url of the hosted repository.
+
+#### Rstudio
+
+1. click on the `Project` selector in the top right of the Rstudio
+   window (as highlighted by the red ellipse in the image below.
+2. select `New Project` from the dropdown menu
+3. select `Version Control` form the Create Project panel
+4. select `Git` from the Create Project from Version Control panel
+5. paste in the address of the repository that you want to clone,
+   optionally a name for this repository (if you do not like the
+   original name) and use the `Browse` button to locate a suitable
+   position for this new directory.
+6. Click the `Create Project` button
+:::
+
+### Initializing a repository in an existing directory
+
+::: {.panel-tabset}
+
+#### Terminal
+
+This is the same as for a new directory.
+
+```{bash}
+#| label: git-create1a
+#| echo: true
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash
+git init
+```
+#### Rstudio
+
+1. click on the `Project` selector in the top right of the Rstudio
+   window (as highlighted by the red ellipse in the image below.
+2. select `New Project` from the dropdown menu
+3. select `Existing Directory` form the Create Project panel
+4. use the `Browse` button to locate the existing directory
+6. Click the `Create Project` button
+:::
