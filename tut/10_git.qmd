@@ -405,7 +405,7 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5-1.p
 ```{bash}
 #| label: Fig6a-conv
 #| echo: false
-convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig6a-1.pdf 10_git_files/figure-html/Fig6a-1.png 
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig6a-1.pdf 10_git_files/figure-html/Fig6a-1.png  
 ```
 
 ```{tikz}
@@ -439,8 +439,41 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig6a-1.
 ```{bash}
 #| label: Fig5b-conv
 #| echo: false
-convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5b-1.pdf 10_git_files/figure-html/Fig5b-1.png
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5b-1.pdf 10_git_files/figure-html/Fig5b-1.png 
 ```
+
+```{tikz}
+%| label: Fig5a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\master{right = 0.5cm of B}\draw[->,line width=3pt,draw=black!60] (master) -- (B);
+
+\rcommit{below = 1cm of A}{rA}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (rA) -- ++(-1,0);
+\rmaster{right = 0.5cm of rA}\draw[->,line width=3pt,draw=black!60] (rmaster) -- (rA);
+
+\draw [->,line width=3pt, draw=black!60, dashed] (B) -- (rA);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Fig5a-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5a-1.pdf 10_git_files/figure-html/Fig5a-1.png
+```
+
 
 <table class= "table-sm table-borderless" style='border-spacing:20px;'>
 <tr>
