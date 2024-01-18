@@ -5126,7 +5126,7 @@ display: none
   <li><a href="#format-of-tutorials" id="toc-format-of-tutorials" class="nav-link" data-scroll-target="#format-of-tutorials"><span class="header-section-number">2</span> Format of tutorials</a>
   <ul class="collapse">
   <li><a href="#r-code" id="toc-r-code" class="nav-link" data-scroll-target="#r-code"><span class="header-section-number">2.1</span> R code</a></li>
-  <li><a href="#bash-code" id="toc-bash-code" class="nav-link" data-scroll-target="#bash-code"><span class="header-section-number">2.2</span> Bash code</a></li>
+  <li><a href="#bash-shell-code" id="toc-bash-shell-code" class="nav-link" data-scroll-target="#bash-shell-code"><span class="header-section-number">2.2</span> Bash (shell) code</a></li>
   <li><a href="#plain-text" id="toc-plain-text" class="nav-link" data-scroll-target="#plain-text"><span class="header-section-number">2.3</span> Plain text</a></li>
   </ul></li>
   </ul>
@@ -5184,16 +5184,16 @@ display: none
 <span id="cb1-8"><a href="#cb1-8"></a>dat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   x    g         y
-1  1 High  4.692853
-2  2 High  6.823009
-3  3 High  9.893487
-4  4 High 12.178540
-5  5 High 18.017405
-6  1  Low  5.820918
-7  2  Low 10.376185
-8  3  Low 10.257267
-9  4  Low 14.144713
-10 5  Low 19.230208</code></pre>
+1  1 High  4.730939
+2  2 High  9.260562
+3  3 High 11.047110
+4  4 High 14.599760
+5  5 High 17.450099
+6  1  Low  3.957725
+7  2  Low  9.667637
+8  3  Low 12.821123
+9  4  Low 14.575270
+10 5  Low 18.278212</code></pre>
 </div>
 </div>
 <p>This format is partially reminiscent of the layout of code editors, albeit with a very opinionated color scheme.</p>
@@ -5209,24 +5209,32 @@ display: none
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">times =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="bash-code" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="bash-code"><span class="header-section-number">2.2</span> Bash code</h2>
+<section id="bash-shell-code" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="bash-shell-code"><span class="header-section-number">2.2</span> Bash (shell) code</h2>
+<p>Bash is a command-line shell that gives you access and control over your computer’s operating system. Whilst the majority of the tutorials in this series are focused on R, there are a couple of tutorials on other supporting topics (like version control) that might be interfaced via a shell (commands entered on a terminal). Furthermore, some software installation and/or configuration instructions might be in the form of shell commands.</p>
+<p>Such commands are presented as:</p>
+<div class="cell bash">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="bu">pwd</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>/home/runner/work/workshops/workshops/tut</code></pre>
+</div>
+</div>
 </section>
 <section id="plain-text" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="plain-text"><span class="header-section-number">2.3</span> Plain text</h2>
 <p>The contents of plain text files will similarly be presented either as:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource txt number-lines code-with-copy"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1"></a>Lorem ipsum dolor sit amet, consectetur adipiscing elit. </span>
-<span id="cb4-2"><a href="#cb4-2"></a>Maecenas sed metus congue risus sagittis viverra. Etiam </span>
-<span id="cb4-3"><a href="#cb4-3"></a>hendrerit orci arcu, et vehicula libero vulputate nec. </span>
-<span id="cb4-4"><a href="#cb4-4"></a>Aliquam placerat lacinia ex sit amet varius. Suspendisse </span>
-<span id="cb4-5"><a href="#cb4-5"></a>potenti. Nam tristique fringilla lacus id tincidunt. Donec </span>
-<span id="cb4-6"><a href="#cb4-6"></a>quis turpis tempus leo pharetra malesuada. Vivamus consequat </span>
-<span id="cb4-7"><a href="#cb4-7"></a>a quam nec vestibulum.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource txt number-lines code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1"></a>Lorem ipsum dolor sit amet, consectetur adipiscing elit. </span>
+<span id="cb6-2"><a href="#cb6-2"></a>Maecenas sed metus congue risus sagittis viverra. Etiam </span>
+<span id="cb6-3"><a href="#cb6-3"></a>hendrerit orci arcu, et vehicula libero vulputate nec. </span>
+<span id="cb6-4"><a href="#cb6-4"></a>Aliquam placerat lacinia ex sit amet varius. Suspendisse </span>
+<span id="cb6-5"><a href="#cb6-5"></a>potenti. Nam tristique fringilla lacus id tincidunt. Donec </span>
+<span id="cb6-6"><a href="#cb6-6"></a>quis turpis tempus leo pharetra malesuada. Vivamus consequat </span>
+<span id="cb6-7"><a href="#cb6-7"></a>a quam nec vestibulum.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>or when necessary to save space:</p>
 <div class="cell plain">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource txt number-lines code-with-copy"><code class="sourceCode default"><span id="cb5-1"><a href="#cb5-1"></a>Lorem ipsum dolor sit amet, consectetur adipiscing elit. </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource txt number-lines code-with-copy"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1"></a>Lorem ipsum dolor sit amet, consectetur adipiscing elit. </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
@@ -5520,106 +5528,122 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class>
-<div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">---</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="an">title:</span><span class="co"> ReefCloud R/Statistics resources </span></span>
-<span id="cb6-3"><a href="#cb6-3"></a><span class="an">author:</span><span class="co"> &quot;Murray Logan&quot;</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a><span class="an">date:</span><span class="co"> &quot;`r format(Sys.time(), &#39;%d %B, %Y&#39;)`&quot;</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="an">format:</span><span class="co"> </span></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="co">  html:</span></span>
-<span id="cb6-7"><a href="#cb6-7"></a><span class="co">    toc: true</span></span>
-<span id="cb6-8"><a href="#cb6-8"></a><span class="co">    toc-float: true</span></span>
-<span id="cb6-9"><a href="#cb6-9"></a><span class="co">    number-sections: true</span></span>
-<span id="cb6-10"><a href="#cb6-10"></a><span class="co">    number-depth: 3</span></span>
-<span id="cb6-11"><a href="#cb6-11"></a><span class="co">    embed-resources: true</span></span>
-<span id="cb6-12"><a href="#cb6-12"></a><span class="co">    code-fold: false</span></span>
-<span id="cb6-13"><a href="#cb6-13"></a><span class="co">    code-tools: true</span></span>
-<span id="cb6-14"><a href="#cb6-14"></a><span class="co">    code-summary: &quot;Show the code&quot;</span></span>
-<span id="cb6-15"><a href="#cb6-15"></a><span class="an">crossref:</span></span>
-<span id="cb6-16"><a href="#cb6-16"></a><span class="co">  fig-title: &#39;**Figure**&#39;</span></span>
-<span id="cb6-17"><a href="#cb6-17"></a><span class="co">  fig-labels: arabic</span></span>
-<span id="cb6-18"><a href="#cb6-18"></a><span class="co">  tbl-title: &#39;**Table**&#39;</span></span>
-<span id="cb6-19"><a href="#cb6-19"></a><span class="co">  tbl-labels: arabic</span></span>
-<span id="cb6-20"><a href="#cb6-20"></a><span class="an">engine:</span><span class="co"> knitr</span></span>
-<span id="cb6-21"><a href="#cb6-21"></a><span class="an">bibliography:</span><span class="co"> resources/references.bib</span></span>
-<span id="cb6-22"><a href="#cb6-22"></a><span class="an">output_dir:</span><span class="co"> &quot;docs&quot;</span></span>
-<span id="cb6-23"><a href="#cb6-23"></a><span class="co">---</span></span>
-<span id="cb6-24"><a href="#cb6-24"></a></span>
-<span id="cb6-25"><a href="#cb6-25"></a><span class="fu"># Purpose</span></span>
-<span id="cb6-26"><a href="#cb6-26"></a></span>
-<span id="cb6-27"><a href="#cb6-27"></a>This tutorial series should be considered reference and background</span>
-<span id="cb6-28"><a href="#cb6-28"></a>materials in support of preparation for more advanced statistical</span>
-<span id="cb6-29"><a href="#cb6-29"></a>analyses with R. The topics covered progress from introductory and</span>
-<span id="cb6-30"><a href="#cb6-30"></a>foundational through to more advanced and as such, the tutorials are</span>
-<span id="cb6-31"><a href="#cb6-31"></a>intended to be consumed and worked through largely in the order laid</span>
-<span id="cb6-32"><a href="#cb6-32"></a>out in the sidebar menu to the left.</span>
-<span id="cb6-33"><a href="#cb6-33"></a></span>
-<span id="cb6-34"><a href="#cb6-34"></a><span class="fu"># Format of tutorials </span></span>
-<span id="cb6-35"><a href="#cb6-35"></a></span>
-<span id="cb6-36"><a href="#cb6-36"></a><span class="fu">## R code</span></span>
-<span id="cb6-37"><a href="#cb6-37"></a>Throughout the tutorials, R code snippets will be presented in a block such as:</span>
-<span id="cb6-38"><a href="#cb6-38"></a></span>
-<span id="cb6-41"><a href="#cb6-41"></a><span class="in">```{r}</span></span>
-<span id="cb6-42"><a href="#cb6-42"></a><span class="co">#| label: cmd1</span></span>
-<span id="cb6-43"><a href="#cb6-43"></a><span class="do">## construct variables</span></span>
-<span id="cb6-44"><a href="#cb6-44"></a>x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">times =</span> <span class="dv">2</span>)</span>
-<span id="cb6-45"><a href="#cb6-45"></a>g <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="at">n =</span> <span class="dv">2</span>, <span class="at">k =</span> <span class="dv">5</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&#39;High&#39;</span>, <span class="st">&#39;Low&#39;</span>))</span>
-<span id="cb6-46"><a href="#cb6-46"></a>y <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">+</span> (<span class="dv">3</span> <span class="sc">*</span> x) <span class="sc">+</span> (<span class="fu">as.numeric</span>(g) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">10</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
-<span id="cb6-47"><a href="#cb6-47"></a><span class="do">## compile into a data frame</span></span>
-<span id="cb6-48"><a href="#cb6-48"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(x, g, y)</span>
-<span id="cb6-49"><a href="#cb6-49"></a><span class="do">## print out data frame</span></span>
-<span id="cb6-50"><a href="#cb6-50"></a>dat</span>
-<span id="cb6-51"><a href="#cb6-51"></a><span class="in">```</span></span>
-<span id="cb6-52"><a href="#cb6-52"></a></span>
-<span id="cb6-53"><a href="#cb6-53"></a>This format is partially reminiscent of the layout of code editors,</span>
-<span id="cb6-54"><a href="#cb6-54"></a>albeit with a very opinionated color scheme.</span>
-<span id="cb6-55"><a href="#cb6-55"></a></span>
-<span id="cb6-56"><a href="#cb6-56"></a><span class="ss">- </span>the R code appears as the text over the faint yellow background.</span>
-<span id="cb6-57"><a href="#cb6-57"></a><span class="ss">- </span>any output appears below the code (white background) and in red font</span>
-<span id="cb6-58"><a href="#cb6-58"></a><span class="ss">- </span>the light gray numbers in the left hand gutter represent the line</span>
-<span id="cb6-59"><a href="#cb6-59"></a>  numbers. These can be useful when trying to draw attention to a</span>
-<span id="cb6-60"><a href="#cb6-60"></a>  particular line of code</span>
-<span id="cb6-61"><a href="#cb6-61"></a><span class="ss">- </span>the light gray text in the R code block beginning with two hash</span>
-<span id="cb6-62"><a href="#cb6-62"></a>  symbols &#39;##&#39; are comments</span>
-<span id="cb6-63"><a href="#cb6-63"></a><span class="ss">- </span>in the upper right hand corner there is a clipboard symbol. Clicking</span>
-<span id="cb6-64"><a href="#cb6-64"></a>  on this symbol will copy the code to the clipboard to help you</span>
-<span id="cb6-65"><a href="#cb6-65"></a>  transfer the code to your own R session.</span>
-<span id="cb6-66"><a href="#cb6-66"></a></span>
-<span id="cb6-67"><a href="#cb6-67"></a>Occasionally (and particularly within tables) code snippets may</span>
-<span id="cb6-68"><a href="#cb6-68"></a>alternatively be presented without the line number gutter. In such</span>
-<span id="cb6-69"><a href="#cb6-69"></a>cases, there tends to only be a single line of code and there are</span>
-<span id="cb6-70"><a href="#cb6-70"></a>substantial space savings if the gutter is removed.</span>
-<span id="cb6-71"><a href="#cb6-71"></a></span>
-<span id="cb6-74"><a href="#cb6-74"></a><span class="in">```{r}</span></span>
-<span id="cb6-75"><a href="#cb6-75"></a><span class="co">#| label: cmd2</span></span>
-<span id="cb6-76"><a href="#cb6-76"></a><span class="co">#| class: plain</span></span>
-<span id="cb6-77"><a href="#cb6-77"></a>x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">times =</span> <span class="dv">2</span>)</span>
-<span id="cb6-78"><a href="#cb6-78"></a><span class="in">```</span></span>
-<span id="cb6-79"><a href="#cb6-79"></a></span>
-<span id="cb6-80"><a href="#cb6-80"></a></span>
-<span id="cb6-81"><a href="#cb6-81"></a><span class="fu">## Bash code</span></span>
-<span id="cb6-82"><a href="#cb6-82"></a></span>
-<span id="cb6-83"><a href="#cb6-83"></a><span class="fu">## Plain text</span></span>
-<span id="cb6-84"><a href="#cb6-84"></a></span>
-<span id="cb6-85"><a href="#cb6-85"></a>The contents of plain text files will similarly be presented either as:</span>
-<span id="cb6-86"><a href="#cb6-86"></a></span>
-<span id="cb6-89"><a href="#cb6-89"></a><span class="in">```{txt}</span></span>
-<span id="cb6-90"><a href="#cb6-90"></a><span class="in">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </span></span>
-<span id="cb6-91"><a href="#cb6-91"></a><span class="in">Maecenas sed metus congue risus sagittis viverra. Etiam </span></span>
-<span id="cb6-92"><a href="#cb6-92"></a><span class="in">hendrerit orci arcu, et vehicula libero vulputate nec. </span></span>
-<span id="cb6-93"><a href="#cb6-93"></a><span class="in">Aliquam placerat lacinia ex sit amet varius. Suspendisse </span></span>
-<span id="cb6-94"><a href="#cb6-94"></a><span class="in">potenti. Nam tristique fringilla lacus id tincidunt. Donec </span></span>
-<span id="cb6-95"><a href="#cb6-95"></a><span class="in">quis turpis tempus leo pharetra malesuada. Vivamus consequat </span></span>
-<span id="cb6-96"><a href="#cb6-96"></a><span class="in">a quam nec vestibulum.</span></span>
-<span id="cb6-97"><a href="#cb6-97"></a><span class="in">```</span></span>
-<span id="cb6-98"><a href="#cb6-98"></a></span>
-<span id="cb6-99"><a href="#cb6-99"></a>or when necessary to save space:</span>
-<span id="cb6-100"><a href="#cb6-100"></a></span>
-<span id="cb6-101"><a href="#cb6-101"></a><span class="in">```{txt, class = &quot;plain&quot;}</span></span>
-<span id="cb6-102"><a href="#cb6-102"></a><span class="in">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </span></span>
-<span id="cb6-103"><a href="#cb6-103"></a><span class="in">```</span></span>
-<span id="cb6-104"><a href="#cb6-104"></a></span>
-<span id="cb6-105"><a href="#cb6-105"></a></span>
-<span id="cb6-106"><a href="#cb6-106"></a></span>
+<div class="sourceCode" id="cb8" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">---</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="an">title:</span><span class="co"> ReefCloud R/Statistics resources </span></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="an">author:</span><span class="co"> &quot;Murray Logan&quot;</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="an">date:</span><span class="co"> &quot;`r format(Sys.time(), &#39;%d %B, %Y&#39;)`&quot;</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="an">format:</span><span class="co"> </span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="co">  html:</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="co">    toc: true</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="co">    toc-float: true</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="co">    number-sections: true</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a><span class="co">    number-depth: 3</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co">    embed-resources: true</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="co">    code-fold: false</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="co">    code-tools: true</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="co">    code-summary: &quot;Show the code&quot;</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="an">crossref:</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="co">  fig-title: &#39;**Figure**&#39;</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="co">  fig-labels: arabic</span></span>
+<span id="cb8-18"><a href="#cb8-18"></a><span class="co">  tbl-title: &#39;**Table**&#39;</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a><span class="co">  tbl-labels: arabic</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a><span class="an">engine:</span><span class="co"> knitr</span></span>
+<span id="cb8-21"><a href="#cb8-21"></a><span class="an">bibliography:</span><span class="co"> resources/references.bib</span></span>
+<span id="cb8-22"><a href="#cb8-22"></a><span class="an">output_dir:</span><span class="co"> &quot;docs&quot;</span></span>
+<span id="cb8-23"><a href="#cb8-23"></a><span class="co">---</span></span>
+<span id="cb8-24"><a href="#cb8-24"></a></span>
+<span id="cb8-25"><a href="#cb8-25"></a><span class="fu"># Purpose</span></span>
+<span id="cb8-26"><a href="#cb8-26"></a></span>
+<span id="cb8-27"><a href="#cb8-27"></a>This tutorial series should be considered reference and background</span>
+<span id="cb8-28"><a href="#cb8-28"></a>materials in support of preparation for more advanced statistical</span>
+<span id="cb8-29"><a href="#cb8-29"></a>analyses with R. The topics covered progress from introductory and</span>
+<span id="cb8-30"><a href="#cb8-30"></a>foundational through to more advanced and as such, the tutorials are</span>
+<span id="cb8-31"><a href="#cb8-31"></a>intended to be consumed and worked through largely in the order laid</span>
+<span id="cb8-32"><a href="#cb8-32"></a>out in the sidebar menu to the left.</span>
+<span id="cb8-33"><a href="#cb8-33"></a></span>
+<span id="cb8-34"><a href="#cb8-34"></a><span class="fu"># Format of tutorials </span></span>
+<span id="cb8-35"><a href="#cb8-35"></a></span>
+<span id="cb8-36"><a href="#cb8-36"></a><span class="fu">## R code</span></span>
+<span id="cb8-37"><a href="#cb8-37"></a>Throughout the tutorials, R code snippets will be presented in a block such as:</span>
+<span id="cb8-38"><a href="#cb8-38"></a></span>
+<span id="cb8-41"><a href="#cb8-41"></a><span class="in">```{r}</span></span>
+<span id="cb8-42"><a href="#cb8-42"></a><span class="co">#| label: cmd1</span></span>
+<span id="cb8-43"><a href="#cb8-43"></a><span class="do">## construct variables</span></span>
+<span id="cb8-44"><a href="#cb8-44"></a>x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">times =</span> <span class="dv">2</span>)</span>
+<span id="cb8-45"><a href="#cb8-45"></a>g <span class="ot">&lt;-</span> <span class="fu">gl</span>(<span class="at">n =</span> <span class="dv">2</span>, <span class="at">k =</span> <span class="dv">5</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">&#39;High&#39;</span>, <span class="st">&#39;Low&#39;</span>))</span>
+<span id="cb8-46"><a href="#cb8-46"></a>y <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">+</span> (<span class="dv">3</span> <span class="sc">*</span> x) <span class="sc">+</span> (<span class="fu">as.numeric</span>(g) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">10</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span>
+<span id="cb8-47"><a href="#cb8-47"></a><span class="do">## compile into a data frame</span></span>
+<span id="cb8-48"><a href="#cb8-48"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(x, g, y)</span>
+<span id="cb8-49"><a href="#cb8-49"></a><span class="do">## print out data frame</span></span>
+<span id="cb8-50"><a href="#cb8-50"></a>dat</span>
+<span id="cb8-51"><a href="#cb8-51"></a><span class="in">```</span></span>
+<span id="cb8-52"><a href="#cb8-52"></a></span>
+<span id="cb8-53"><a href="#cb8-53"></a>This format is partially reminiscent of the layout of code editors,</span>
+<span id="cb8-54"><a href="#cb8-54"></a>albeit with a very opinionated color scheme.</span>
+<span id="cb8-55"><a href="#cb8-55"></a></span>
+<span id="cb8-56"><a href="#cb8-56"></a><span class="ss">- </span>the R code appears as the text over the faint yellow background.</span>
+<span id="cb8-57"><a href="#cb8-57"></a><span class="ss">- </span>any output appears below the code (white background) and in red font</span>
+<span id="cb8-58"><a href="#cb8-58"></a><span class="ss">- </span>the light gray numbers in the left hand gutter represent the line</span>
+<span id="cb8-59"><a href="#cb8-59"></a>  numbers. These can be useful when trying to draw attention to a</span>
+<span id="cb8-60"><a href="#cb8-60"></a>  particular line of code</span>
+<span id="cb8-61"><a href="#cb8-61"></a><span class="ss">- </span>the light gray text in the R code block beginning with two hash</span>
+<span id="cb8-62"><a href="#cb8-62"></a>  symbols &#39;##&#39; are comments</span>
+<span id="cb8-63"><a href="#cb8-63"></a><span class="ss">- </span>in the upper right hand corner there is a clipboard symbol. Clicking</span>
+<span id="cb8-64"><a href="#cb8-64"></a>  on this symbol will copy the code to the clipboard to help you</span>
+<span id="cb8-65"><a href="#cb8-65"></a>  transfer the code to your own R session.</span>
+<span id="cb8-66"><a href="#cb8-66"></a></span>
+<span id="cb8-67"><a href="#cb8-67"></a>Occasionally (and particularly within tables) code snippets may</span>
+<span id="cb8-68"><a href="#cb8-68"></a>alternatively be presented without the line number gutter. In such</span>
+<span id="cb8-69"><a href="#cb8-69"></a>cases, there tends to only be a single line of code and there are</span>
+<span id="cb8-70"><a href="#cb8-70"></a>substantial space savings if the gutter is removed.</span>
+<span id="cb8-71"><a href="#cb8-71"></a></span>
+<span id="cb8-74"><a href="#cb8-74"></a><span class="in">```{r}</span></span>
+<span id="cb8-75"><a href="#cb8-75"></a><span class="co">#| label: cmd2</span></span>
+<span id="cb8-76"><a href="#cb8-76"></a><span class="co">#| class: plain</span></span>
+<span id="cb8-77"><a href="#cb8-77"></a>x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">times =</span> <span class="dv">2</span>)</span>
+<span id="cb8-78"><a href="#cb8-78"></a><span class="in">```</span></span>
+<span id="cb8-79"><a href="#cb8-79"></a></span>
+<span id="cb8-80"><a href="#cb8-80"></a></span>
+<span id="cb8-81"><a href="#cb8-81"></a><span class="fu">## Bash (shell) code</span></span>
+<span id="cb8-82"><a href="#cb8-82"></a></span>
+<span id="cb8-83"><a href="#cb8-83"></a>Bash is a command-line shell that gives you access and control over</span>
+<span id="cb8-84"><a href="#cb8-84"></a>your computer&#39;s operating system. Whilst the majority of the tutorials</span>
+<span id="cb8-85"><a href="#cb8-85"></a>in this series are focused on R, there are a couple of tutorials on</span>
+<span id="cb8-86"><a href="#cb8-86"></a>other supporting topics (like version control) that might be</span>
+<span id="cb8-87"><a href="#cb8-87"></a>interfaced via a shell (commands entered on a terminal). Furthermore,</span>
+<span id="cb8-88"><a href="#cb8-88"></a>some software installation and/or configuration instructions might be</span>
+<span id="cb8-89"><a href="#cb8-89"></a>in the form of shell commands.</span>
+<span id="cb8-90"><a href="#cb8-90"></a></span>
+<span id="cb8-91"><a href="#cb8-91"></a>Such commands are presented as:</span>
+<span id="cb8-92"><a href="#cb8-92"></a></span>
+<span id="cb8-95"><a href="#cb8-95"></a><span class="in">```{bash}</span></span>
+<span id="cb8-96"><a href="#cb8-96"></a><span class="co">#| label: bash</span></span>
+<span id="cb8-97"><a href="#cb8-97"></a><span class="co">#| classes: bash </span></span>
+<span id="cb8-98"><a href="#cb8-98"></a><span class="bu">pwd</span></span>
+<span id="cb8-99"><a href="#cb8-99"></a><span class="in">```</span></span>
+<span id="cb8-100"><a href="#cb8-100"></a></span>
+<span id="cb8-101"><a href="#cb8-101"></a><span class="fu">## Plain text</span></span>
+<span id="cb8-102"><a href="#cb8-102"></a></span>
+<span id="cb8-103"><a href="#cb8-103"></a>The contents of plain text files will similarly be presented either as:</span>
+<span id="cb8-104"><a href="#cb8-104"></a></span>
+<span id="cb8-107"><a href="#cb8-107"></a><span class="in">```{txt}</span></span>
+<span id="cb8-108"><a href="#cb8-108"></a><span class="in">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </span></span>
+<span id="cb8-109"><a href="#cb8-109"></a><span class="in">Maecenas sed metus congue risus sagittis viverra. Etiam </span></span>
+<span id="cb8-110"><a href="#cb8-110"></a><span class="in">hendrerit orci arcu, et vehicula libero vulputate nec. </span></span>
+<span id="cb8-111"><a href="#cb8-111"></a><span class="in">Aliquam placerat lacinia ex sit amet varius. Suspendisse </span></span>
+<span id="cb8-112"><a href="#cb8-112"></a><span class="in">potenti. Nam tristique fringilla lacus id tincidunt. Donec </span></span>
+<span id="cb8-113"><a href="#cb8-113"></a><span class="in">quis turpis tempus leo pharetra malesuada. Vivamus consequat </span></span>
+<span id="cb8-114"><a href="#cb8-114"></a><span class="in">a quam nec vestibulum.</span></span>
+<span id="cb8-115"><a href="#cb8-115"></a><span class="in">```</span></span>
+<span id="cb8-116"><a href="#cb8-116"></a></span>
+<span id="cb8-117"><a href="#cb8-117"></a>or when necessary to save space:</span>
+<span id="cb8-118"><a href="#cb8-118"></a></span>
+<span id="cb8-119"><a href="#cb8-119"></a><span class="in">```{txt, class = &quot;plain&quot;}</span></span>
+<span id="cb8-120"><a href="#cb8-120"></a><span class="in">Lorem ipsum dolor sit amet, consectetur adipiscing elit. </span></span>
+<span id="cb8-121"><a href="#cb8-121"></a><span class="in">```</span></span>
+<span id="cb8-122"><a href="#cb8-122"></a></span>
+<span id="cb8-123"><a href="#cb8-123"></a></span>
+<span id="cb8-124"><a href="#cb8-124"></a></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
