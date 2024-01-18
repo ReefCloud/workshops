@@ -2590,3 +2590,480 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig2a-1.
 ```
 
 ![](10_git_files/figure-html/Fig2a-1.png)
+
+
+::: {.panel-tabset}
+
+### Terminal
+
+To commit a set of changes from the staging area to the local
+repository, we issue the `git commit` _command_. We usually add the
+`-m` _switch_ to explicitly supply a message to be associated with the
+commit. This message should ideally describe what the changes the
+commit introduces to the repository.
+
+```{bash}
+#| label: git-commit
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git commit -m 'Initial repo and added file1'
+```
+
+We now see that the status has changed. It indicates that the tree in
+the workspace is in sync with the repository.
+
+```{bash}
+#| label: git-commit1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git status
+```
+
+### Rstudio
+
+To commit a set of changes from the staging area to the local
+repository:
+
+1. click on the "Commit" button to open the "Review Changes" window
+
+   ![](resources/rstudio_commit1.png){width=80%}
+
+   This box will list the files to be committed (in this case
+   "file1"), the changes in this file since the previous commit (as
+   this is the first time this file has been committed, the changes
+   are the file contents)
+   
+2. you should also provide a commit message (in the figure above, I
+   entered "Initial commit". This message should ideally describe what
+   the changes the commit introduces to the repository.
+3. click the "Commit" button and you will be presented with a popup
+   message.
+
+   ![](resources/rstudio_commit2.png){width=80%}
+   
+   This message provides feedback to confirm that your commit was
+   successful.  
+4. close the popup window and the "Review Changes" window
+
+`file1` should now have disappeared from the git status panel.
+:::
+
+Our simple overview schematic represents the staging of file 1.
+
+
+```{tikz}
+%| label: Fig-advanced3a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\usetikzlibrary{arrows.meta}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_index}{rgb}{0.78,0.86,0.27}
+\definecolor{color_local}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+
+% A template for making the storage symbol
+\newcommand{\state}[3]{
+\draw (#1) node [draw=none,fill=#2,shape=circle,minimum width=2cm] (#3) {
+\begin{tikzpicture}
+\node [draw=white, fill=white,shape=cylinder,shape aspect=1.3 ,shape border rotate=90,minimum height=1.6cm,minimum width=1.5cm] at (0,0) (Cylinder) {};				\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.1cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.5cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.9cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\end{tikzpicture}
+};
+}
+
+% Define dirtree
+\makeatletter
+\newcount\dirtree@lvl
+\newcount\dirtree@plvl
+\newcount\dirtree@clvl
+\def\dirtree@growth{%
+\ifnum\tikznumberofcurrentchild=1\relax
+\global\advance\dirtree@plvl by 1
+\expandafter\xdef\csname dirtree@p@\the\dirtree@plvl\endcsname{\the\dirtree@lvl}
+\fi
+\global\advance\dirtree@lvl by 1\relax
+\dirtree@clvl=\dirtree@lvl
+\advance\dirtree@clvl by -\csname dirtree@p@\the\dirtree@plvl\endcsname
+\pgf@xa=0.25cm\relax
+\pgf@ya=-0.5cm\relax
+\pgf@ya=\dirtree@clvl\pgf@ya
+\pgftransformshift{\pgfqpoint{\the\pgf@xa}{\the\pgf@ya}}%
+\ifnum\tikznumberofcurrentchild=\tikznumberofchildren
+\global\advance\dirtree@plvl by -1
+\fi
+}
+
+\tikzset{
+dirtree/.style={
+growth function=\dirtree@growth,
+every node/.style={anchor=north},
+every child node/.style={anchor=west},
+edge from parent path={(\tikzparentnode\tikzparentanchor) |- (\tikzchildnode\tikzchildanchor)}
+}
+}
+\makeatother
+%end of t
+
+%Define a file 
+\newcommand{\file}[3] {
+\coordinate (#3) at (#1);
+\draw [anchor=top left](#1) rectangle ++(2,-2);
+\draw [fill=color_workspace]($(#1) +(2,0)$) -- ++(0,-0.5) --++(-0.5,0.5) -- cycle; 
+\node [anchor=north west,fileText] at ($(#1) +(0.3,-0.3)$) {#2};
+}
+% end of file definition
+
+\begin{tikzpicture}
+
+\state{0,0}{color_workspace}{W}
+\node[TARGET,fill=white] at ($(W.north) +(0,0.5cm)$) {Workspace};
+\state{6,0}{color_index}{I}
+\node[TARGET,fill=white] at ($(I.north) +(0,0.5cm)$) {Staging Area};
+\state{12,0}{color_local}{L}
+\node[TARGET,fill=white] at ($(L.north) +(0,0.5cm)$) {Local Repository};
+
+\node [anchor=north west] at ($(W) +(-1cm,-1cm)$)  (W0) {
+\begin{tikzpicture}[dirtree,TREE]
+\node {} 
+child {node {file 1}};
+\end{tikzpicture}
+};
+%\draw[decorate,decoration={brace,amplitude=5pt},very thick] ($(W0.north) + (-1cm,-1cm)$)  -- ($(W0.south) + (-1cm,0.2cm)$);
+
+\node [anchor=north west] at ($(W) +(-1cm,-1cm)$)  (W0) {
+\begin{tikzpicture}[dirtree,TREE]
+\node {} 
+child { node {file 1}};
+\end{tikzpicture}
+};
+%\draw[decorate,decoration={brace,amplitude=5pt},very thick] ($(W0.north) + (-1cm,-1cm)$)  -- ($(W0.south) + (-1cm,0.2cm)$);
+
+\node [anchor=north west] at ($(I) +(-1cm,-1cm)$)  (W0) {
+\begin{tikzpicture}[dirtree,TREE,text=gray,color=gray]
+\node {} 
+child { node {file 1}};
+\end{tikzpicture}
+};
+
+
+\node [anchor=north west] at ($(L) +(-1cm,-1cm)$)  (L0) {
+\begin{tikzpicture}[dirtree,TREE]
+\node {} 
+child { node {file 1}};
+\end{tikzpicture}
+};
+\draw[decorate,decoration={brace,amplitude=5pt},very thick] ($(L0.north) + (1.3cm,-0.2cm)$)  -- ($(L0.south) + (1.3cm,0.0cm)$);
+\node [TREE,anchor=west] at ($(L0) +(1.5,-0.1)$) {committed snapshot 1}; 
+
+\end{tikzpicture}			   
+```
+
+
+::: {.callout-note collapse="true"}
+## Additional details about the commit
+
+The following modifications have occurred (in reverse order to how
+they actually occur):
+
+- The **main** _branch_ reference was created. There is currently only
+  a single branch (more on branches later). The branch reference point
+  to (indicates) which commit is the current commit within a branch.
+
+  ```{bash}
+  #| label: git-commit1a
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  cat .git/refs/heads/main
+  ```
+
+- A **commit** was created. This points to a **tree** (which itself
+  points to the blob representing `file1`) as well as other important
+  metadata (such as who made the commit and when). Since the time
+  stamp will be unique each time a snapshot is commited, so too the
+  name of the commit (as a SHA-1 checksum hash) will differ. **To
+  reiterate, the names of blobs and trees are determined by contents
+  alone, commit names are also incorporate commit timestamp and
+  details of the committer - and are thus virtually unique**.
+
+  ```{r}
+  #| label: bash1
+  #| echo: false
+  #| eval: true
+  #| cache: false
+  hash = scan('~/tmp/Repo1/.git/refs/heads/main', what='character')
+  hash_commit = strtrim(hash, width=5)
+  knit_engines$set(bash1=function(options) {
+    engine=options$engine
+    options$code = gsub('#',hash_commit,options$code)
+    code = paste("bash -c",shQuote(paste(options$code, collapse="\n")))
+    code = paste(options$engine_opts,code)
+    out = system(code,intern=TRUE)
+    engine_output(options,options$code,out) 
+  })
+  ```
+  
+  ```{r, replace=TRUE}
+  #| label: git-commit1b
+  #| echo: !expr -1
+  #| eval: false
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git cat-file commit #
+  ```
+
+- A **tree** object was created. This represents the directory tree of
+  the snapshot (commit) and thus points to the **blob**s.
+
+  ```{r, replace=TRUE}
+  #| label: git-commit1c
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git ls-tree #
+  ```
+  
+  Or most commonly (if interested in the latest commit):
+  
+  ```{r, replace=FALSE}
+  #| label: git-commit1d
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git ls-tree HEAD
+  ```
+::: 
+
+The schematic now looks like
+
+```{cat}
+#| label: Fig-advanced3
+#| echo: true
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig-advanced3.tikz"
+
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\usetikzlibrary{arrows.meta}
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_tree}{HTML}{9ACD32} %\definecolor{color_tree}{rgb}{0.78,0.86,0.27}
+\definecolor{color_commit}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+\definecolor{color_index}{HTML}{E0FFFF} %\definecolor{color_index}{rgb}{1,1,1}
+\definecolor{color_file}{rgb}{1,1,1}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+%Define a file 
+\newcommand{\file}[4] {
+\def\corner{0.15in};
+\def\cornerradius{0.02in};
+\def\lwidth{0.02in};
+\def\h{0.5in};
+\def\w{0.85in};
+\def\nline{0};
+\def\iconmargin{0.1in};
+\def\topmargin{0.3in};
+\node at (#1) {\begin{tikzpicture}
+\coordinate (nw) at ($(-0.05in*1,-0.15in*1)$);
+\coordinate (#3) at (#1); 
+\coordinate (ne0) at ($(nw) + (\w, 0)$);
+\coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+\coordinate (ne2) at ($(ne0) - (0, \corner)$);
+\coordinate (se) at ($(ne0) + (0, -\h)$); 
+\filldraw [-, line width = \lwidth, fill=#4] (nw) -- (ne1) -- (ne2)
+[rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+\draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+\node [anchor=north west,TREE] at (nw) {#2};
+\foreach \k in {0,...,\nline}
+{
+\draw [-, line width = \lwidth, line cap=round] 
+($(nw|-se) + (\iconmargin,\iconmargin) + (0,{(\k-1)/(\nline-1)*(\h - \iconmargin - \topmargin)})$)
+-- ++ ($(\w,0) - 2*(\iconmargin,0)$);
+}
+\end{tikzpicture}};
+}
+% end of file definition
+
+\begin{tikzpicture}
+\coordinate (G_ul) at (0,0);
+\coordinate (G_ll) at ($(G_ul) +(0,-10)$);
+\coordinate (G_lr) at ($(G_ll) +(4,0)$);
+\coordinate (G_ur) at ($(G_ul) +(4,0)$);
+
+\node[TREE,anchor=west] at ($(G_ul) +(0,-0.5)$) (git) {.git/};
+\file{$(git.west) +(1.5,-2)$}{HEAD}{HEAD}{color_head}
+\file{$(HEAD) +(0,-2)$}{index}{index}{color_index}
+\draw[] (G_ul) -- (G_ll) -- (G_lr) -- (G_ur) -- cycle;
+
+%refs
+\node[TREE,anchor=west] at ($(G_ul) +(-5,-0.5)$) (git_ref) {.git/refs/};
+\file{$(git_ref.west) +(1.5,-2)$}{\textcolor{white}{master}}{master}{color_master}
+\draw[] ($(G_ul) +(-5,0)$) -- ++(0,-10) -- ++(4.9,0) -- ++(0,10) -- cycle;
+
+%objects
+\node[TREE,anchor=west] at ($(G_ul) +(-17,-0.5)$) (git_object) {.git/objects/};
+\file{$(git_object.west) +(1.5,-2)$}{\textcolor{black}{hashblob}}{blob1}{color_workspace}
+\draw[] ($(G_ul) +(-17,0)$) -- ++(0,-10) -- ++(11.9,0) -- ++(0,10) -- cycle;
+
+%trees
+\file{$(blob1.west) +(5,0)$}{\textcolor{black}{hashtree}}{tree1}{color_tree}
+
+%commits
+\file{$(tree1.west) +(3,0)$}{\textcolor{black}{hashcommit}}{commit1}{color_commit}
+
+%files
+\node[TREE,anchor=west] at ($(G_ul) +(-21,-0.5)$) (root) {/};
+\file{$(root.west) +(1.7,-2)$}{\textcolor{black}{file1}}{file1}{color_file}
+\draw [very thick] (root) -- (root |- file1) -- ++(0.2,0);
+\begin{pgfonlayer}{background}
+\draw[fill=color_workspace!20] ($(G_ul) +(-21,0)$) -- ++(0,-10) -- ++(3.9,0) -- ++(0,10) -- cycle;
+\end{pgfonlayer}
+
+%arrows
+\draw[->,very thick] ($(HEAD) +(-1,0)$) -- ($(master) +(1.2,0)$);
+\draw[->,very thick] ($(master) +(-1,0)$) -- ($(commit1) +(1.2,0)$);
+\draw[->,very thick] ($(commit1) +(-1,0)$) -- ($(tree1) +(1.2,0)$);
+\draw[->,very thick] ($(tree1) +(-1,0)$) -- ($(blob1) +(1.2,0)$);
+\draw[->,very thick,solid] ($(index) +(-1,0)$) -- ($(blob1) +(1.2,0)$);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+#commit
+hash = scan('~/tmp/Repo1/.git/refs/heads/main', what='character')
+hash_commit = strtrim(hash, width=5)
+#tree
+hash = system(paste0('cd ~/tmp/Repo1; git cat-file -p ',hash_commit), intern=TRUE)
+hash = read.table(textConnection(hash[1]))
+hash_tree = strtrim(hash$V2,5)
+#blob
+hash = system('cd ~/tmp/Repo1; git ls-files --stage', intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_blob = strtrim(hash$V2,5)
+
+system(paste0("sed -i 's/hashblob/",hash_blob,"/g' resources/Fig-advanced3.tikz"))
+system(paste0("sed -i 's/hashtree/",hash_tree,"/g' resources/Fig-advanced3.tikz"))
+system(paste0("sed -i 's/hashcommit/",hash_commit,"/g' resources/Fig-advanced3.tikz"))
+system("xelatex -output-directory=resources resources/Fig-advanced3.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig-advanced3.pdf resources/Fig-advanced3.png")
+```
+
+  
+![](resources/Fig-advanced3.png)
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the git
+```{bash}
+#| label: gitDraw3
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit3.png 
+```
+
+![](10_git_files/figure-html/drawGit3.png)
+
+:::
+
+::: {.callout-note collapse="true"}
+## More information about committing changes to the repository
+Committing staged changes creates an object under the `.git` tree.
+
+```{r, replace=TRUE}
+#| label: git-add3a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -a --charset unicode
+```
+
+```{r, replace=TRUE}
+#| label: git-add3b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git cat-file -p HEAD
+```
+
+```{r, replace=TRUE}
+#| label: git-add3c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git cat-file -p HEAD^{tree}
+```
+
+```{r, replace=TRUE}
+#| label: git-add3d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --oneline
+```
+
+:::
