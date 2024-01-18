@@ -1253,3 +1253,342 @@ the project in one direction whilst still being able to actively
 develop the _main branch_ at the same time. 'Feature' and
 'main' _branches_ are depicted in the left hand sequence of
 circles of the schematic below.
+
+```{tikz}
+%| label: Fig-overview
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}]
+\tikzstyle{refText} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
+\begin{tikzpicture}
+
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_inactive}{}{}
+\commit{right = 1cm of B}{C}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [-,line width=3pt,draw=black!60] (C) -- (B);
+\commit{above = 0.5cm of B}{D}{color_inactive}{}{}
+\draw [-,line width=3pt,draw=black!60] (A.east) to[out=0,in=180] (D);
+\master{right = 0.5cm of C}\draw[->,line width=3pt,draw=black!60] (master) -- (C);
+\HEAD{right = 0.5cm of master}\draw[->,line width=3pt,draw=black!60] (HEAD) -- (master);
+\branch{right = 0.5cm of D}{Feature}\draw[->,line width=3pt,draw=black!60] (Feature) -- (D);
+
+\rcommit{right = 3cm of HEAD}{rA}{color_inactive}{}{}
+\rcommit{right = 1cm of rA}{rB}{color_inactive}{}{}
+\rcommit{right = 1cm of rB}{rC}{color_inactive}{}{}
+\rcommit{right = 1cm of rC}{rC2}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (rA) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (rB) -- (rA);
+\draw [-,line width=3pt,draw=black!60] (rC) -- (rB);
+\draw [-,line width=3pt,draw=black!60] (rC2) -- (rC);
+
+\rcommit{above = 0.5cm of rB}{rD}{color_inactive}{}{}
+\draw [-,line width=3pt,draw=black!60] (rA.east) to[out=0,in=180] (rD);
+\rmaster{right = 0.5cm of rC2}\draw[->,line width=3pt,draw=black!60] (rmaster) -- (rC2);
+\branch{right = 0.5cm of rD}{origin/Feature}\draw[->,line width=3pt,draw=black!60] (origin/Feature) -- (rD);
+\rcommit{below = 0.5cm of rB}{rE}{color_inactive}{}{}
+\draw [-,line width=3pt,draw=black!60] (rA.east) to[out=0,in=180] (rE);
+\branch{right = 0.5cm of rE}{origin/dev}\draw[->,line width=3pt,draw=black!60] (origin/dev) -- (rE);
+\rHEAD{right = 0.5cm of rmaster}\draw[->,line width=3pt,draw=black!60] (rHEAD) -- (rmaster);
+
+\state{$(A) +(0,3cm)$}{color_local}{L}
+\node[TARGET,fill=white] at ($(L.north) +(0,0.5cm)$) {Local Repository};
+
+\state{$(rA) +(0,3cm)$}{color_remote}{R}
+\node[TARGET,fill=white] at ($(R.north) +(0,0.5cm)$) {Remote Repository};
+
+\end{tikzpicture}
+```
+
+The circles represent **commits** (stored snapshots). We can see that
+the first commit is the common ancestor of the 'Feature' and 'main'
+_branch_. **HEAD** is a special reference that points to the _tip_ of
+the currently active _commit_. It indicates where the next _commit_
+will be built onto. In diagram above, `HEAD` is pointing to the last
+_commit_ in `main`. Hence the next _commit_ will build on this
+_commit_. To develop the `Feature` _branch_ further, we first have to
+move `HEAD` to the tip of the `Feature` _branch_.
+
+We can later `merge` the `Feature` _branch_ into the `main` _branch_
+in order to make the new changes mainstream.
+
+To support collaboration, there can also be a _remote repository_
+(referred to as **origin** and depicted by the squares in the figure
+above). Unlike a _local repository_, a _remote repository_ does not
+contain a _workspace_ as files are not directly edited in the _remote
+repository_. Instead, the _remote repository_ acts as a permanently
+available conduit between multiple contributors.
+
+In the diagram above, we can see that the _remote repository_
+(`origin`) has an additional _branch_ (in this called `dev`). The
+collaborator whose _local repository_ is depicted above has either not
+yet obtained (**pulled**) this _branch_ or has elected not to (as
+perhaps it is not a direction that they are involved in).
+
+We also see that the `main` _branch_ on the _remote repository_ has a
+newer (additional) _commit_ than the _local repository_.
+
+Prior to working on _branch_ a collaborator should first get any
+updates to the _remote repository_. This is a two step process.
+Firstly, the collaborator **fetches** any changes and then secondly
+**merges** those changes into their version of the _branch_.
+Collectively, these two actions are called a **pull**.
+
+To make local changes available to others, the collaborator can
+**push** _commits_ up to the _remote repository_. The _pushed_ changes
+are applied directly to the nominated _branch_ so it is the users
+responsibility to ensure as much as possible, their local repository
+already included the most recent _remote repository_ changes (by
+always _pulling_ before _pushing_).
+
+```{tikz}
+%| label: Fig-git
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+
+\usetikzlibrary{arrows.meta}
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}]
+\tikzstyle{refText} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
+\begin{tikzpicture}
+
+\coordinate (R1) at (0,8cm);
+\coordinate (R2) at (0,6cm);
+\coordinate (R3) at (0,4cm);
+\coordinate (R4) at (0,2cm);
+\coordinate (R5) at (0,0cm);
+\coordinate (R6) at (0,-3cm);
+\coordinate (R7) at (0,-6cm);
+\coordinate (R8) at (0,-6cm);
+\coordinate (R8) at (0,-8cm);
+\coordinate (R9) at (0,-10cm);
+\coordinate (R10) at (0,-12cm);
+\coordinate (R11) at (0,-14cm);
+
+\coordinate (C1) at (0cm,-2cm);
+\coordinate (C2) at (8cm,-2cm);
+\coordinate (C3) at (16cm,-2cm);
+\coordinate (C4) at (24cm,-2cm);
+
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_index}{rgb}{0.78,0.86,0.27}
+\definecolor{color_local}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+
+\draw [line width=0.1cm,draw=color_workspace] (C1.west |- R1.north) -- (C1.west |- R11.south); 
+\node [draw=none,fill=color_workspace,shape=circle,minimum width=2cm] at (C1) (W) {
+\begin{tikzpicture}
+\node [draw=white, fill=white,shape=cylinder,shape aspect=1.3 ,shape border rotate=90,minimum height=1.6cm,minimum width=1.5cm] at (0,0) (Cylinder) {};
+\draw[draw=color_workspace,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.1cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=color_workspace,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.5cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=color_workspace,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.9cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\end{tikzpicture}	
+};
+\node[TARGET,fill=white] at ($(W.south) +(0,-0.5cm)$) {Workspace};
+
+\draw [line width=0.1cm,draw=color_index] (C2.west |- R1.north) -- (C2.west |- R11.south); 
+\node [draw=none,fill=color_index,shape=circle,minimum width=2cm] at (C2) (I) {
+\begin{tikzpicture}
+\node [draw=white, fill=white,shape=cylinder,shape aspect=1.3 ,shape border rotate=90,minimum height=1.6cm,minimum width=1.5cm] at (0,0) (Cylinder) {};
+\draw[draw=color_index,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.1cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=color_index,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.5cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=color_index,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.9cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\end{tikzpicture}	
+};
+\node[TARGET,fill=white] at ($(I.south) +(0,-0.5cm)$) {Staging area (Index)};
+
+\draw [line width=0.1cm,draw=color_local] (C3.west |- R1.north) -- (C3.west |- R11.south);
+\node [draw=none,fill=color_local,shape=circle,minimum width=2cm] at (C3) (L) {
+\begin{tikzpicture}
+\node [draw=white, fill=white,shape=cylinder,shape aspect=1.3 ,shape border rotate=90,minimum height=1.6cm,minimum width=1.5cm] at (0,0) (Cylinder) {};
+\draw[draw=color_local,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.1cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=color_local,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.5cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=color_local,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.9cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\end{tikzpicture}	
+};
+\node[TARGET,fill=white] at ($(L.south) +(0,-0.5cm)$) {Local Repository};
+
+\draw [line width=0.1cm,draw=color_remote] (C4.west |- R1.north) -- (C4.west |- R11.south);
+\node [draw=none,fill=color_remote,shape=circle,minimum width=2cm] at (C4) (R) {
+\begin{tikzpicture}
+\node [draw=white, fill=white,shape=cylinder,shape aspect=1.3 ,shape border rotate=90,minimum height=1.6cm,minimum width=1.5cm] at (0,0) (Cylinder) {};
+\draw[draw=color_remote,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.1cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=color_remote,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.5cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=color_remote,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.9cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\end{tikzpicture}	
+};
+\node[TARGET,fill=white] at ($(R.south) +(0,-0.5cm)$) {Remote Repository};
+
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_index] ($(C1.west |- R2.south) + (0.1cm,0)$) -- ($(C2.west |- R2.south) + (-0.1cm,0)$) node[anchor=west,pos=0, text=black,align=center,CODE] {git rm / git mv};
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_index] ($(C1.west |- R3.south) + (0.1cm,0)$) -- ($(C2.west |- R3.south) + (-0.1cm,0)$) node[anchor=west,pos=0, text=black,align=center,CODE] {git add};
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_local] ($(C2.west |- R3.south) + (0.1cm,0)$) -- ($(C3.west |- R3.south) + (-0.1cm,0)$) node[anchor=west,pos=0, text=black,align=center,CODE] {git commit};
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_remote] ($(C3.west |- R3.south) + (0.1cm,0)$) -- ($(C4.west |- R3.south) + (-0.1cm,0)$) node[anchor=west,pos=0, text=black,align=center,CODE] {git push};
+
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_remote] ($(C4.west |- R7.south) + (-0.1cm,0)$) -- ($(C1.west |- R7.south) + (0.1cm,0)$) node[anchor=east,pos=0, text=black,CODE] {git pull / git reset --hard <remote/branch>};
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_remote] ($(C4.west |- R8.south) + (-0.1cm,0)$) -- ($(C3.west |- R8.south) + (0.1cm,0)$) node[anchor=east,pos=0, text=black,CODE] {git fetch};
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_local] ($(C3.west |- R8.south) + (-0.1cm,0)$) -- ($(C1.west |- R8.south) + (0.1cm,0)$) node[anchor=east,pos=0, text=black,CODE] {git merge / git rebase};
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_workspace] ($(C3.west |- R9.south) + (-0.1cm,0)$) -- ($(C1.west |- R9.south) + (0.1cm,0)$) node[anchor=east,pos=0, text=black,CODE] {git checkout HEAD / git reset --hard};
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_index] ($(C3.west |- R10.south) + (-0.1cm,0)$) -- ($(C2.west |- R10.south) + (0.1cm,0)$) node[anchor=east,pos=0, text=black,CODE] {git reset --soft};
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_workspace] ($(C2.west |- R10.south) + (-0.1cm,0)$) -- ($(C1.west |- R10.south) + (0.1cm,0)$) node[anchor=east,pos=0, text=black,CODE] {git checkout};
+
+\draw[Triangle Cap-Triangle Cap,very thick, line width=1cm, draw=color_index!40] ($(C2.west |- R4.south) + (-0.1cm,0)$) -- ($(C1.west |- R4.south) + (0.1cm,0)$) node[anchor=center,pos=0.5, text=black,CODE] {git diff};
+\draw[Triangle Cap-Triangle Cap,very thick, line width=1cm, draw=color_local!40] ($(C3.west |- R5.south) + (-0.1cm,0)$) -- ($(C1.west |- R5.south) + (0.1cm,0)$) node[anchor=center,pos=0.5, text=black,CODE] {git diff HEAD};
+
+\node[rounded corners,CODE,fill=color_workspace,minimum height=1cm] at ($(R1) +(0,1.5cm)$)  (init) {git init};
+\draw[line width=1cm,draw=color_workspace,-{Triangle Cap[cap angle=60,length=0.3cm]}] ($(init.south) +(0,-0.3cm)$) -- +(0,-0.5cm);
+
+\node[rounded corners,CODE,fill=color_remote,minimum height=1cm] at ($(C4 |- R1) +(0,1.5cm)$)  (initbare) {git init --bare};
+\draw[line width=1cm,draw=color_remote,-{Triangle Cap[cap angle=60,length=0.3cm]}] ($(initbare.south) +(0,-0.3cm)$) -- +(0,-0.5cm);
+
+\end{tikzpicture}
+```
+
+# Installation
+
+::: panel-tabset 
+
+## Windows
+
+Git Bash (Command Line Version):
+
+1. Download the Git for Windows installer from [Git for Windows](https://gitforwindows.org/)
+   - Click the Download button
+   - Select the latest version from the list of `Assets`
+2. Run the installer and follow the installation prompts.
+3. Choose the default options unless you have specific preferences.
+4. Select the default text editor (usually Vim) or choose another
+   editor like Nano or Notepad++.
+5. Choose to use Git from the Windows Command Prompt (recommended).
+6. Complete the installation.
+
+## MacOSx
+
+Using Homebrew:
+
+1. Open Terminal.
+2. Install Homebrew if not installed:
+
+:::: {.indented}
+```{bash}
+#| label: install1
+#| echo: true
+#| eval: false
+#| cache: false
+#| engine: bash
+#| classes: bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+:::
+
+3. Install Git using Homebrew:
+
+:::: {.indented}
+
+```{bash}
+#| label: install2
+#| echo: true
+#| eval: false
+#| cache: false
+#| engine: bash
+#| classes: bash
+brew install git
+```
+::::
+
+## Linux
+
+1. Open Terminal.
+
+:::: {.indented}
+Ubuntu/Debian:
+
+```{bash}
+#| label: install3a
+#| echo: true
+#| eval: false
+#| cache: false
+#| engine: bash
+#| classes: bash
+sudo apt update
+sudo apt install git
+```
+::::
+
+:::: {.indented}
+Fedora:
+
+```{bash}
+#| label: install3b
+#| echo: true
+#| eval: false
+#| cache: false
+#| engine: bash
+#| classes: bash
+sudo dnf install git
+```
+::::
+
+:::: {.indented}
+Arch Linux:
+
+```{bash}
+#| label: install3c
+#| echo: true
+#| eval: false
+#| cache: false
+#| engine: bash
+#| classes: bash
+sudo pacman -S git
+```
+::::
+
+:::: {.indented}
+Linux (Red Hat/CentOS):
+
+```{bash}
+#| label: install3d
+#| echo: true
+#| eval: false
+#| cache: false
+#| engine: bash
+#| classes: bash
+sudo yum install git
+```
+::::
+:::
+
+
+To verify that the software is installed and accessible, open a
+terminal and issue the following:
+
+```{bash}
+#| label: install4a
+#| echo: true
+#| eval: true
+#| cache: false
+#| engine: bash
+#| classes: bash
+git --version
+```
+
+Pay particular attention to the number of hyphens in the above
+command - there are two in a row and no spaces between the `--` and
+the word `version`.
+
+If you get output similar to above (an indication of what version of
+git you have on your system), then it is likely to be properly
+installed. If instead you get an error message, then it is likely that
+git is not properly installed and you should try again.
