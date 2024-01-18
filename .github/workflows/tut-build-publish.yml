@@ -70,6 +70,11 @@ jobs:
       - name: Change ImageMagick policy to allow pdf->png conversion.
         run: |
           sudo sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
+      - name: retrieve previous compiled pages
+        uses: actions/checkout@v3
+          with:
+            path: doc  # Specify the target folder for checkout
+            ref: gh-pages  
       # render tutorials
       - name: Make tutorials
         #run: make -i tut
