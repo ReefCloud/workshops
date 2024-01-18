@@ -1712,6 +1712,7 @@ rules apply since it is just a regular directory.
 #| label: makedirectory1
 #| cache: false
 #| echo: false
+if (!dir.exists("~/tmp")) dir.create("~\tmp")
 unlink('~/tmp/Repo1', recursive=TRUE, force=TRUE)
 ```
 
