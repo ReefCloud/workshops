@@ -88,10 +88,9 @@ jobs:
         #  echo "library(quarto); quarto_render(\"tut/index.qmd\")" | R --no-save --no-restore;
         #  echo "library(quarto); quarto_render(\"tut/10_git.qmd\")" | R --no-save --no-restore;
 
-        
       # Deploy site to gh-pages branch
-       - name: Deploy
-         uses: JamesIves/github-pages-deploy-action@4.1.4
-         with:
-           branch: gh-pages
-           folder: docs
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: docs
