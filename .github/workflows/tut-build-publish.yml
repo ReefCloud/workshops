@@ -74,15 +74,17 @@ jobs:
           sudo sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
           
       # Checkout the gh-pages branch into the docs folder    
-      - name: retrieve previous compiled pages
+      - name: Retrieve previous compiled pages
         uses: actions/checkout@v3
         with:
           path: docs  # Specify the target folder for checkout
           ref: gh-pages  
           fetch-depth: 0
+          
       - name: Restore Timestamps
         uses: chetan/git-restore-mtime-action@v1
-      - name: check that the docs folder is there and populated
+        
+      - name: Check that the docs folder is there and populated
         run: | 
           ls -la
           ls -la docs
