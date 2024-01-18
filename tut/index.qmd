@@ -74,7 +74,23 @@ x <- rep(1:5, times = 2)
 ```
 
 
-## Bash code
+## Bash (shell) code
+
+Bash is a command-line shell that gives you access and control over
+your computer's operating system. Whilst the majority of the tutorials
+in this series are focused on R, there are a couple of tutorials on
+other supporting topics (like version control) that might be
+interfaced via a shell (commands entered on a terminal). Furthermore,
+some software installation and/or configuration instructions might be
+in the form of shell commands.
+
+Such commands are presented as:
+
+```{bash}
+#| label: bash
+#| classes: bash 
+pwd
+```
 
 ## Plain text
 
