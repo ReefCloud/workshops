@@ -2172,3 +2172,376 @@ git init
 4. use the `Browse` button to locate the existing directory
 6. Click the `Create Project` button
 :::
+
+
+# Tracking files
+
+The basic workflow for tracking files is a two step process in which
+one or more files are first added to the **staging area** before
+they are committed to the **local repository**. The staging area
+acts as a little like a snapshot of what the repository will look like
+once the changes have been committed. The staging area also acts like
+a buffer between the files in the workspace (actual local copy of
+files) and the local repository (committed changes).
+
+The reason that this is a two step process is that it allows the user
+to make edits to numerous files, yet block the commits in smaller
+chunks to help isolate changes in case there is a need to roll back to
+previous versions.
+
+## Staging files
+
+When a file is first added to the staging area, a full copy of that
+file is added to the staging area (not just the file diffs as in other
+versioning systems).
+
+::: {.panel-tabset}
+
+### Terminal
+
+To demonstrate lets create a file (a simple text file containing the
+string saying 'File 1') and add it to the staging area.
+
+```{bash}
+#| label: git-add
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+echo 'File 1' > file1
+```
+
+Now lets add this file to the staging area
+
+```{bash}
+#| label: git-add1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git add file1
+```
+
+To see the status of the repository (that is, what files are being
+tracked), we issue the `git status` _command_
+
+```{bash}
+#| label: git-status
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git status
+```
+
+This indicates that there is a single file (`file1`) in the
+staging area
+
+
+### Rstudio
+
+To demonstrate lets create a file (a simple text file containing the
+string saying 'File 1') and add it to the staging area.
+
+1. Click the green "New File" button followed by the "Text File"
+    option (or click the equivalent option from the "File" menu)
+    ![](resources/rstudio_status1.png){width=50%}
+
+2. Type `File 1` in the panel with the flashing cursor. This panel
+   represents the contents of the yet to be named file that we are
+   creating.
+
+    ![](resources/rstudio_status2.png){width=50%}
+
+3. Click the "Save" or "Save all" buttons (or select the equivalent
+   items from the "File" menu) and name the file "file1"
+
+    Switch to the `Git` tab and you should notice a number of items
+    (including the file we just created) in the panel. These are files
+    that git is aware of, but not yet tracking. This panel acts as a
+    status window. The yellow "?" symbol indicates that git considers
+    these files "untracked"
+
+    ![](resources/rstudio_status3.png){width=50%}
+
+4. To stage a file, click on the corresponding checkbox - the status
+   symbol should change to a green "A" (for added)
+   
+   ![](resources/rstudio_status4.png){width=50%}
+   
+:::
+
+Our simple overview schematic represents the staging of file 1.
+
+```{tikz}
+%| label: Fig-advanced2a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\usetikzlibrary{arrows.meta}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_index}{rgb}{0.78,0.86,0.27}
+\definecolor{color_local}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+
+% A template for making the storage symbol
+\newcommand{\state}[3]{
+\draw (#1) node [draw=none,fill=#2,shape=circle,minimum width=2cm] (#3) {
+\begin{tikzpicture}
+\node [draw=white, fill=white,shape=cylinder,shape aspect=1.3 ,shape border rotate=90,minimum height=1.6cm,minimum width=1.5cm] at (0,0) (Cylinder) {};				\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.1cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.5cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.9cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\end{tikzpicture}
+};
+}
+
+% Define dirtree
+\makeatletter
+\newcount\dirtree@lvl
+\newcount\dirtree@plvl
+\newcount\dirtree@clvl
+\def\dirtree@growth{%
+\ifnum\tikznumberofcurrentchild=1\relax
+\global\advance\dirtree@plvl by 1
+\expandafter\xdef\csname dirtree@p@\the\dirtree@plvl\endcsname{\the\dirtree@lvl}
+\fi
+\global\advance\dirtree@lvl by 1\relax
+\dirtree@clvl=\dirtree@lvl
+\advance\dirtree@clvl by -\csname dirtree@p@\the\dirtree@plvl\endcsname
+\pgf@xa=0.25cm\relax
+\pgf@ya=-0.5cm\relax
+\pgf@ya=\dirtree@clvl\pgf@ya
+\pgftransformshift{\pgfqpoint{\the\pgf@xa}{\the\pgf@ya}}%
+\ifnum\tikznumberofcurrentchild=\tikznumberofchildren
+\global\advance\dirtree@plvl by -1
+\fi
+}
+
+\tikzset{
+dirtree/.style={
+growth function=\dirtree@growth,
+every node/.style={anchor=north},
+every child node/.style={anchor=west},
+edge from parent path={(\tikzparentnode\tikzparentanchor) |- (\tikzchildnode\tikzchildanchor)}
+}
+}
+\makeatother
+%end of t
+
+%Define a file 
+\newcommand{\file}[3] {
+\coordinate (#3) at (#1);
+\draw [anchor=top left](#1) rectangle ++(2,-2);
+\draw [fill=color_workspace]($(#1) +(2,0)$) -- ++(0,-0.5) --++(-0.5,0.5) -- cycle; 
+\node [anchor=north west,fileText] at ($(#1) +(0.3,-0.3)$) {#2};
+}
+% end of file definition
+
+\begin{tikzpicture}
+
+\state{0,0}{color_workspace}{W}
+\node[TARGET,fill=white] at ($(W.north) +(0,0.5cm)$) {Workspace};
+\state{6,0}{color_index}{I}
+\node[TARGET,fill=white] at ($(I.north) +(0,0.5cm)$) {Staging Area};
+\state{12,0}{color_local}{L}
+\node[TARGET,fill=white] at ($(L.north) +(0,0.5cm)$) {Local Repository};
+
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_index] ($(W.east) + (0.1cm,0)$) -- ($(I.west) + (-0.1cm,0)$) node[anchor=center,pos=0.5, text=black,align=center,CODE] {add};
+
+\node [anchor=north west] at ($(W) +(-1cm,-1cm)$)  (W0) {
+\begin{tikzpicture}[dirtree,TREE]
+\node {} 
+child {node {file 1}};
+\end{tikzpicture}
+};
+%\draw[decorate,decoration={brace,amplitude=5pt},very thick] ($(W0.north) + (-1cm,-1cm)$)  -- ($(W0.south) + (-1cm,0.2cm)$);
+
+\node [anchor=north west] at ($(I) +(-1cm,-1cm)$)  (W0) {
+\begin{tikzpicture}[dirtree,TREE,text=gray,color=gray]
+\node {} 
+child {node {file 1}};
+\end{tikzpicture}
+};
+
+\end{tikzpicture}			   
+```
+
+A schematic of the internal working of git shows in
+`.git/objects` a **blob** has been created. This is a
+compressed version of `file1`. Its filename is a 40 digit
+**SHA-1 checksum** has representing the contents of the
+`file1`. To re-iterate, the blob name is a SHA-1 hash of
+the file contents (actually, the first two digits form a folder and
+the remaining 38 form the filename).
+
+We can look at the contents of this _blob_ using the `git
+cat-file` _command_. This command outputs the contents of a
+compressed _object_ (_blob_, _tree_, _commit_)
+from either the objects name (or unique fraction thereof) or its
+_tag_ (we will discuss tags later). 
+
+```{bash}
+#| label: git-blob1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git cat-file blob 50fcd
+```
+
+The add (staging) process also created a `index` file. This file
+simply points to the _blob_ that is part of the snapshot. The git
+internals schematic illustrates the internal changes in response to
+staging a file.
+
+```{cat}
+#| label: Fig-advanced2
+#| echo: true
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig-advanced2.tikz"
+   
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\usetikzlibrary{arrows.meta}
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_tree}{HTML}{9ACD32} %\definecolor{color_tree}{rgb}{0.78,0.86,0.27}
+\definecolor{color_commit}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+\definecolor{color_index}{HTML}{E0FFFF} %\definecolor{color_index}{rgb}{1,1,1}
+\definecolor{color_file}{rgb}{1,1,1}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{Inconsolata}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{Inconsolata}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{Inconsolata}}] 
+
+%Define a file 
+\newcommand{\file}[4] {
+\def\corner{0.15in};
+\def\cornerradius{0.02in};
+\def\lwidth{0.02in};
+\def\h{0.5in};
+\def\w{0.85in};
+\def\nline{0};
+\def\iconmargin{0.1in};
+\def\topmargin{0.3in};
+\node at (#1) {\begin{tikzpicture}
+\coordinate (nw) at ($(-0.05in*1,-0.15in*1)$);
+\coordinate (#3) at (#1); 
+\coordinate (ne0) at ($(nw) + (\w, 0)$);
+\coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+\coordinate (ne2) at ($(ne0) - (0, \corner)$);
+\coordinate (se) at ($(ne0) + (0, -\h)$); 
+\filldraw [-, line width = \lwidth, fill=#4] (nw) -- (ne1) -- (ne2)
+[rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+\draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+\node [anchor=north west,TREE] at (nw) {#2};
+\foreach \k in {0,...,\nline}
+{
+\draw [-, line width = \lwidth, line cap=round] 
+($(nw|-se) + (\iconmargin,\iconmargin) + (0,{(\k-1)/(\nline-1)*(\h - \iconmargin - \topmargin)})$)
+-- ++ ($(\w,0) - 2*(\iconmargin,0)$);
+}
+\end{tikzpicture}};
+}
+% end of file definition
+
+\begin{tikzpicture}
+\coordinate (G_ul) at (0,0);
+\coordinate (G_ll) at ($(G_ul) +(0,-10)$);
+\coordinate (G_lr) at ($(G_ll) +(4,0)$);
+\coordinate (G_ur) at ($(G_ul) +(4,0)$);
+
+\node[TREE,anchor=west] at ($(G_ul) +(0,-0.5)$) (git) {.git/};
+\file{$(git.west) +(1.5,-2)$}{HEAD}{HEAD}{color_head}
+\file{$(HEAD) +(0,-2)$}{index}{index}{color_index}
+\draw[] (G_ul) -- (G_ll) -- (G_lr) -- (G_ur) -- cycle;
+
+%refs
+\node[TREE,anchor=west] at ($(G_ul) +(-5,-0.5)$) (git_ref) {.git/refs/};
+\draw[] ($(G_ul) +(-5,0)$) -- ++(0,-10) -- ++(4.9,0) -- ++(0,10) -- cycle;
+
+%objects
+\node[TREE,anchor=west] at ($(G_ul) +(-17,-0.5)$) (git_object) {.git/objects/};
+\file{$(git_object.west) +(1.5,-2)$}{\textcolor{black}{hashblob}}{blob1}{color_workspace}
+\draw[] ($(G_ul) +(-17,0)$) -- ++(0,-10) -- ++(11.9,0) -- ++(0,10) -- cycle;
+
+%trees
+
+%commits
+
+%files
+\node[TREE,anchor=west] at ($(G_ul) +(-21,-0.5)$) (root) {/};
+\file{$(root.west) +(1.7,-2)$}{\textcolor{black}{file1}}{file1}{color_file}
+\draw [very thick] (root) -- (root |- file1) -- ++(0.2,0);
+\begin{pgfonlayer}{background}
+\draw[fill=color_workspace!20] ($(G_ul) +(-21,0)$) -- ++(0,-10) -- ++(3.9,0) -- ++(0,10) -- cycle;
+\end{pgfonlayer}
+
+%arrows
+\draw[->,very thick,dashed] ($(file1) +(1.2,0)$) -- ($(blob1) +(-1.1,0)$);
+\draw[->,very thick,solid] ($(index) +(-1,0)$) -- ($(blob1) +(1.2,0)$);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+hash = system('cd ~/tmp/Repo1; git ls-files --stage', intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_blob = strtrim(hash$V2,5)
+
+system(paste0("sed -i 's/hashblob/",hash_blob,"/g' resources/Fig-advanced2.tikz"))
+system("xelatex -output-directory=resources resources/Fig-advanced2.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig-advanced2.pdf resources/Fig-advanced2.png")
+```
+
+![](resources/Fig-advanced2.png)
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the git
+```{bash}
+#| label: gitDraw2
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit2.png 
+```
+
+![](10_git_files/figure-html/drawGit2.png)
+
+:::
