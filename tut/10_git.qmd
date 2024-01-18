@@ -375,6 +375,12 @@ convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig4-1.p
 \end{tikzpicture}
 ```
 
+```{bash}
+#| label: Fig5-conv
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig5-1.pdf 10_git_files/figure-html/Fig5-1.png   
+```
+
 <table class= "table-sm table-borderless" style='border-spacing:20px;'>
 <tr>
 <td>
