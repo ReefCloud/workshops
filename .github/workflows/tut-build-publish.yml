@@ -75,12 +75,12 @@ jobs:
       - name: retrieve previous compiled pages
         uses: actions/checkout@v3
         with:
-          path: doc  # Specify the target folder for checkout
+          path: docs  # Specify the target folder for checkout
           ref: gh-pages  
       - name: check that the docs folder is there and populated
         run: | 
           ls -la
-          ls -la doc
+          ls -la docs
           ls -la tut
           
       # render tutorials
