@@ -55,8 +55,8 @@
 }
 
 \newcommand{\master}[1] {
-%\node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (master) {main};
-\node [#1,rectangle, refText] (master) {main};
+\node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (master) {main};
+%% \node [#1,rectangle, refText] (master) {main};
 }
 \newcommand{\rmaster}[1] {
 \node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (rmaster) {origin/main};
