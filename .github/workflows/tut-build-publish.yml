@@ -80,7 +80,7 @@ jobs:
       - name: check that the docs folder is there and populated
         run: | 
           ls -la
-          ls -la docs
+          ls -la doc
       # render tutorials
       - name: Make tutorials
         #run: make -i tut
