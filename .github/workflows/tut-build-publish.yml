@@ -85,7 +85,7 @@ jobs:
           
       - name: Diffs
         run: |
-          git diff --name-only HEAD HEAD~1 | touch
+          git diff --name-only HEAD HEAD~1 | xards touch
         
       - name: Check that the docs folder is there and populated
         run: | 
