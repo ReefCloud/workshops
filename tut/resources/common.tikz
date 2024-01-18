@@ -4,6 +4,7 @@
 \tikzstyle{commentText} = [font={\fontspec[Scale=1.0]{Inconsolata}}]
 %\tikzstyle{refText} = [font={\fontspec[Scale=1.5]{Inconsolata}}]
 \tikzstyle{refText} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
+\tikzstyle{Title} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}]
 
 \definecolor{color_branch}{rgb}{1,0.8,0.4}
 \definecolor{color_head}{HTML}{6495ED} %
