@@ -633,3 +633,68 @@ Commiting generates a 'snapshot' of the file system.
   </td>
 </tr>
 </table>
+
+
+# Context
+
+
+Git is a distributed versioning system. This means that the complete
+contents and history of a repository (in simplistic terms a repository
+is a collection of files and associated metadata) can be completely
+duplicated across multiple locations.
+
+No doubt you have previously been working on a file (could be a
+document, spreadsheet, script or any other type of file) and got to a
+point where you have thought that you are starting to make edits that
+substantially change the file and therefore have considered saving the
+new file with a new name that indicates that it is a new version.
+
+```{tikz}
+%| label: Fig10
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}]
+\tikzstyle{fileText} = [font={\fontspec[Scale=1]{InconsolataSemiCondensed-Regular}}] 
+
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_index}{rgb}{0.78,0.86,0.27}
+\definecolor{color_local}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{rgb}{0.26,0.65,0.91}
+
+\newcommand{\file}[3] {
+\coordinate (#3) at (#1);
+\draw [anchor=top left](#1) rectangle ++(1.5,-2);
+\draw [fill=color_workspace]($(#1) +(1.5,0)$) -- ++(0,-0.5) --++(-0.5,0.5) -- cycle; 
+\node [anchor=north west,fileText] at ($(#1) +(0,-0.5)$) {#2};
+}
+
+\begin{tikzpicture}
+
+\file{0,0}{\begin{minipage}{1.3cm}\textcolor{red}{- item 1}\\\textcolor{red}{- item 2}\end{minipage}}{F1}
+\node [fileText] at ($(F1) + (0.75,0.3)$) {Version 1};
+\node [fileText] at ($(F1) + (0.75,-2.3)$) {todo.txt};
+
+\file{2,0}{\begin{minipage}{1.3cm}- item 1\\- item 2\\\textcolor{red}{- item 3}\end{minipage}}{F2}
+\node [fileText] at ($(F2) + (0.75,0.3)$) {Version 2};
+\node [fileText] at ($(F2) + (0.75,-2.3)$) {todo2.txt};
+
+\file{4,0}{\begin{minipage}{1.3cm}- item 1\\- item 2\\- item 3\\\textcolor{red}{- item 4}\end{minipage}}{F3}
+\node [fileText] at ($(F3) + (0.75,0.3)$) {Version 3};
+\node [fileText] at ($(F3) + (0.75,-2.3)$) {todo3.txt};
+
+\file{6,0}{\begin{minipage}{1.3cm}- item 1\\- item 2\\\textcolor{blue}{- item 4}\end{minipage}}{F4}
+\node [fileText] at ($(F4) + (0.75,0.3)$) {Version 4};
+\node [fileText] at ($(F4) + (0.75,-2.3)$) {todo4.txt};
+
+\node [fileText] at ($(F4) +(3.5,-1)$) {\begin{minipage}{2.5cm}An example of a poor, adhoc versioning system.\end{minipage}};)
+
+\end{tikzpicture}
+```
