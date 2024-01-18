@@ -72,8 +72,9 @@ jobs:
           sudo sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
       # render tutorials
       - name: Make tutorials
-        run: make -i tut
-
+        #run: make -i tut
+        run: echo "hello"
+        
       # Deploy site to gh-pages branch
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.4
