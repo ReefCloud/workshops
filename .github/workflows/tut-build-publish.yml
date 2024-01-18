@@ -77,6 +77,8 @@ jobs:
         with:
           path: docs  # Specify the target folder for checkout
           ref: gh-pages  
+      - name: Restore Timestamps
+        uses: chetan/git-restore-mtime-action@v1
       - name: check that the docs folder is there and populated
         run: | 
           ls -la
