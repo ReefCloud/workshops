@@ -7444,23 +7444,23 @@ Q10   E2      Q10  full       15.90</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb346"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb346-1"><a href="#cb346-1"></a><span class="fu">rep</span>(<span class="fu">runif</span>(<span class="dv">1</span>), <span class="at">times =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.03305032 0.03305032 0.03305032 0.03305032 0.03305032</code></pre>
+<pre><code>[1] 0.08317098 0.08317098 0.08317098 0.08317098 0.08317098</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb348"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb348-1"><a href="#cb348-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.86546749 0.08115979 0.98305946 0.77863367 0.63070696</code></pre>
+<pre><code>[1] 0.3576346 0.3477648 0.4903713 0.1380111 0.8532910</code></pre>
 </div>
 </div>
 <p>When the function being run within <code>runif()</code> itself produces a vector of length &gt; 1, the <code>runif()</code> function combines each of the vectors together as separate columns in a matrix:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb350"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb350-1"><a href="#cb350-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          [,1]       [,2]      [,3]      [,4]       [,5]
-[1,] 0.1148367 0.12293031 0.1161434 0.6574451 0.31967283
-[2,] 0.1267861 0.05519859 0.7005858 0.9382271 0.95721033
-[3,] 0.6971226 0.50809210 0.4268676 0.7386643 0.02763507
-[4,] 0.8105056 0.35545079 0.3803041 0.9553176 0.20273749
-[5,] 0.3089950 0.49562762 0.6449096 0.1083068 0.33470447</code></pre>
+<pre><code>          [,1]      [,2]      [,3]      [,4]      [,5]
+[1,] 0.1178926 0.1849809 0.9273782 0.2724162 0.1873532
+[2,] 0.3570860 0.8315519 0.3337415 0.6574619 0.8308568
+[3,] 0.9382650 0.8905430 0.2040232 0.1066007 0.8535959
+[4,] 0.4545296 0.6091815 0.5026904 0.0668626 0.9322971
+[5,] 0.1909246 0.6834099 0.2525010 0.3080813 0.9968649</code></pre>
 </div>
 </div>
 <section id="apply-functions-along-matrix-margins" class="level3" data-number="5.7.1">
