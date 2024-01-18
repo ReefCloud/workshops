@@ -70,17 +70,23 @@ jobs:
       - name: Change ImageMagick policy to allow pdf->png conversion.
         run: |
           sudo sed -i 's/^.*policy.*coder.*none.*PDF.*//' /etc/ImageMagick-6/policy.xml
+          
+      # Checkout the gh-pages branch into the docs folder    
       - name: retrieve previous compiled pages
         uses: actions/checkout@v3
         with:
           path: doc  # Specify the target folder for checkout
           ref: gh-pages  
+      -name: check that the docs folder is there and populated
+        run: | 
+          ls -la
+          ls -la docs
       # render tutorials
       - name: Make tutorials
         #run: make -i tut
-        run: |
-          echo "library(quarto); quarto_render(\"tut/index.qmd\")" | R --no-save --no-restore;
-          echo "library(quarto); quarto_render(\"tut/10_git.qmd\")" | R --no-save --no-restore;
+        #run: |
+        #  echo "library(quarto); quarto_render(\"tut/index.qmd\")" | R --no-save --no-restore;
+        #  echo "library(quarto); quarto_render(\"tut/10_git.qmd\")" | R --no-save --no-restore;
 
         
       # Deploy site to gh-pages branch
