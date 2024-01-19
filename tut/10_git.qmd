@@ -5207,3 +5207,1471 @@ git reflog
 
 
 ::::
+
+2. use the `git checkout <name>` _command_ to move the `HEAD` to
+   the tip of this new branch (`Feature`).
+
+:::: {.indented}
+
+::: {.panel-tabset}
+
+## Terminal
+```{bash}
+#| label: git_branch2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git checkout Feature
+```
+
+## Rstudio
+
+To checkout a branch in Rstudio, click on the "Switch branch" button
+and select the branch name (in this case `Feature`) from the dialog box.
+
+![](resources/rstudio_gitbranch3.png)
+
+If we now examine the "History" tab of the "Review Changes" window, we
+will see that the most recent commit has both `main` and `Feature`
+branch markers. However, the main connection is with the `Feature`
+branch indicating that the `HEAD` is currently on the `Feature`
+branch.
+
+![](resources/rstudio_gitbranch2.png)
+
+:::
+
+```{cat}
+#| label: Fig7b
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7b.tikz"
+    
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+    \usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+    
+\input{resources/common1.tikz}
+
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+    
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+    
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_commit}{commitshash3}{commitscomment3}
+\master{below = 1cm of commitshash3} 
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+\branch{below = 0.1cm of master}{Feature} 
+\HEAD{below = 0.1cm of Feature} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+    
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+
+system(paste0("sed -i 's/commitshash1/", commits$hash[1], "/g' resources/Fig7b.tikz"))
+system(paste0("sed -i 's/commitscomment1/", commits$comment[1], "/g' resources/Fig7b.tikz"))
+system(paste0("sed -i 's/commitshash2/", commits$hash[2], "/g' resources/Fig7b.tikz"))
+system(paste0("sed -i 's/commitscomment2/", commits$comment[2], "/g' resources/Fig7b.tikz"))
+system(paste0("sed -i 's/commitshash3/", commits$hash[3], "/g' resources/Fig7b.tikz"))
+system(paste0("sed -i 's/commitscomment3/", commits$comment[3], "/g' resources/Fig7b.tikz"))
+system("xelatex -output-directory=resources resources/Fig7b.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7b.pdf resources/Fig7b.png")
+```
+
+![](resources/Fig7b.png)
+
+The only noticable change is that we are now considered to be on the
+"Feature" branch (notice that HEAD is pointing to Feature). Any new
+commits will be applied to this new branch.
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch7b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline
+```
+```{r, replace=TRUE}
+#| label: git-branch7b2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+git reflog
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7b
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7b.png 
+```
+
+![](10_git_files/figure-html/drawGit7b.png){width=100%}
+
+:::
+
+::::
+
+
+Now if we make and commit a change (such as an edit to `file1` and an
+addition of `file3` within `dir1`), we will be operating on a separate
+_branch_.
+
+::: {.panel-tabset}
+
+## Terminal
+```{bash}
+#| label: git_branch3
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+echo 'b' >> file1
+echo 'File 3' > dir1/file3
+git add .
+git commit -m 'New feature'
+```
+
+## Rstudio
+
+1. modify `file1` by adding a carriage return followed by some
+   additional text (e.g. a `b`) like in the figure below
+ 
+   ![](resources/rstudio_gitbranch4.png)
+   
+   
+2. navigate to this new directory (`dir1`)
+3. click the "Create a new blank file in current directory" button and
+   select "Text file"
+4. enter a new filename (`file3`) into the popup box
+5. enter some text into this file (such as `File 3`)
+
+   ![](resources/rstudio_gitbranch5.png)
+6. stage (add) the two modified files using their respective
+   checkboxes
+7. click the "Commit" button, provide a commit message (sch as "New
+   feature")
+8. close the popup
+9. goto the "History" tab
+
+   ![](resources/rstudio_gitbranch6.png)
+
+Notice that we have advanced one commit on this new branch.
+:::
+ 
+ 
+
+```{cat}
+#| label: Fig7c
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7c.tikz"
+
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+    \usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+    
+\input{resources/common1.tikz}
+
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+    
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+\master{below = 1cm of commitshash3} 
+    
+\commit{right = 1.5cm of commitshash3}{commitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash5.west);
+\branch{below = 1cm of commitshash5}{Feature} 
+\HEAD{below = 0.1cm of Feature} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig7c.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig7c.tikz")) 
+  }
+
+system("xelatex -output-directory=resources resources/Fig7c.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7c.pdf resources/Fig7c.png")
+```
+
+![](resources/Fig7c.png)
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch7c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline
+```
+```{r, replace=TRUE}
+#| label: git-branch7c2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+git reflog
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7c
+#| engine: bash
+#| cache: false
+#| echo: false
+#| eval: true
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7c.png  
+```
+
+![](10_git_files/figure-html/drawGit7c.png){width=100%}
+
+:::
+
+So we can now continue to develop the `Feature` _branch_. But what if
+we now decided that we wanted to make a change to the `main`
+_branch_ (perhaps addressing a bug or issue).
+
+1. switch over to the `main` branch
+
+:::: {.indented}
+
+::: {.panel-tabset}
+
+## Terminal
+
+```{bash}
+#| label: git_branch4
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git checkout main
+```
+
+## Rstudio
+
+Use the "Switch branch" selector to checkout the `main` branch
+
+:::
+
+```{cat}
+#| label: Fig7d
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7d.tikz"
+
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+    \usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_commit}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+\master{below = 1cm of commitshash3} 
+\HEAD{below = 0.1cm of master} 
+
+\commit{right = 1.5cm of commitshash3}{commitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash5.west);
+\branch{below = 1cm of commitshash5}{Feature} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig7d.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig7d.tikz")) 
+}
+system("xelatex -output-directory=resources resources/Fig7d.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7d.pdf resources/Fig7d.png")
+```
+
+![](resources/Fig7d.png)
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch7d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-branch7d2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+```{r, replace=TRUE}
+#| label: git-branch7d3
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7d
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7d.png  
+```
+
+![](10_git_files/figure-html/drawGit7d.png){width=100%}
+
+:::
+::::
+
+
+2. make the necessary changes to the files and commit them on the
+  `main` _branch_
+
+:::: {.indented}
+
+::: {.panel-tabset}
+
+## Terminal
+```{bash}
+#| label: git_branch5
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+echo ' another bug fix' >> dir1/file2
+git add .
+git commit -m 'Bug fix in file1'
+```
+
+## Rstudio
+
+
+1. make the following edits to `dir1/file2`
+
+   ![](resources/rstudio_gitbranch7b.png)
+
+2. stage and commit the changes
+
+:::
+
+```{cat}
+#| label: Fig7e
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7e.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+    \usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+    
+\input{resources/common1.tikz}
+
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+    
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+    
+\commit{right = 1.5cm of commitshash3}{commitshash7}{color_commit}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+    
+\commit{above = 3cm of commitshash7}{commitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash5.south west);
+\branch{below = 1cm of commitshash5}{Feature} 
+
+\master{below = 1cm of commitshash7} 
+\HEAD{below = 0.1cm of master} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig7e.tikz")) 
+  system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig7e.tikz")) 
+}
+system("xelatex -output-directory=resources resources/Fig7e.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7e.pdf resources/Fig7e.png")
+```
+
+![](resources/Fig7e.png)
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch7e
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-branch7e2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+git reflog
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7e
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7e.png  
+```
+
+![](10_git_files/figure-html/drawGit7e.png){width=100%}
+
+:::
+::::
+ 
+ 
+
+We could simultaneously make additional modifications to the `Feature`
+_branch_ just by simply checking out the `Feature` _branch_ and
+commiting those modifications. To illustrate, we will make another
+change to the `dir1/file3` file.
+
+
+::: {.callout-info collapse="false"}
+For this demonstration we are deliberately avoiding making edits to
+either `file1` or `dir1/file2`. This is because if we did, there is a
+chance that we might introduce conflicting edits of the same lines of
+files across the two branches (`main` and `Feature`).
+
+In a later section, we WILL deliberately introduce a conflict so that
+we can see how to resolve conflicts.
+:::
+
+::: {.panel-tabset}
+
+## Terminal
+```{bash}
+#| label: git_branch6
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git checkout Feature
+echo ' a modification' >> dir1/file3
+git add .
+git commit -m 'Feature complete'
+```
+
+## Rstudio
+
+1. checkout the `Feature` branch using the "Switch branch" selector
+2. modify `dir1/file3` by adding a carriage return followed by some
+   additional text (e.g. ` a modification`) like in the figure below
+
+   ![](resources/rstudio_gitbranch7c.png)
+3. stage (add) this file
+4. commit the change with the message of `Feature complete`
+
+:::
+
+```{cat}
+#| label: Fig7f
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7f.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+    \usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+\commit{right = 1.5cm of commitshash3}{commitshash7}{color_commit}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+
+\commit{above = 3cm of commitshash7}{commitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash5.south west);
+
+\master{below = 1cm of commitshash7} 
+
+\commit{right = 1.5cm of commitshash5}{commitshash9}{color_commit}{commitshash9}{commitscomment9}
+\draw [<-,line width=3pt,draw=black!60] (commitshash5.east) -- (commitshash9.west);
+
+\branch{below = 1cm of commitshash9}{Feature} 
+\HEAD{below = 0.1cm of Feature} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig7f.tikz")) 
+  system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig7f.tikz")) 
+}
+
+system("xelatex -output-directory=resources resources/Fig7f.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7f.pdf resources/Fig7f.png")
+```
+
+![](resources/Fig7f.png)
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch7f
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+git reflog
+```
+```{r, replace=TRUE}
+#| label: git-branch7f2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7f
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7f.png  
+```
+
+![](10_git_files/figure-html/drawGit7f.png){width=100%}
+
+:::
+
+
+## Merge branches
+
+Finally, (if we are satisfied that `Feature` is stable and complete),
+we might like to introduce these changes into the `main` _branch_ so
+that they become a part of the main project base. This operation is
+called a **merge** and is completed with the `git merge <branch>`
+_command_ where `<branch>` is the name of the _branch_ you want to
+merge the current branch (that pointed to by `HEAD`) with. Typically
+we want to _merge_ the _non-main branch_ with the `main` _branch_.
+Therefore we must be _checkout_ the `main` _branch_ before _merging_.
+
+::: {.panel-tabset}
+
+If we add the _switch_ `--no-edit`, then rather than supply a commit
+message (or be dropped into an editor to make a commit message), the
+default merge message will be applied to the commit.
+
+## Terminal
+```{bash}
+#| label: git_branch7a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| error: true
+#| message: true
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git checkout main
+```
+```{bash}
+#| label: git_branch7b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| error: true
+#| message: true
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git merge Feature --no-edit
+```
+
+## Rstudio
+
+1. checkout the `main` branch using the "Switch branch" selector
+2. merging is not directly supported in Rstudio, so go to the terminal
+   and enter the `git merge` command as shown below
+   
+   ![](resources/rstudio_gitmerge1.png)
+   
+3. if you now review the "History" tab of the "Review Changes" window,
+   you will see the confluence of the two branches reflected in the
+   commit graphic
+   
+   ![](resources/rstudio_gitmerge2.png)
+:::
+
+```{cat}
+#| label: Fig7g
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7g.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash7}{color_inactive}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+
+\commit{above = 3cm of commitshash7}{commitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash5.south west);
+
+\commit{right = 1.5cm of commitshash5}{commitshash9}{color_inactive}{commitshash9}{commitscomment9}
+\draw [<-,line width=3pt,draw=black!60] (commitshash5.east) -- (commitshash9.west);
+
+\commit{right = 5cm of commitshash7}{commitshash11}{color_commit}{commitshash11}{commitscomment11}
+\draw [<-,line width=3pt,draw=black!60] (commitshash9.south east) -- (commitshash11.north west);
+\draw [<-,line width=3pt,draw=black!60] (commitshash7.east) -- (commitshash11.west);
+
+\master{below = 1cm of commitshash11} 
+\branch{below = 1cm of commitshash9}{Feature} 
+\HEAD{below = 0.1cm of master} 
+
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig7g.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig7g.tikz")) 
+}
+system("xelatex -output-directory=resources resources/Fig7g.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7g.pdf resources/Fig7g.png")
+```
+
+![](resources/Fig7g.png)
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch7g
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-branch7g2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+git reflog
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7g
+#| engine: bash
+#| echo: false
+#| eval: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7g.png  
+  ```
+
+![](10_git_files/figure-html/drawGit7g.png){width=100%}
+
+:::
+
+
+::: {.callout-warning collapse="false"}
+
+If, when issuing a `git merge` command, you get a conflict message,
+please refer to the section on resolving conflicts below.
+
+:::
+
+
+## Delete a branch
+
+Once the purpose of the branch has been fulfilled (for example to
+develop a new feature) and the branch has been merged back into the
+main branch, you might consider deleting the branch so as to simplify
+the commit history.
+
+Importantly, this action should only ever be performed after the
+branch has been successfully merged into the main branch (in fact `git
+will not allow you to delete an un-merged branch unless you really
+fight for it).
+
+**Note also, this can only be performed on a local repository.**
+
+This procedure is only available via the terminal.
+
+<!-- The following chunk is used to get the hash of the Feature branch head so that later on in the doc, I can restore the branch.  Since the next chunk will delete it. -->
+```{r}
+#| label: bash8h
+#| echo: false
+#| eval: true
+#| cache: false
+hash = scan('~/tmp/Repo1/.git/refs/heads/Feature', what='character')
+hash_commit = strtrim(hash, width=5)
+knit_engines$set(bash1=function(options) {
+  engine=options$engine
+  options$code = gsub('#',hash_commit,options$code)
+  code = paste("bash -c",shQuote(paste(options$code, collapse="\n")))
+  code = paste(options$engine_opts,code)
+  out = system(code,intern=TRUE)
+  engine_output(options,options$code,out) 
+})
+```
+
+```{bash}
+#| label: git_branch8g
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git branch -d Feature
+```
+
+```{cat}
+#| label: Fig7h
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7h.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash7}{color_inactive}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+
+\commit{above = 3cm of commitshash7}{commitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash5.south west);
+
+\commit{right = 1.5cm of commitshash5}{commitshash9}{color_inactive}{commitshash9}{commitscomment9}
+\draw [<-,line width=3pt,draw=black!60] (commitshash5.east) -- (commitshash9.west);
+
+\commit{right = 5cm of commitshash7}{commitshash11}{color_commit}{commitshash11}{commitscomment11}
+\draw [<-,line width=3pt,draw=black!60] (commitshash9.south east) -- (commitshash11.north west);
+\draw [<-,line width=3pt,draw=black!60] (commitshash7.east) -- (commitshash11.west);
+
+\master{below = 1cm of commitshash11} 
+\HEAD{below = 0.1cm of master} 
+
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig7h.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig7h.tikz")) 
+}
+system("xelatex -output-directory=resources resources/Fig7h.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7h.pdf resources/Fig7h.png")
+```
+
+![](resources/Fig7h.png)
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch7h
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-branch7h2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+git reflog
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7h
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7h.png 
+```
+
+![](10_git_files/figure-html/drawGit7h.png){width=100%}
+
+:::
+
+In order to facilitate the rest of the tutorial, I am going to
+**reset** the repository to a commit that precedes the merge. The
+process of resetting will be covered later on in this tutorial.
+
+<!-- The hash variable needed for the code below comes from above bash8h -->
+
+```{bash, replace=TRUE}
+#| label: git_branch8h
+#| eval: false
+#| echo: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git branch -D Feature
+git branch Feature #
+```
+
+```{bash, replace=TRUE}
+#| label: git_branch8h1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reset --hard HEAD~1
+git clean -qfdx
+git reflog expire --expire-unreachable=now --all
+git gc --prune=now
+```
+
+```{cat}
+#| label: Fig7i
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7i.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash7}{color_inactive}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+
+\commit{above = 3cm of commitshash7}{commitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash5.south west);
+
+\commit{right = 1.5cm of commitshash5}{commitshash9}{color_inactive}{commitshash9}{commitscomment9}
+\draw [<-,line width=3pt,draw=black!60] (commitshash5.east) -- (commitshash9.west);
+
+\master{below = 1cm of commitshash7} 
+\HEAD{below = 0.1cm of master} 
+
+\end{tikzpicture}
+
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig7i.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig7i.tikz")) 
+}
+
+system("xelatex -output-directory=resources resources/Fig7i.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7i.pdf resources/Fig7i.png")
+```
+
+![](resources/Fig7i.png)
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch9h3
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+git log --graph --decorate --oneline --all
+git reflog
+```
+:::
+
+## Rebasing
+
+Branches are great for working on new features without disturbing a
+stable codebase. However, the main branch may have changed or
+progressed since the branch started. As a result, it may be building
+upon old code that may either no longer work or no longer be
+appropriate.
+
+Whilst you could attempt to manually apply the newer main code changes
+into your branch, this is likely to be tedious and error prone.
+**Rebasing** is the process of changing the root (base) of the branch
+from one commit to another. In this way, the base of the branch can be
+moved to the current HEAD of the main branch, thereby absorbing all
+the updates from the main branch into the feature branch.
+
+This section builds on the repository created up to this point in the
+tutorial. To remind you, the repository currently looks like:
+
+::: {.callout-note collapse="true"}
+## Commands to create the repository
+```{bash}
+#| label: git_status8
+#| classes: bash
+#| engine: bash
+#| echo: true
+#| eval: true
+rm -rf ~/tmp/Repo1
+mkdir ~/tmp/Repo1
+cd ~/tmp/Repo1
+git init 
+echo 'File 1' > file1
+git add file1
+git commit -m 'Initial repo and added file1'
+echo '---------------' >> file1
+mkdir dir1
+echo '* Notes' > dir1/file2
+git add file1 dir1/file2
+git commit -m 'Modified file1 and added file2 (in dir1)'
+echo '---' >> dir1/file2
+echo 'temp' > dir1/f.tmp
+echo '*.tmp' > .gitignore
+git add .
+git commit -m 'Modified file2, added .gitignore'
+git tag V.1
+git branch Feature
+git checkout Feature
+echo 'b' >> file1
+echo 'File 3' > dir1/file3
+git add .
+git commit -m 'New feature'
+git checkout main
+echo ' another bug fix' >> dir1/file2
+git add .
+git commit -m 'Bug fix in file1'
+git checkout Feature
+echo ' a modification' >> dir1/file3
+git add .
+git commit -m 'Feature complete'
+```
+
+:::
+
+
+![](resources/Fig7i.png)
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rebase1a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+```{r, replace=TRUE}
+#| label: git-rebase1b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-rebase1c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+:::
+
+
+::: {.panel-tabset}
+## Terminal
+```{bash}
+#| label: git-rebase3a
+#| echo: !expr -1
+#| eval: true
+#| error: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git checkout Feature
+```
+
+```{bash}
+#| label: git-rebase3b
+#| echo: !expr -1
+#| eval: true
+#| error: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git rebase main
+```
+
+## Rstudio
+
+Rebasing is not directly supported by Rstudio. 
+
+1. checkout the `Feature` branch using the "Switch branch" selector
+2. in the terminal, type `git rebase main` to rebase the `Feature`
+   branch on the end of the `main` branch.
+
+3. if you now review the "History" tab of the "Review Changes" window,
+   you will now see that the history is linear and the `Feature`
+   branch stems from the end of the `main` branch. That is, we have
+   moved the base of the `Feature` branch.
+   
+   ![](resources/rstudio_gitrebase1.png)
+:::
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rebase4a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+```{r, replace=TRUE}
+#| label: git-rebase4b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-rebase4c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+:::
+
+```{cat}
+#| label: Fig8a
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig8a.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+%Bug fix
+\commit{right = 1.5cm of commitshash3}{commitshash7}{color_inactive}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+
+%New feature
+\commit{right = 1.5cm of commitshash7}{commitshash13}{color_inactive}{commitshash13}{commitscomment13}
+\draw [<-,line width=3pt,draw=black!60] (commitshash7.east) -- (commitshash13.west);
+
+%Feature complete
+\commit{right = 1.5cm of commitshash13}{commitshash14}{color_commit}{commitshash14}{commitscomment14}
+\draw [<-,line width=3pt,draw=black!60] (commitshash13.east) -- (commitshash14.west);
+
+\master{below = 1cm of commitshash7} 
+\branch{below = 1cm of commitshash14}{Feature} 
+\HEAD{below = 0.1cm of Feature} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig8a.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig8a.tikz")) 
+  }
+
+system("xelatex -output-directory=resources resources/Fig8a.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig8a.pdf resources/Fig8a.png")
+```
+
+![](resources/Fig8a.png)
+
+
+If the rebased commits were previously on a remote repository
+(hopefully you checked to make sure noone was relying on any of the
+commits that have been squashed), then it will be necessary to force a
+push on this repository.
