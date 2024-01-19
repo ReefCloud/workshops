@@ -2647,7 +2647,7 @@ repository:
 3. click the "Commit" button and you will be presented with a popup
    message.
 
-   ![](resources/rstudio_commit2.png){width=80%}
+   ![](resources/rstudio_commit2.png)
    
    This message provides feedback to confirm that your commit was
    successful.  
@@ -2782,3 +2782,17 @@ child { node {file 1}};
 ```
 
 
+
+```{bash}
+#| label: git-junk
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+ls -la
+cd .git
+ls -la
+tree
+```
