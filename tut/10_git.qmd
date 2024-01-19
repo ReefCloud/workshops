@@ -4227,3 +4227,611 @@ git log --oneline
 ```
 
 :::
+
+# Inspecting a repository
+
+For this section, will will be working on the repository built up in
+the previous section. If you did not follow along with the previous
+section, I suggest that you expand the following callout and run the
+provided code in a terminal.
+
+If you already have the repository, you can ignore the commands to
+create the repository.
+
+
+::: {.callout-note collapse="true"}
+## Commands to create the the repository
+
+Issue the following commands in your terminal
+```{bash}
+#| label: git_status1
+#| classes: bash
+#| engine: bash
+#| echo: true
+#| eval: false
+rm -rf ~/tmp/Repo1
+mkdir ~/tmp/Repo1
+cd ~/tmp/Repo1
+git init 
+echo 'File 1' > file1
+git add file1
+git commit -m 'Initial repo and added file1'
+echo '---------------' >> file1
+mkdir dir1
+echo '* Notes' > dir1/file2
+git add file1 dir1/file2
+git commit -m 'Modified file1 and added file2 (in dir1)'
+echo '---' >> dir1/file2
+echo 'temp' > dir1/f.tmp
+echo '*.tmp' > .gitignore
+git add .
+git commit -m 'Modified file2, added .gitignore'
+```
+
+```{bash}
+#| label: git-status2a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+:::
+
+## Status of workspace and staging area
+
+Recall that within the .git environment, files can be in one of four
+states:
+
+- untracked
+- modified
+- staged
+- committed
+
+To inspect the status of files in your workspace, you can issue the
+`git status` <i>command</i> (as we have done on numerous occasions
+above). This command displays the current state of the workspace and
+staging area.
+
+::: {.panel-tabset}
+
+### Terminal
+
+```{bash}
+#| label: git_status2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git status
+```
+The output of `git status` partitions all the files into (staged:
+`Changes to be committed`, unstaged: `Changes not staged for commit`
+and `Untracked`) as well as hints on how to either promote or demote
+the status of these files.
+
+
+### Rstudio
+
+Examine the git status panel - ideally it should be empty thereby
+signalling that all your important files are tracked andcommitted.
+
+:::
+
+### log of commits
+
+
+::: {.panel-tabset}
+
+#### Terminal
+
+The `git log` _command_ allows us to review the history of committed
+snapshots
+
+```{bash}
+#| label: git_log
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log
+```
+
+We can see that in my case some fool called 'Murray Logan' has made a
+total of three commits. We can also see the date/time that the commits
+were made as well as the supplied commit comment.
+
+Over time repositories accumulate a large number of commits, to only
+review the last 2 commits, we could issue the `git log -n
+2` _command_. 
+
+```{bash}
+#| label: git_log1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log -n 2 
+```
+
+::: {.callout-note collapse="true"}
+## Additional useful (`git log`) options
+
+<table>
+<thead>
+<th>Option</th><th>Example</th>
+</thead>
+<tbody>
+<tr>
+<td>`--oneline`<br>Condensed view</td>
+<td>
+```{bash}
+#| label: git_log2a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log --oneline
+```
+</td>
+</tr>
+<tr>
+<td>`--stat`<br>Indicates number of changes</td>
+<td>
+```{bash}
+#| label: git_log2b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log --stat
+```
+</td>
+</tr>
+<tr>
+<td>`-p`<br>Displays the full diff of each commit</td>
+<td>
+```{bash}
+#| label: git_log2c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log -p
+```
+</td>
+</tr>
+
+<tr>
+<td>`--author="<name>"`<br>Filter by author</td>
+<td>
+```{bash}
+#| label: git_log2d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log --author="Murray"
+```
+</td>
+</tr>
+
+<tr>
+<td>`--grep="<pattern>"`<br>Filter by regex pattern of commit message</td>
+<td>
+```{bash}
+#| label: git_log2e
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log --grep="Modified"
+```
+</td>
+</tr>
+
+<tr>
+<td>`<file>`<br>Filter by filename</td>
+<td>
+```{bash}
+#| label: git_log2f
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log file1
+```
+</td>
+</tr>
+
+<tr>
+<td>`--decorate --graph`</td>
+<td>
+```{bash}
+#| label: git_log2g
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline
+```
+</td>
+</tr>
+
+<tr>
+<td>`--all`<br>All branches</td>
+<td>
+```{bash}
+#| label: git_log2h
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log --all
+```
+</td>
+</tr>
+</tbody>
+</table>
+:::
+
+
+#### Rstudio
+
+To explore the history of a repository, click on the clock icon ("View
+history of previous commits" button). This will open up the "Review
+Changes" window in the "History" tab.
+
+![](resources/rstudio_gitstatus1.png)
+
+Along with the reverse chronological list of commits, for each commit
+(and file thereof), you can explore the changes (diffs) that occurred.
+
+Text that appears over a green background represents text that have
+been added as part of the current commit. Text that appears over a red
+background represents text that have been removed.
+
+If we scroll down and explore the changes in `dir1/file2` for the most
+recent commit, we see that the text `* Notes` was removed and then `*
+Notes` and `---` were added. At first this might seem a bit odd - why
+was `* Notes` deleted and then added back? 
+
+![](resources/rstudio_gitstatus2.png)
+
+Git works on entire lines of text. So the first line was replaced
+because in the newer version, the first line had a carriage return
+(newline character). Although we cant see this character, it is
+there - we see it more via its effect (sending the text after it to
+the next line). Hence, in fact, two lines of text were actually
+changed in the most recent commit.
+
+:::
+
+### `reflog`
+
+::: {.panel-tabset}
+
+#### Terminal
+
+Another way to explore the commit history is to look at the
+**reflog**. This is a log of the _branch_ references. This approach is
+more useful when we have multiple _branches_ and so will be visited in
+the <a href="#Branching">section on branching</a>. It displays all
+repository activity, not just the commits.
+
+```{bash}
+#| label: git_reflog1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git reflog
+```
+
+#### Rstudio
+
+Some of this sort of information can be gleaned from the git
+"History". Just make sure you select ("all branches") from the "Switch
+branch" menu.
+
+![](resources/rstudio_gitstatus3.png)
+
+:::
+
+### `diff`
+
+Whilst some of these actions described in this section are available
+from the "History" tab of the "Review Changes" window in Rstudio, most
+are only available as terminal commands.
+
+```{tikz}
+%| label: Fig-advancedDiff1
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\usetikzlibrary{arrows.meta}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_index}{rgb}{0.78,0.86,0.27}
+\definecolor{color_local}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+
+% A template for making the storage symbol
+\newcommand{\state}[3]{
+\draw (#1) node [draw=none,fill=#2,shape=circle,minimum width=2cm] (#3) {
+\begin{tikzpicture}
+\node [draw=white, fill=white,shape=cylinder,shape aspect=1.3 ,shape border rotate=90,minimum height=1.6cm,minimum width=1.5cm] at (0,0) (Cylinder) {};				\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.1cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.5cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\draw[draw=#2,very thick,line width=0.1cm,anchor=north west] ($(Cylinder.north west) +(-0.05cm,-0.9cm)$) arc (-180:0:0.8cm and 0.2cm); 
+\end{tikzpicture}
+};
+}
+
+% Define dirtree
+\makeatletter
+\newcount\dirtree@lvl
+\newcount\dirtree@plvl
+\newcount\dirtree@clvl
+\def\dirtree@growth{%
+\ifnum\tikznumberofcurrentchild=1\relax
+\global\advance\dirtree@plvl by 1
+\expandafter\xdef\csname dirtree@p@\the\dirtree@plvl\endcsname{\the\dirtree@lvl}
+\fi
+\global\advance\dirtree@lvl by 1\relax
+\dirtree@clvl=\dirtree@lvl
+\advance\dirtree@clvl by -\csname dirtree@p@\the\dirtree@plvl\endcsname
+\pgf@xa=0.25cm\relax
+\pgf@ya=-0.5cm\relax
+\pgf@ya=\dirtree@clvl\pgf@ya
+\pgftransformshift{\pgfqpoint{\the\pgf@xa}{\the\pgf@ya}}%
+\ifnum\tikznumberofcurrentchild=\tikznumberofchildren
+\global\advance\dirtree@plvl by -1
+\fi
+}
+
+\tikzset{
+dirtree/.style={
+growth function=\dirtree@growth,
+every node/.style={anchor=north},
+every child node/.style={anchor=west},
+edge from parent path={(\tikzparentnode\tikzparentanchor) |- (\tikzchildnode\tikzchildanchor)}
+}
+}
+\makeatother
+%end of t
+
+%Define a file 
+\newcommand{\file}[3] {
+\coordinate (#3) at (#1);
+\draw [anchor=top left](#1) rectangle ++(2,-2);
+\draw [fill=color_workspace]($(#1) +(2,0)$) -- ++(0,-0.5) --++(-0.5,0.5) -- cycle; 
+\node [anchor=north west,fileText] at ($(#1) +(0.3,-0.3)$) {#2};
+}
+% end of file definition
+
+\begin{tikzpicture}
+\state{0,0}{color_workspace}{W}
+\node[TARGET,fill=white] at ($(W.north) +(0,0.5cm)$) {Workspace};
+\draw [line width=0.1cm,draw=color_workspace] (W.south) -- ++(0,-5); 
+
+\state{8,0}{color_index}{I}
+\node[TARGET,fill=white] at ($(I.north) +(0,0.5cm)$) {Staging Area};
+\draw [line width=0.1cm,draw=color_index] (I.south) -- ++(0,-5); 
+
+\state{16,0}{color_local}{L}
+\node[TARGET,fill=white] at ($(L.north) +(0,0.5cm)$) {Local Repository};
+\draw [line width=0.1cm,draw=color_local] (L.south) -- ++(0,-5); 
+
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_index] ($(W) + (0.1cm,-3)$) -- ($(I) + (-0.1cm,-3)$) node[anchor=west,pos=0, text=black,align=center,CODE] {git diff};
+
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_local] ($(I) + (0.1cm,-3)$) -- ($(L) + (-0.1cm,-3)$) node[anchor=west,pos=0, text=black,align=center,CODE] {git diff --cached};
+
+\draw[{Round Cap[length=0.5em]}-Triangle Cap,very thick, line width=1cm, draw=color_local] ($(W) + (0.1cm,-5)$) -- ($(L) + (-0.1cm,-5)$) node[anchor=west,pos=0, text=black,align=center,CODE] {git diff HEAD};
+
+\end{tikzpicture}
+```
+
+Two of the three commits in our repository involved modifications to a
+file (`dir1/file2`). To further help illustrate commands to compare
+files indifferent states, we will additionally make a further change
+to `dir1/file2`. The `git diff` allows us to explore differences
+between:
+
+- the workspace and the staging area (index)
+
+  ```{bash}
+  #| label: git_diff1
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  # lets modify dir1/file2
+  echo 'Notes' >> dir1/file2
+  git diff
+  ```
+
+  The output indicates that we are comparing the blob representing
+  `dir1/file2` in the <i>index</i> (staging area) with the newly
+  modified `dir1/file2`. The next couple of rows indicate that the
+  <i>indexed</i> version will be represented by a '-' sign and the new
+  version will be represented by a '+' sign. The next row (which is
+  surrounded in a pair of `@` signs, indicates that there are two
+  lines that have changed. Finally the next two rows show that a
+  charrage return has been added to the end of the first line and the
+  new version has added the word 'Notes' to the next line.
+  
+- the staging area and the last commit
+
+  ```{bash}
+  #| label: git_diff3
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git add .
+  git diff --cached
+  ```
+
+  Once we stage the modifications, we see that the same differences
+  are recorded.
+
+- the index and a tree (in this case, the current tree)
+
+  ```{bash}
+  #| label: git_diff4
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git diff --cached HEAD^{tree}
+  ```
+
+- the workspace and the current commit
+
+  ```{bash}
+  #| label: git_diff5
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git diff HEAD
+  ```
+
+- two commits (e.g. previous and current commits)
+
+  ```{bash}
+  #| label: git_diff6
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git diff HEAD^ HEAD
+  ```
+
+- two trees (first example, the current and previous commit trees)
+
+  ```{bash}
+  #| label: git_diff7
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git diff HEAD^{tree} HEAD^^{tree}
+  ```
+
+  ```{bash}
+  #| label: git_diff8
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git diff 07a94 2b61e
+  ```
+
+- two blobs (indeed any two objects)
+
+  ```{bash}
+  #| label: git_diff9
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git diff 50fcd 28ed2
+  ```
+
+### `ls-files`
+
+Similar to the previous section, the following is only really
+available via the terminal.
+
+We can list the files that comprise the repository by:
+
+```{bash}
+#| label: git_ls_files
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git ls-files 
+```
+
+The change to `dir1/file2` above was just to illustrate the `git
+diff`. In doing so we now have a modified version of this file that
+has not been committed Before we move on, I am going to remove these
+changes so that the `dir1/file2` is not in a modified state and
+reflects the state of the current commit. To do so, I will use perform
+a **hard reset** (`git reset --hard`). More will be discussed about
+the `git reset` command later in this tutorial - for now all that is
+important is to know that it restores the workspace to a previous
+state.
+
+In addition to the `git reset --hard`, I will also clean and prune the repository.
+
+```{bash}
+#| label: git_ls_files1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git reset --hard 
+git clean -qfdx
+git reflog expire --expire-unreachable=now --all
+git gc --prune=now
+```
