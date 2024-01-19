@@ -5011,7 +5011,6 @@ The following are a couple of different visuals of the repository.
 
 \input{resources/common1.tikz}
       
-\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
 \begin{tikzpicture}
 \commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
 
