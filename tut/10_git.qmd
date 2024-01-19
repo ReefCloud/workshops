@@ -6685,3 +6685,1237 @@ If the rebased commits were previously on a remote repository
 commits that have been squashed), then it will be necessary to force a
 push on this repository.
  
+
+# Undoing (rolling back) changes
+
+One of the real strengths of a versioning system is the ability to
+roll back to a previous state when changes have been found to
+introduce undesirable or unintended consequences. There are also
+multiple different stages from which to roll back. For example, do we
+want to revert from committed states or just unstage a file or files.
+
+To illustrate the various ways to roll back within a repository, we
+will start with a small repository comprising of a single branch and
+just three commits. This repository will mimic a repository created
+earlier in this tutorial (before we started branching).
+
+::: {.callout-note collapse="true"}
+## Commands to create the repository
+```{bash}
+#| label: git_status9
+#| classes: bash
+#| engine: bash
+#| echo: true
+#| cache: false
+#| eval: true
+rm -rf ~/tmp/Repo1
+mkdir ~/tmp/Repo1
+cd ~/tmp/Repo1
+git init 
+echo 'File 1' > file1
+git add file1
+git commit -m 'Initial repo and added file1'
+echo '---------------' >> file1
+mkdir dir1
+echo '* Notes' > dir1/file2
+git add file1 dir1/file2
+git commit -m 'Modified file1 and added file2 (in dir1)'
+echo '---' >> dir1/file2
+echo 'temp' > dir1/f.tmp
+echo '*.tmp' > .gitignore
+git add .
+git commit -m 'Modified file2, added .gitignore'
+git tag V.1
+```
+
+
+```{bash}
+#| label: git-commit1a1000
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+cat .git/refs/heads/main
+```
+    
+
+:::
+
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rollback1a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+```{r, replace=TRUE}
+#| label: git-rollback1b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-rollback1c
+#| echo: false
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+:::
+
+```{cat}
+#| label: Fig-advanced7
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig-advanced7.tikz"
+
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\usetikzlibrary{arrows.meta}
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_tree}{HTML}{9ACD32} %\definecolor{color_tree}{rgb}{0.78,0.86,0.27}
+\definecolor{color_commit}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+\definecolor{color_index}{HTML}{E0FFFF} %\definecolor{color_index}{rgb}{1,1,1}
+\definecolor{color_file}{rgb}{1,1,1}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+%Define a file 
+\newcommand{\file}[4] {
+\def\corner{0.15in};
+\def\cornerradius{0.02in};
+\def\lwidth{0.02in};
+\def\h{0.5in};
+\def\w{0.85in};
+\def\nline{0};
+\def\iconmargin{0.1in};
+\def\topmargin{0.3in};
+\node at (#1) {\begin{tikzpicture}
+\coordinate (nw) at ($(-0.05in*1,-0.15in*1)$);
+\coordinate (#3) at (#1); 
+\coordinate (ne0) at ($(nw) + (\w, 0)$);
+\coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+\coordinate (ne2) at ($(ne0) - (0, \corner)$);
+\coordinate (se) at ($(ne0) + (0, -\h)$); 
+\filldraw [-, line width = \lwidth, fill=#4] (nw) -- (ne1) -- (ne2)
+[rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+\draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+\node [anchor=north west,TREE] at (nw) {#2};
+\foreach \k in {0,...,\nline}
+{
+\draw [-, line width = \lwidth, line cap=round] 
+($(nw|-se) + (\iconmargin,\iconmargin) + (0,{(\k-1)/(\nline-1)*(\h - \iconmargin - \topmargin)})$)
+-- ++ ($(\w,0) - 2*(\iconmargin,0)$);
+}
+\end{tikzpicture}};
+}
+% end of file definition
+    
+\begin{tikzpicture}
+\coordinate (G_ul) at (0,0);
+\coordinate (G_ll) at ($(G_ul) +(0,-10)$);
+\coordinate (G_lr) at ($(G_ll) +(4,0)$);
+\coordinate (G_ur) at ($(G_ul) +(4,0)$);
+
+\node[TREE,anchor=west] at ($(G_ul) +(0,-0.5)$) (git) {.git/};
+\file{$(git.west) +(1.5,-2)$}{HEAD}{HEAD}{color_head}
+\file{$(HEAD) +(0,-2)$}{index}{index}{color_index}
+\draw[] (G_ul) -- (G_ll) -- (G_lr) -- (G_ur) -- cycle;
+
+%refs
+\node[TREE,anchor=west] at ($(G_ul) +(-5,-0.5)$) (git_ref) {.git/refs/};
+\file{$(git_ref.west) +(1.5,-2)$}{\textcolor{white}{main}}{master}{color_master}
+\draw[] ($(G_ul) +(-5,0)$) -- ++(0,-10) -- ++(4.9,0) -- ++(0,10) -- cycle;
+
+
+%files
+\node[TREE,anchor=west] at ($(G_ul) +(-21,-0.5)$) (root) {/};
+\file{$(root.west) +(1.7,-2)$}{\textcolor{black}{file1}}{file1}{color_file}
+\node[TREE,anchor=west] at ($(root |- file1) +(0.4,-2.2)$) (dir1) {dir1/};
+\draw [very thick] (root) -- (root |- file1) -- ++(0.2,0);
+\draw [very thick] (root) -- (root |- dir1) -- ++(0.2,0);
+\file{$(dir1.west) +(1.7,-1.0)$}{\textcolor{black}{file2}}{file2}{color_file}
+\draw [very thick] ($(dir1.west) +(0.2,-0.2)$) -- ($(dir1.west |- file2) +(0.2,0)$) -- ++(0.2,0);
+\file{$(file2.west) +(0,-1.5)$}{\textcolor{black!70}{f.tmp}}{file3}{color_file}
+\draw [very thick] ($(dir1.west) +(0.2,-0.2)$) -- ($(dir1.west |- file3) +(0.2,0)$) -- ++(0.2,0);
+\file{$(root.west) +(1.7,-8.5)$}{\textcolor{black}{.giti.}}{file4}{color_file}
+\draw [very thick] (root) -- (root |- file4) -- ++(0.2,0);
+\begin{pgfonlayer}{background}
+\draw[fill=color_workspace!20] ($(G_ul) +(-21,0)$) -- ++(0,-10) -- ++(3.9,0) -- ++(0,10) -- cycle;
+\end{pgfonlayer}
+
+%objects
+\node[TREE,anchor=west] at ($(G_ul) +(-17,-0.5)$) (git_object) {.git/objects/};
+\file{$(git_object.west) +(1.5,-2)$}{\textcolor{black}{hashblob1}}{blob1}{color_workspace!20}
+\file{$(git_object.west) +(1.5,-3.5)$}{\textcolor{black}{hashblob3}}{blob2}{color_workspace}
+\file{$(git_object.west |- file2.north) +(1.5,-0)$}{\textcolor{black}{hashblob2}}{blob3}{color_workspace!20}
+
+\file{$(git_object.west |- file3.north) +(1.5,0)$}{\textcolor{black}{hashblob5}}{blob4}{color_workspace}
+\file{$(git_object.west |- file4.north) +(1.5,0)$}{\textcolor{black}{hashblob4}}{blob5}{color_workspace}
+\draw[] ($(G_ul) +(-17,0)$) -- ++(0,-10) -- ++(11.9,0) -- ++(0,10) -- cycle;
+
+%trees
+\file{$(blob1.west) +(5,0)$}{\textcolor{black}{hashtree1}}{tree1}{color_tree!20}
+\file{$($(blob3.west) !0.5! (blob3.west)$) +(3,0)$}{\textcolor{black}{hashtree3}}{tree2}{color_tree!20}
+\file{$($(blob2.west) !0.5! (blob3.west)$) +(5.75,0)$}{\textcolor{black}{hashtree2}}{tree3}{color_tree!20}
+\file{$($(blob4.west) !0.5! (blob4.west)$) +(3,0)$}{\textcolor{black}{hashtree5}}{tree4}{color_tree}
+\file{$($(blob4.west) !0.5! (blob5.west)$) +(5.75,0)$}{\textcolor{black}{hashtree4}}{tree5}{color_tree}
+
+%commits
+\file{$(tree1.west) +(3,0)$}{\textcolor{black}{hashcommits1}}{commit1}{color_commit!20}
+\file{$(tree3.west) +(2.75,0)$}{\textcolor{black}{hashcommits2}}{commit2}{color_commit!20}
+\file{$(tree5.west) +(2.75,0)$}{\textcolor{black}{hashcommits3}}{commit3}{color_commit}
+
+%arrows
+\draw[->,very thick,draw=black] ($(HEAD) +(-1,0)$) -- ($(master) +(1.2,0)$);
+\draw[->,very thick] ($(master) +(-1,0)$) -- ($(commit3) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(commit1) +(-1,0)$) -- ($(tree1) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree1) +(-1,0)$) -- ($(blob1) +(1.2,0)$);
+    
+\draw[->,very thick,draw=gray] ($(commit2) +(-1,0)$) -- ($(tree3) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree3) +(-1,0)$) -- ($(tree2) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree3) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree2) +(-1,0)$) -- ($(blob3) +(1.2,0)$);
+    
+\draw[->,very thick,draw=gray] ($(commit2) +(0,0.6)$) -- ($(commit1) +(0,-0.7)$);
+    
+\draw[->,very thick] ($(commit3) +(-1,0)$) -- ($(tree5) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(tree4) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(blob5) +(1.2,0)$);
+\draw[->,very thick] ($(tree4) +(-1,0)$) -- ($(blob4) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\draw[->,very thick] ($(commit3) +(0,0.6)$) -- ($(commit2) +(0,-0.7)$);
+    
+\draw[<-,very thick,dashed] ($(blob2) +(-1.2,0)$) -- ($(file1) +(1.2,0)$);
+\draw[<-,very thick,dashed] ($(blob4) +(-1.2,0)$) -- ($(file2) +(1.2,0)$);
+\draw[<-,very thick,dashed] ($(blob5) +(-1.2,0)$) -- ($(file4) +(1.2,0)$);
+    
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob3) +(1.2,0)$);
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r scal7a, cache=FALSE, echo=FALSE, results='markup'}
+library(knitr)
+# commit
+hash = scan("~/tmp/Repo1/.git/refs/heads/main", what = "character")
+has_commits <- strtrim(hash, width = 5)
+#hash_commits = c(hash_commits, strtrim(hash, width = 5))
+# tree
+hash = system(paste0("cd ~/tmp/Repo1; git cat-file -p ", hash_commits[2]), intern = TRUE)
+hash = read.table(textConnection(hash[1]))
+hash_tree = c(hash_tree, strtrim(hash$V2, 5))
+
+hash = system(paste0('cd ~/tmp/Repo1; git cat-file -p HEAD^{tree}'), intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_tree = c(hash_tree, strtrim(hash$V3[hash$V2 == "tree"], 5))
+
+#blob
+hash = system('cd ~/tmp/Repo1; git ls-files --stage', intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_blob = unique(c(hash_blob,strtrim(hash$V2,5)))
+ 
+system(paste0("sed -i 's/hashblob1/", hash_blob[1], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashblob2/", hash_blob[2], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashblob3/", hash_blob[3], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashblob4/", hash_blob[4], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashblob5/", hash_blob[5], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashtree1/", hash_tree[1], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashtree2/", hash_tree[2], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashtree3/", hash_tree[3], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashtree4/", hash_tree[4], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashtree5/", hash_tree[5], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashcommits1/", hash_commits[1], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashcommits2/", hash_commits[2], "/g' resources/Fig-advanced7.tikz"))
+system(paste0("sed -i 's/hashcommits3/", hash_commits[3], "/g' resources/Fig-advanced7.tikz"))
+system("xelatex -output-directory=resources resources/Fig-advanced7.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig-advanced7.pdf resources/Fig-advanced7.png")
+```
+
+![](resources/Fig-advanced7.png)
+    
+The above diagram shows that both `HEAD` and `main` point at the
+same stage (all three files). **Again, remember that the SHA-1 has
+values will be different in your repo so in the following, you will
+need to use the SHA value that corresponds to the item in your list**.
+
+With additional commits and activity, the above schematic will rapidly
+become very busy and complex. As a result, we will now switch to a
+simpler schematic that focuses only on the commits and references
+thereof (`HEAD`, `main` and _branches_).
+
+```{cat}
+#| label: Fig9a
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig9a.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+\master{below = 1cm of commitshash3} 
+\HEAD{below = 0.1cm of master} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+## commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+## commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+## commits = commits[rev(1:nrow(commits)),]
+## colnames(commits) <- c('hash','comment')
+## commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+## lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+## lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+## lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+
+# get the commits from .git/logs/HEAD
+commits = system("cd ~/tmp/Repo1; git log --oneline | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),10),'..')	
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig9a.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig9a.tikz")) 
+  }
+
+system("xelatex -output-directory=resources resources/Fig9a.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig9a.pdf resources/Fig9a.png")
+```
+
+![](resources/Fig9a.png)
+
+Recall that a git repository comprises multiple levels in which
+changes are recorded:
+
+- there is the **Workspace** (which is essentially the actual files
+  and folders that you directly edit).
+- there is the **Staging area** (or index which is a record of which
+  files are next to be committed).
+- there is the **Local repository** (the actual commits).
+- and finally, three is the **remote repository** (a remote store of
+  commits).
+
+As such, there are multiple levels from which changes could be undone.
+Furthermore, we might want to undo changes at the commit or individual
+file level. For example, we might decide that we have made a local
+commit that introduced an issue and we now wish to return back to the
+state prior to this commit. Alternatively, we might have just
+accidentally staged a file (yet not committed it) and now we want to
+unstage it.
+
+```{tikz}
+%| label: Figs9a
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\commit{right = 1cm of B}{C}{color_detached}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [-,line width=3pt,draw=black!60] (C) -- (B);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Figs9a-conv
+#| cache: false
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Figs9a-1.pdf 10_git_files/figure-html/Figs9a-1.png 
+```
+
+
+```{tikz}
+%| label: Figs9b
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\commit{right = 1cm of B}{C}{color_detached!30}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [->,dashed,line width=3pt,draw=black!60] (C) -- (B);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Figs9b-conv
+#| cache: false
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Figs9b-1.pdf 10_git_files/figure-html/Figs9b-1.png  
+```
+
+```{tikz}
+%| label: Figs9c
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_commit}{}{}
+\commit{right = 1cm of A}{B}{color_detached!30}{}{}
+\commit{right = 1cm of B}{C}{color_detached!30}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [->, dashed, line width=3pt,draw=black!60] (B) -- (A);
+\draw [->,dashed,line width=3pt,draw=black!60] (C) -- (B);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Figs9c-conv
+#| cache: false
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Figs9c-1.pdf 10_git_files/figure-html/Figs9c-1.png   
+```
+
+```{tikz}
+%| label: Figs9d
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\commit{right = 1cm of B}{C}{color_detached}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Figs9d-conv
+#| cache: false
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Figs9d-1.pdf 10_git_files/figure-html/Figs9d-1.png  
+```
+
+```{tikz}
+%| label: Figs9e
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| include: false
+%| dependson: common
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+\begin{tikzpicture}%[every node/.style={inner sep=0,outer sep=0, minimum height = 0}]
+\commit{}{A}{color_inactive}{}{}
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\commit{right = 1cm of B}{C}{color_detached}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\draw [-,line width=3pt,draw=black!60] (C) -- (B);
+\draw [->,line width=3pt,draw=black!60] (A) to[out=45] (C);
+\end{tikzpicture}
+```
+```{bash}
+#| label: Figs9e-conv
+#| cache: false
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Figs9e-1.pdf 10_git_files/figure-html/Figs9e-1.png  
+```
+
+<table class='table table-primary table-bordered table-sm paramsTable' id = 'rollback-table'>
+<thead>
+<tr class = 'header'>
+<th>Action</th><th width='30%'>Command</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td colspan='3'><i>Commit level</i></td></tr>
+<tr>
+<td>Undo to a particular local commit<br>
+![](10_git_files/figure-html/Figs9a-1.png)
+</td>
+<td>`git reset --soft <commit>`</td>
+<td>HEAD is moved to the nominated <commit>. IT DOES NOT alter index or the workspace</td>
+</tr>
+
+<tr>
+<td>Roll back to the the previous commit<br>
+![](10_git_files/figure-html/Figs9b-1.png)
+</td>
+<td>`git reset --hard <commit>`</td>
+<td>Resets the Index and Workspace</td>
+</tr>
+
+<tr>
+<td>Roll back over the last two commits<br>
+![](10_git_files/figure-html/Figs9c-1.png)
+</td>
+<td>`git reset --hard HEAD~2`</td>
+<td>Roll back over the last two commits</td>
+</tr>
+
+<tr>
+<td>Inspect an old commit<br>
+![](10_git_files/figure-html/Figs9d-1.png)
+</td>
+<td>`git checkout <commit>`</td>
+<td>moves the HEAD and modifies the workspace to reflect its state at <commit></td>
+</tr>
+
+<tr>
+<td>Roll back the changes introduced by commit so that a new commit resembles a previous state<br>
+![](10_git_files/figure-html/Figs9e-1.png)
+</td>
+<td>`git revert HEAD`</td>
+<td>Creates a new commit that reverses the changes introduced by the last commit.
+Revert creates a new revision history that adds onto existing history and is therefore safe to use on a branch that has been pushed to a remote.</td>
+</tr>
+</tbody>
+</table>
+
+Now lets say we wanted to roll back to the state before we added `.gitignore` and modified `dir1/file2`.
+That is, we want to roll-back to commit ``r commits$hash[2]``.
+We have three main choices:
+
+- **reset** - this allows us to remove all commits back to a nominated
+  commit. _Resetting_ is a irreversible process as it totally removes
+  commits from the history. A _reset_ should only ever be used if you
+  are sure you want to permanently remove the changes introduced via
+  one or more commits. **A reset should never be performed on a branch
+  that exists in a remote repository**
+			  
+- **revert** - this allows us to skip the most recent commit. That
+  is, a _revert_ rolls back to a previous commit and then apply
+  that state to a new commit. Unlike a _reset_, all commits
+  remain safely in the git history and can target a single commit.
+
+- **branch** - this allows us to safely take the project (or part of
+  the project) in an experimental direction that might involve
+  dramatic deviations in files without interrupting the main thread of
+  the project. At some point, if the new direction proves useful, the
+  changes can be merged back into the main branch. We will expore
+  _branching_ in <a href="#Branching">the section on branching</a>.
+				
+Normally we would not perform all three. Rather, we would select the
+most appropriate one depending on the context and goal. Nevertheless,
+this is a tutorial and therefore we will perform all three. In order
+to ensure that we start from the same point for each demonstration,
+prior to each demonstration, we will aggressively reset the repository
+back to the state it was at commit ``r commits$hash[2]``.
+
+## Reset
+
+Reset is not directly supported by Rstudio - use the terminal for this section.
+
+### Soft reset
+
+When we perform a **soft reset**, we move the head to the nominated
+commit, but the workspace is unchanged.
+
+
+```{r}
+#| label: bash9
+#| echo: false
+#| eval: true
+#| cache: false
+knit_engines$set(bash1=function(options) {
+  engine=options$engine
+  options$code = gsub("#", commits$hash[2], options$code)
+  code = paste("bash -c",shQuote(paste(options$code, collapse="\n")))
+  code = paste(options$engine_opts,code)
+  out = system(code,intern=TRUE)
+  engine_output(options,options$code,out) 
+})
+```
+
+```{r, replace=TRUE}
+#| label: git-reset9b
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reset --soft #
+```
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rollback2d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+```{r, replace=TRUE}
+#| label: git-rollback2e
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-rollback2f
+#| echo: false
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+:::
+
+
+```{cat}
+#| label: Fig-advanced8
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig-advanced8.tikz"
+
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\usetikzlibrary{arrows.meta}
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_tree}{HTML}{9ACD32} %\definecolor{color_tree}{rgb}{0.78,0.86,0.27}
+\definecolor{color_commit}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+\definecolor{color_index}{HTML}{E0FFFF} %\definecolor{color_index}{rgb}{1,1,1}
+\definecolor{color_file}{rgb}{1,1,1}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+%Define a file 
+\newcommand{\file}[4] {
+\def\corner{0.15in};
+\def\cornerradius{0.02in};
+\def\lwidth{0.02in};
+\def\h{0.5in};
+\def\w{0.85in};
+\def\nline{0};
+\def\iconmargin{0.1in};
+\def\topmargin{0.3in};
+\node at (#1) {\begin{tikzpicture}
+\coordinate (nw) at ($(-0.05in*1,-0.15in*1)$);
+\coordinate (#3) at (#1); 
+\coordinate (ne0) at ($(nw) + (\w, 0)$);
+\coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+\coordinate (ne2) at ($(ne0) - (0, \corner)$);
+\coordinate (se) at ($(ne0) + (0, -\h)$); 
+\filldraw [-, line width = \lwidth, fill=#4] (nw) -- (ne1) -- (ne2)
+[rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+\draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+\node [anchor=north west,TREE] at (nw) {#2};
+\foreach \k in {0,...,\nline}
+{
+\draw [-, line width = \lwidth, line cap=round] 
+($(nw|-se) + (\iconmargin,\iconmargin) + (0,{(\k-1)/(\nline-1)*(\h - \iconmargin - \topmargin)})$)
+-- ++ ($(\w,0) - 2*(\iconmargin,0)$);
+}
+\end{tikzpicture}};
+}
+% end of file definition
+    
+\begin{tikzpicture}
+\coordinate (G_ul) at (0,0);
+\coordinate (G_ll) at ($(G_ul) +(0,-10)$);
+\coordinate (G_lr) at ($(G_ll) +(4,0)$);
+\coordinate (G_ur) at ($(G_ul) +(4,0)$);
+
+\node[TREE,anchor=west] at ($(G_ul) +(0,-0.5)$) (git) {.git/};
+\file{$(git.west) +(1.5,-2)$}{HEAD}{HEAD}{color_head}
+\file{$(HEAD) +(0,-2)$}{index}{index}{color_index}
+\draw[] (G_ul) -- (G_ll) -- (G_lr) -- (G_ur) -- cycle;
+
+%refs
+\node[TREE,anchor=west] at ($(G_ul) +(-5,-0.5)$) (git_ref) {.git/refs/};
+\file{$(git_ref.west) +(1.5,-2)$}{\textcolor{white}{main}}{master}{color_master}
+\draw[] ($(G_ul) +(-5,0)$) -- ++(0,-10) -- ++(4.9,0) -- ++(0,10) -- cycle;
+
+
+%files
+\node[TREE,anchor=west] at ($(G_ul) +(-21,-0.5)$) (root) {/};
+\file{$(root.west) +(1.7,-2)$}{\textcolor{black}{file1}}{file1}{color_file}
+\node[TREE,anchor=west] at ($(root |- file1) +(0.4,-2.2)$) (dir1) {dir1/};
+\draw [very thick] (root) -- (root |- file1) -- ++(0.2,0);
+\draw [very thick] (root) -- (root |- dir1) -- ++(0.2,0);
+\file{$(dir1.west) +(1.7,-1.0)$}{\textcolor{black}{file2}}{file2}{color_file}
+\draw [very thick] ($(dir1.west) +(0.2,-0.2)$) -- ($(dir1.west |- file2) +(0.2,0)$) -- ++(0.2,0);
+\file{$(file2.west) +(0,-1.5)$}{\textcolor{black!70}{f.tmp}}{file3}{color_file}
+\draw [very thick] ($(dir1.west) +(0.2,-0.2)$) -- ($(dir1.west |- file3) +(0.2,0)$) -- ++(0.2,0);
+\file{$(root.west) +(1.7,-8.5)$}{\textcolor{black}{.giti.}}{file4}{color_file}
+\draw [very thick] (root) -- (root |- file4) -- ++(0.2,0);
+\begin{pgfonlayer}{background}
+\draw[fill=color_workspace!20] ($(G_ul) +(-21,0)$) -- ++(0,-10) -- ++(3.9,0) -- ++(0,10) -- cycle;
+\end{pgfonlayer}
+
+%objects
+\node[TREE,anchor=west] at ($(G_ul) +(-17,-0.5)$) (git_object) {.git/objects/};
+\file{$(git_object.west) +(1.5,-2)$}{\textcolor{black}{hashblob1}}{blob1}{color_workspace!20}
+\file{$(git_object.west) +(1.5,-3.5)$}{\textcolor{black}{hashblob3}}{blob2}{color_workspace}
+\file{$(git_object.west |- file2.north) +(1.5,-0)$}{\textcolor{black}{hashblob2}}{blob3}{color_workspace!20}
+
+\file{$(git_object.west |- file3.north) +(1.5,0)$}{\textcolor{black}{hashblob5}}{blob4}{color_workspace}
+\file{$(git_object.west |- file4.north) +(1.5,0)$}{\textcolor{black}{hashblob4}}{blob5}{color_workspace}
+\draw[] ($(G_ul) +(-17,0)$) -- ++(0,-10) -- ++(11.9,0) -- ++(0,10) -- cycle;
+
+%trees
+\file{$(blob1.west) +(5,0)$}{\textcolor{black}{hashtree1}}{tree1}{color_tree!20}
+\file{$($(blob3.west) !0.5! (blob3.west)$) +(3,0)$}{\textcolor{black}{hashtree3}}{tree2}{color_tree!20}
+\file{$($(blob2.west) !0.5! (blob3.west)$) +(5.75,0)$}{\textcolor{black}{hashtree2}}{tree3}{color_tree!20}
+\file{$($(blob4.west) !0.5! (blob4.west)$) +(3,0)$}{\textcolor{black}{hashtree5}}{tree4}{color_tree}
+\file{$($(blob4.west) !0.5! (blob5.west)$) +(5.75,0)$}{\textcolor{black}{hashtree4}}{tree5}{color_tree}
+
+%commits
+\file{$(tree1.west) +(3,0)$}{\textcolor{black}{hashcommits1}}{commit1}{color_commit!20}
+\file{$(tree3.west) +(2.75,0)$}{\textcolor{black}{hashcommits2}}{commit2}{color_commit!20}
+\file{$(tree5.west) +(2.75,0)$}{\textcolor{black}{hashcommits3}}{commit3}{color_commit}
+
+%arrows
+\draw[->,very thick,draw=black] ($(HEAD) +(-1,0)$) -- ($(master) +(1.2,0)$);
+\draw[->,very thick] ($(master) +(-1,0)$) -- ($(commit3) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(commit1) +(-1,0)$) -- ($(tree1) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree1) +(-1,0)$) -- ($(blob1) +(1.2,0)$);
+    
+\draw[->,very thick,draw=gray] ($(commit2) +(-1,0)$) -- ($(tree3) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree3) +(-1,0)$) -- ($(tree2) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree3) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree2) +(-1,0)$) -- ($(blob3) +(1.2,0)$);
+    
+\draw[->,very thick,draw=gray] ($(commit2) +(0,0.6)$) -- ($(commit1) +(0,-0.7)$);
+    
+\draw[->,very thick] ($(commit3) +(-1,0)$) -- ($(tree5) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(tree4) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(blob5) +(1.2,0)$);
+\draw[->,very thick] ($(tree4) +(-1,0)$) -- ($(blob4) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\draw[->,very thick] ($(commit3) +(0,0.6)$) -- ($(commit2) +(0,-0.7)$);
+    
+\draw[<-,very thick,dashed] ($(blob2) +(-1.2,0)$) -- ($(file1) +(1.2,0)$);
+\draw[<-,very thick,dashed] ($(blob4) +(-1.2,0)$) -- ($(file2) +(1.2,0)$);
+\draw[<-,very thick,dashed] ($(blob5) +(-1.2,0)$) -- ($(file4) +(1.2,0)$);
+    
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob3) +(1.2,0)$);
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob5) +(1.2,0)$);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r scal8a, cache=FALSE, echo=FALSE, results='markup'}
+library(knitr)
+# commit
+hash = scan("~/tmp/Repo1/.git/refs/heads/main", what = "character")
+has_commits <- strtrim(hash, width = 5)
+#hash_commits = c(hash_commits, strtrim(hash, width = 5))
+# tree
+hash = system(paste0("cd ~/tmp/Repo1; git cat-file -p ", hash_commits[2]), intern = TRUE)
+hash = read.table(textConnection(hash[1]))
+hash_tree = c(hash_tree, strtrim(hash$V2, 5))
+
+hash = system(paste0('cd ~/tmp/Repo1; git cat-file -p HEAD^{tree}'), intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_tree = c(hash_tree, strtrim(hash$V3[hash$V2 == "tree"], 5))
+
+#blob
+hash = system('cd ~/tmp/Repo1; git ls-files --stage', intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_blob = unique(c(hash_blob,strtrim(hash$V2,5)))
+ 
+system(paste0("sed -i 's/hashblob1/", hash_blob[1], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashblob2/", hash_blob[2], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashblob3/", hash_blob[3], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashblob4/", hash_blob[4], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashblob5/", hash_blob[5], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashtree1/", hash_tree[1], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashtree2/", hash_tree[2], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashtree3/", hash_tree[3], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashtree4/", hash_tree[4], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashtree5/", hash_tree[5], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashcommits1/", hash_commits[1], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashcommits2/", hash_commits[2], "/g' resources/Fig-advanced8.tikz"))
+system(paste0("sed -i 's/hashcommits3/", hash_commits[3], "/g' resources/Fig-advanced8.tikz"))
+system("xelatex -output-directory=resources resources/Fig-advanced8.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig-advanced8.pdf resources/Fig-advanced8.png")
+```
+
+![](resources/Fig-advanced8.png)
+    
+
+::: {.callout-note collapse="true"}
+
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw8a
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit8a.png 
+```
+
+![](10_git_files/figure-html/drawGit8a.png){width=100%}
+
+:::
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-reset2a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+```{r, replace=TRUE}
+#| label: git-reset2b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-reset2c
+#| echo: false
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+:::
+
+
+### Hard reset
+
+When we perform a **hard reset**, we not only move the head to the
+nominated commit, but the workspace is altered to reflect the
+workspace that existed when that commit was originally performed.
+
+As I am about to demonstrate this on a repo that I have just performed
+a soft reset on, I am first going to start by re-establishing the
+original repository. If you have not just run a soft reset, then
+ignore the following.
+
+
+::: {.callout-note collapse="true"}
+## Re-establish repository
+
+```{r, replace=TRUE}
+#| label: git-reset3a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reset --hard V.1
+git clean -qfdx
+git reflog expire --expire-unreachable=now --all
+git gc --prune=now
+```
+
+:::
+
+Now we are in a position to perform the hard reset.
+
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub(".*:", "", commits$comment), 15), "..")
+```
+
+
+```{r, replace=TRUE}
+#| label: git-reset9c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reset --hard #
+```
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rollback3d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+Notice that `.gitignore` is not not present.
+
+```{r, replace=TRUE}
+#| label: git-rollback3e
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-rollback3f
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+
+Note, however, if we looked at the log, it would be as if the previous
+commit had not occurred. For this reason, care must be exercised when
+using reset on remote repositories since others may be relying on a
+specific point in the repo history that you may have just erased.
+
+:::
+
+```{cat}
+#| label: Fig9b
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig9b.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_commit}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commitz{right = 1.5cm of commitshash2}{commitshash3}{color_zombie}{commitshash3}{commitscomment3}{black!20!white}
+\draw [<-,line width=3pt,draw=black!20] (commitshash2.east) -- (commitshash3.west);
+
+\master{below = 1cm of commitshash2} 
+\HEAD{below = 0.1cm of master} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+## get these from a chunk before had reset so that it has all commits
+ 
+## commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+## commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+## commits = commits[rev(1:nrow(commits)),]
+## colnames(commits) <- c('hash','comment')
+## commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig9b.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig9b.tikz")) 
+  }
+
+system("xelatex -output-directory=resources resources/Fig9b.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig9b.pdf resources/Fig9b.png")
+```
+
+![](resources/Fig9b.png)
+
+::: {.callout-note collapse="true"}
+
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw9a
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit9a.png 
+```
+
+![](10_git_files/figure-html/drawGit9a.png){width=100%}
+
+:::
+
+If we now make a change (such as a change to file1 and adding file3)
+and commit, it would be as if any commits after `r commits$hash[2]`
+had never occurred.
+
+```{bash}
+#| label: git-reset9d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+echo 'End' > file1
+echo 'File3' >> dir1/file3
+git add file1 dir1/file3
+git commit -m 'Modified file1 and added file3'
+```
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rollback4a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+```{r, replace=TRUE}
+#| label: git-rollback4b
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+```{r, replace=TRUE}
+#| label: git-rollback4c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+Notice the addition of `file3` in `dir1`
+
+```{r, replace=TRUE}
+#| label: git-rollback4d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git ls-files
+```
+:::
+
+```{cat}
+#| label: Fig9c
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig9c.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash7}{color_commit}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2) -- (commitshash7.west);
+
+\commitz{below = 3cm of commitshash7}{commitshash3}{color_zombie}{commitshash3}{commitscomment3}{black!20!white}
+\draw [<-,line width=3pt,draw=black!20] (commitshash2.east) -- (commitshash3.west);
+
+\master{below = 1cm of commitshash7} 
+\HEAD{below = 0.1cm of master} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig9c.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig9c.tikz")) 
+  }
+
+system("xelatex -output-directory=resources resources/Fig9c.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig9c.pdf resources/Fig9c.png")
+```
+
+![](resources/Fig9c.png)
+
+::: {.callout-note collapse="true"}
+
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw9c
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit9c.png 
+```
+
+![](10_git_files/figure-html/drawGit9c.png){width=100%}
+
+:::
