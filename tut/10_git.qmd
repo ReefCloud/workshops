@@ -3772,3 +3772,458 @@ subdirectories) we issue the `git add .` _command_ (notice the dot).
 cd ~/tmp/Repo1
 git add .
 ```
+
+## `.gitignore`
+
+Whilst it is convenient to not have to list every file that you want
+to be staged (added), what about files that we don't want to get
+staged and committed. It is also possible to define a file (called
+`.gitignore`) that is a list of files (or file patterns) that are to
+be excluded when we request all files be added. This functionality is
+provided via the `.gitignore` _file_ that must be in the root of the
+repository working directory.
+
+For example, we may have temporary files or automatic backup files or
+files generated as intermediates in a compile process etc that get
+generated. These files are commonly generated in the process of
+working with files in a project, yet we do not necessarily wish for
+them to be tracked. Often these files have very predictable filename
+pattern (such as ending with a # or ~ symbol or having a specific file
+extension such as .aux. 
+
+As an example, when working with a project in Rstudio, files (such as
+`.Rhistory`) and directories (such as `.Rproj.user`) are automatically
+added to the file system and thus appear as untracked files in git
+status.
+
+Hence, we can create a`.gitignore` to exclude these files/directories.
+Indeed, if you are using Rstudio, you might have noticed that a
+`.gitignore` file was automatically created when you created the
+project.
+
+
+Lets start by modifying the `file2` and creating a new file
+`f.tmp` (that we want to ignore).
+
+::: {.panel-tabset}
+
+### Terminal
+```{bash}
+#| label: git-add7
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+echo '---' >> dir1/file2
+echo 'temp' > dir1/f.tmp
+```
+
+### Rstudio
+
+1. navigate to the `dir1` directory and open `file2` for editing (or
+   just make sure you are on the `file2` tab.
+2. edit the file such that it just contains three hyphens (`---`)
+   before saving the file
+3. in the same `dir1` directory add another new text file (`f.tmp`)
+   and edit this file to contain the word `temp` (then save the file)
+
+The Git status panel should display both of these as untracked files.
+
+![](resources/rstudio_gitignore1.png)
+:::
+
+
+To ignore the `f.tmp` file, we could either explicitly add
+this file as a row in a `.gitignore` file, or else we could
+supply a wildcard version that will ignore all files ending in
+`.tmp`.
+
+::: {.panel-tabset}
+
+### Terminal
+```{bash}
+#| label: git-ignore1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+echo '*.tmp' > .gitignore
+cat .gitignore
+```
+### Rstudio
+1. navigate back to the root of the project
+2. click on the `gitignore` file to open it up for editing
+3. navigate to the end of this file and add a newline containing the
+   text `*.tmp`
+   
+   ![](resources/rstudio_gitignore2.png)
+
+You will notice that this `.gitignore` file already had items in it
+before you started editing it. These were added by Rstudio when you
+first created the new project.
+
+The first item is `.Rproj.user` and its presence in this file is why
+it does not appear in the git status panel.
+
+Once we save the `.gitignore` file, notice how the `f.tmp` file is
+similarly removed from the git status panel - since via `.gitignore`
+we have indicated that we want to ignore this file (not track it as
+part of our version control system).
+
+:::
+
+::: {.callout-note collapse="true"}
+## More information about exclusions (`.gitignore`)
+
+| Entry          | Meaning                                                                                                                |
+|----------------|------------------------------------------------------------------------------------------------------------------------|
+| `file1`        | DO NOT stage (add) file1                                                                                               |
+| `*.tmp`        | DO NOT stage (add) any file ending in .tmp                                                                             |
+| `/dir1/*`      | DO NOT stage (add) the folder called dir1 (or any of its contents) unless this is specifically negated (see next line) |
+| `!/dir1/file2` | DO stage (add) the file called file2 in the dir1 folder                                                                                                                       |
+
+: {.primary .bordered .sm .paramsTable}
+
+:::
+
+
+Now when we go to add all files to the staging area, those that fall
+under the exclude rules will be _ignored_
+
+::: {.panel-tabset}
+
+### Terminal
+```{bash}
+#| label: gitgitignore2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git add .
+```
+```{bash}
+#| label: gitgitignore3
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git status
+```
+
+You will notice that `.gitignore` was added as a _new file_ and
+`dir1/file2` was marked as _modified_ yet `dir1/f.tmp` was totally
+ignored.
+
+### Rstudio
+
+You will notice that `.gitignore` was added as a _new file_ and
+`dir1/file2` was marked as _modified_ yet `dir1/f.tmp` was totally
+ignored.
+
+1. check the boxes next to each of the files listed in the status
+   panel
+
+   ![](resources/rstudio_gitignore3.png)
+
+:::
+
+
+Lets now commit these changes.
+
+::: {.panel-tabset}
+
+### Terminal
+```{bash}
+#| label: gitgitignore4
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git commit -m 'Modified file2, added .gitignore'
+```
+
+```{bash}
+#| label: gitgitignore5
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git status
+```
+
+### Rstudio
+
+1. click on the "Commit" button
+2. add a commit message (such as `Modified file2, added .gitignore`)
+3. click the "Commit" button
+4. close the popup
+5. close the "Review Changes" window
+:::
+
+
+For those still interested in the schematic...
+
+```{cat}
+#| label: Fig-advanced6
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig-advanced6.tikz"
+
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\usetikzlibrary{arrows.meta}
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_tree}{HTML}{9ACD32} %\definecolor{color_tree}{rgb}{0.78,0.86,0.27}
+\definecolor{color_commit}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+\definecolor{color_index}{HTML}{E0FFFF} %\definecolor{color_index}{rgb}{1,1,1}
+\definecolor{color_file}{rgb}{1,1,1}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+%Define a file 
+\newcommand{\file}[4] {
+\def\corner{0.15in};
+\def\cornerradius{0.02in};
+\def\lwidth{0.02in};
+\def\h{0.5in};
+\def\w{0.85in};
+\def\nline{0};
+\def\iconmargin{0.1in};
+\def\topmargin{0.3in};
+\node at (#1) {\begin{tikzpicture}
+\coordinate (nw) at ($(-0.05in*1,-0.15in*1)$);
+\coordinate (#3) at (#1); 
+\coordinate (ne0) at ($(nw) + (\w, 0)$);
+\coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+\coordinate (ne2) at ($(ne0) - (0, \corner)$);
+\coordinate (se) at ($(ne0) + (0, -\h)$); 
+\filldraw [-, line width = \lwidth, fill=#4] (nw) -- (ne1) -- (ne2)
+[rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+\draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+\node [anchor=north west,TREE] at (nw) {#2};
+\foreach \k in {0,...,\nline}
+{
+\draw [-, line width = \lwidth, line cap=round] 
+($(nw|-se) + (\iconmargin,\iconmargin) + (0,{(\k-1)/(\nline-1)*(\h - \iconmargin - \topmargin)})$)
+-- ++ ($(\w,0) - 2*(\iconmargin,0)$);
+}
+\end{tikzpicture}};
+}
+% end of file definition
+    
+\begin{tikzpicture}
+\coordinate (G_ul) at (0,0);
+\coordinate (G_ll) at ($(G_ul) +(0,-10)$);
+\coordinate (G_lr) at ($(G_ll) +(4,0)$);
+\coordinate (G_ur) at ($(G_ul) +(4,0)$);
+
+\node[TREE,anchor=west] at ($(G_ul) +(0,-0.5)$) (git) {.git/};
+\file{$(git.west) +(1.5,-2)$}{HEAD}{HEAD}{color_head}
+\file{$(HEAD) +(0,-2)$}{index}{index}{color_index}
+\draw[] (G_ul) -- (G_ll) -- (G_lr) -- (G_ur) -- cycle;
+
+%refs
+\node[TREE,anchor=west] at ($(G_ul) +(-5,-0.5)$) (git_ref) {.git/refs/};
+\file{$(git_ref.west) +(1.5,-2)$}{\textcolor{white}{master}}{master}{color_master}
+\draw[] ($(G_ul) +(-5,0)$) -- ++(0,-10) -- ++(4.9,0) -- ++(0,10) -- cycle;
+
+
+%files
+\node[TREE,anchor=west] at ($(G_ul) +(-21,-0.5)$) (root) {/};
+\file{$(root.west) +(1.7,-2)$}{\textcolor{black}{file1}}{file1}{color_file}
+\node[TREE,anchor=west] at ($(root |- file1) +(0.4,-2.2)$) (dir1) {dir1/};
+\draw [very thick] (root) -- (root |- file1) -- ++(0.2,0);
+\draw [very thick] (root) -- (root |- dir1) -- ++(0.2,0);
+\file{$(dir1.west) +(1.7,-1.0)$}{\textcolor{black}{file2}}{file2}{color_file}
+\draw [very thick] ($(dir1.west) +(0.2,-0.2)$) -- ($(dir1.west |- file2) +(0.2,0)$) -- ++(0.2,0);
+\file{$(file2.west) +(0,-1.5)$}{\textcolor{black!70}{f.tmp}}{file3}{color_file}
+\draw [very thick] ($(dir1.west) +(0.2,-0.2)$) -- ($(dir1.west |- file3) +(0.2,0)$) -- ++(0.2,0);
+\file{$(root.west) +(1.7,-8.5)$}{\textcolor{black}{.giti.}}{file4}{color_file}
+\draw [very thick] (root) -- (root |- file4) -- ++(0.2,0);
+\begin{pgfonlayer}{background}
+\draw[fill=color_workspace!20] ($(G_ul) +(-21,0)$) -- ++(0,-10) -- ++(3.9,0) -- ++(0,10) -- cycle;
+\end{pgfonlayer}
+
+%objects
+\node[TREE,anchor=west] at ($(G_ul) +(-17,-0.5)$) (git_object) {.git/objects/};
+\file{$(git_object.west) +(1.5,-2)$}{\textcolor{black}{hashblob1}}{blob1}{color_workspace!20}
+\file{$(git_object.west) +(1.5,-3.5)$}{\textcolor{black}{hashblob3}}{blob2}{color_workspace}
+\file{$(git_object.west |- file2.north) +(1.5,-0)$}{\textcolor{black}{hashblob2}}{blob3}{color_workspace!20}
+
+\file{$(git_object.west |- file3.north) +(1.5,0)$}{\textcolor{black}{hashblob5}}{blob4}{color_workspace}
+\file{$(git_object.west |- file4.north) +(1.5,0)$}{\textcolor{black}{hashblob4}}{blob5}{color_workspace}
+\draw[] ($(G_ul) +(-17,0)$) -- ++(0,-10) -- ++(11.9,0) -- ++(0,10) -- cycle;
+
+%trees
+\file{$(blob1.west) +(5,0)$}{\textcolor{black}{hashtree1}}{tree1}{color_tree!20}
+\file{$($(blob3.west) !0.5! (blob3.west)$) +(3,0)$}{\textcolor{black}{hashtree3}}{tree2}{color_tree!20}
+\file{$($(blob2.west) !0.5! (blob3.west)$) +(5.75,0)$}{\textcolor{black}{hashtree2}}{tree3}{color_tree!20}
+\file{$($(blob4.west) !0.5! (blob4.west)$) +(3,0)$}{\textcolor{black}{hashtree5}}{tree4}{color_tree}
+\file{$($(blob4.west) !0.5! (blob5.west)$) +(5.75,0)$}{\textcolor{black}{hashtree4}}{tree5}{color_tree}
+
+%commits
+\file{$(tree1.west) +(3,0)$}{\textcolor{black}{hashcommits1}}{commit1}{color_commit!20}
+\file{$(tree3.west) +(2.75,0)$}{\textcolor{black}{hashcommits2}}{commit2}{color_commit!20}
+\file{$(tree5.west) +(2.75,0)$}{\textcolor{black}{hashcommits3}}{commit3}{color_commit}
+
+%arrows
+\draw[->,very thick,draw=black] ($(HEAD) +(-1,0)$) -- ($(master) +(1.2,0)$);
+\draw[->,very thick] ($(master) +(-1,0)$) -- ($(commit3) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(commit1) +(-1,0)$) -- ($(tree1) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree1) +(-1,0)$) -- ($(blob1) +(1.2,0)$);
+    
+\draw[->,very thick,draw=gray] ($(commit2) +(-1,0)$) -- ($(tree3) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree3) +(-1,0)$) -- ($(tree2) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree3) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\draw[->,very thick,draw=gray] ($(tree2) +(-1,0)$) -- ($(blob3) +(1.2,0)$);
+    
+\draw[->,very thick,draw=gray] ($(commit2) +(0,0.6)$) -- ($(commit1) +(0,-0.7)$);
+    
+\draw[->,very thick] ($(commit3) +(-1,0)$) -- ($(tree5) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(tree4) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(blob5) +(1.2,0)$);
+\draw[->,very thick] ($(tree4) +(-1,0)$) -- ($(blob4) +(1.2,0)$);
+\draw[->,very thick] ($(tree5) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\draw[->,very thick] ($(commit3) +(0,0.6)$) -- ($(commit2) +(0,-0.7)$);
+    
+\draw[<-,very thick,dashed] ($(blob2) +(-1.2,0)$) -- ($(file1) +(1.2,0)$);
+\draw[<-,very thick,dashed] ($(blob4) +(-1.2,0)$) -- ($(file2) +(1.2,0)$);
+\draw[<-,very thick,dashed] ($(blob5) +(-1.2,0)$) -- ($(file4) +(1.2,0)$);
+    
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob3) +(1.2,0)$);
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+#commit 
+hash = scan('~/tmp/Repo1/.git/refs/heads/main', what='character')
+hash_commits = c(hash_commits, strtrim(hash, width = 5))
+
+# tree
+hash = system(paste0("cd ~/tmp/Repo1; git cat-file -p ", hash_commits[2]), intern = TRUE)
+hash = read.table(textConnection(hash[1]))
+hash_tree = c(hash_tree, strtrim(hash$V2, 5))
+
+hash = system(paste0('cd ~/tmp/Repo1; git cat-file -p HEAD^{tree}'), intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_tree = c(hash_tree, strtrim(hash$V3[hash$V2 == "tree"], 5))
+
+#blob
+hash = system('cd ~/tmp/Repo1; git ls-files --stage', intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_blob = unique(c(hash_blob,strtrim(hash$V2,5)))
+ 
+system(paste0("sed -i 's/hashblob1/", hash_blob[1], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashblob2/", hash_blob[2], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashblob3/", hash_blob[3], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashblob4/", hash_blob[4], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashblob5/", hash_blob[5], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashtree1/", hash_tree[1], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashtree2/", hash_tree[2], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashtree3/", hash_tree[3], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashtree4/", hash_tree[4], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashtree5/", hash_tree[5], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashcommits1/", hash_commits[1], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashcommits2/", hash_commits[2], "/g' resources/Fig-advanced6.tikz"))
+system(paste0("sed -i 's/hashcommits3/", hash_commits[3], "/g' resources/Fig-advanced6.tikz"))
+system("xelatex -output-directory=resources resources/Fig-advanced6.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig-advanced6.pdf resources/Fig-advanced6.png")
+```
+
+  
+![](resources/Fig-advanced6.png)
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the git
+```{bash}
+#| label: gitDraw6
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit6.png 
+```
+
+![](10_git_files/figure-html/drawGit6.png){width=100%}
+
+:::
+
+::: {.callout-note collapse="true"}
+## More information about committing changes to the repository
+Committing staged changes creates an object under the `.git` tree.
+
+```{r, replace=TRUE}
+#| label: git-add6a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -a --charset unicode
+```
+
+```{r, replace=TRUE}
+#| label: git-add6b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git cat-file -p HEAD
+```
+
+```{r, replace=TRUE}
+#| label: git-add6c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git cat-file -p HEAD^{tree}
+```
+
+```{r, replace=TRUE}
+#| label: git-add6d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --oneline
+```
+
+:::
