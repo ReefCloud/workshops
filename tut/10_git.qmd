@@ -4884,7 +4884,7 @@ cd ~/tmp/Repo1
 git reflog
 ```
 
-### Rstudio
+#### Rstudio
 
 The functionality to add tags to commits is not directly supported in
 Rstudio. in order to apply a tag, you will need to switch the terminal
@@ -4927,3 +4927,284 @@ we can see the tag represented by a yellow tag in the commit diagram.
 
 :::
 
+
+# Branching
+
+Again we will start with our repository. For this section, will be
+working on the repository built up in the previous section.
+
+
+::: {.callout-note collapse="true"}
+## Commands to create the repository (from above)
+```{bash}
+#| label: git_status1a
+#| classes: bash
+#| engine: bash
+#| echo: true
+#| cache: false
+#| eval: true
+rm -rf ~/tmp/Repo1
+mkdir ~/tmp/Repo1
+cd ~/tmp/Repo1
+git init 
+echo 'File 1' > file1
+git add file1
+git commit -m 'Initial repo and added file1'
+echo '---------------' >> file1
+mkdir dir1
+echo '* Notes' > dir1/file2
+git add file1 dir1/file2
+git commit -m 'Modified file1 and added file2 (in dir1)'
+echo '---' >> dir1/file2
+echo 'temp' > dir1/f.tmp
+echo '*.tmp' > .gitignore
+git add .
+git commit -m 'Modified file2, added .gitignore'
+git tag V.1
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Graphical representations of the repository
+The following are a couple of different visuals of the repository.
+
+```{bash}
+#| label: git-status2a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+```
+
+![](resources/Fig-advanced6.png)
+
+```{bash}
+#| label: gitDraw6a
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit6a.png 
+```
+
+![](10_git_files/figure-html/drawGit6a.png){width=100%}
+:::
+
+```{cat}
+#| label: Fig7
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7.tikz"
+
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_commit}{commitshash3}{commitscomment3}
+\master{below = 1cm of commitshash3} 
+\HEAD{below = 0.1cm of master} 
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+
+system(paste0("sed -i 's/commitshash1/", commits$hash[1], "/g' resources/Fig7.tikz"))
+system(paste0("sed -i 's/commitscomment1/", commits$comment[1], "/g' resources/Fig7.tikz"))
+system(paste0("sed -i 's/commitshash2/", commits$hash[2], "/g' resources/Fig7.tikz"))
+system(paste0("sed -i 's/commitscomment2/", commits$comment[2], "/g' resources/Fig7.tikz"))
+system(paste0("sed -i 's/commitshash3/", commits$hash[3], "/g' resources/Fig7.tikz"))
+system(paste0("sed -i 's/commitscomment3/", commits$comment[3], "/g' resources/Fig7.tikz"))
+system("xelatex -output-directory=resources resources/Fig7.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7.pdf resources/Fig7.png")
+```
+
+![](resources/Fig7.png)
+
+Lets assume that the current commit represents a largely stable
+project. We are about to embark on a substantial modification in the
+form of a new feature that will involve editing `file1` and adding a
+new file to `dir1`. At the same time, we wish to leave open the
+possibility of committing additional minor changes to the current
+commit in order to address any bugs or issues that might arise.
+
+In essence what we want to do is start a new _branch_ for the new
+feature. This is performed in two steps:
+
+1. use the `git branch <name>` _command_ to generate a new branch
+   _reference_. In the following example, I will call the new branch
+   **Feature**, but it can be anything.
+
+:::: {.indented}
+
+::: {.panel-tabset}
+
+## Terminal
+
+```{bash}
+#| label: git_branch1
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git branch Feature
+```
+
+## Rstudio
+
+To create a new branch, click on the "New branch" icon (see figure
+below) and enter a name (e.g. `Feature`) for the branch in the popup
+box.
+
+![](resources/rstudio_gitbranch1.png)
+
+:::
+
+```{cat}
+#| label: Fig7a
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig7a.tikz"
+    
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+    \usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+    
+\input{resources/common1.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+    
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+    
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_commit}{commitshash3}{commitscomment3}
+\master{below = 1cm of commitshash3} 
+\HEAD{below = 0.1cm of master} 
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+\branch{below = 0.1cm of HEAD}{Feature} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+
+system(paste0("sed -i 's/commitshash1/", commits$hash[1], "/g' resources/Fig7a.tikz"))
+system(paste0("sed -i 's/commitscomment1/", commits$comment[1], "/g' resources/Fig7a.tikz"))
+system(paste0("sed -i 's/commitshash2/", commits$hash[2], "/g' resources/Fig7a.tikz"))
+system(paste0("sed -i 's/commitscomment2/", commits$comment[2], "/g' resources/Fig7a.tikz"))
+system(paste0("sed -i 's/commitshash3/", commits$hash[3], "/g' resources/Fig7a.tikz"))
+system(paste0("sed -i 's/commitscomment3/", commits$comment[3], "/g' resources/Fig7a.tikz"))
+system("xelatex -output-directory=resources resources/Fig7a.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig7a.pdf resources/Fig7a.png")
+```
+    
+![](resources/Fig7a.png)
+
+::: {.callout-note}
+Note, at this stage we have only created a reference to a new branch,
+until we commit to this branch, its contents will be the same as the
+main branch.
+:::
+
+::: {.callout-note collapse="true"}
+## More information following the creation of the branch
+
+```{r, replace=TRUE}
+#| label: git-branch7a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline
+```
+```{r, replace=TRUE}
+#| label: git-branch7a2
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+git reflog
+```
+:::
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7a
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7a.png 
+```
+
+![](10_git_files/figure-html/drawGit7a.png){width=100%}
+
+:::
+
+
+::::
