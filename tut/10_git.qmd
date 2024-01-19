@@ -4835,3 +4835,95 @@ git clean -qfdx
 git reflog expire --expire-unreachable=now --all
 git gc --prune=now
 ```
+
+## Tags
+
+Although it is possible to track the history of a repository via its
+commit sha1 names, most find it more convenient to apply **tags** to
+certain milestone commits. For example, a particular commit might
+represent a specific point in the history of a project - such as a
+release version. Git tags allow us to apply more human readable flags.
+
+::: {.panel-tabset}
+
+#### Terminal
+```{bash}
+#| label: git_tag1a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git tag V.1
+```
+
+In the above, `V.1` is the tag we are applying to the most recent
+commit. For this example, `V.1` simply denotes something like "version
+1". The tag must not contain any spaces (just replace space characters
+with underscores or periods).
+
+```{bash}
+#| label: git_tag1b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline
+```
+```{bash}
+#| label: git_tag1c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git reflog
+```
+
+### Rstudio
+
+The functionality to add tags to commits is not directly supported in
+Rstudio. in order to apply a tag, you will need to switch the terminal
+and enter a command like:
+
+![](resources/rstudio_gittag1.png)
+
+```{bash}
+#| label: git_tag1a
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash
+```
+In the above, `V.1` is the tag we are applying to the most recent
+commit. For this example, `V.1` simply denotes something like "version
+1". The tag must not contain any spaces (just replace space characters
+with underscores or periods).
+
+Now if we return to the "History" tab of the "Review Changes" window,
+we can see the tag represented by a yellow tag in the commit diagram.
+
+![](resources/rstudio_gittag2.png)
+:::
+
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw7
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit7.png 
+```
+
+![](10_git_files/figure-html/drawGit7.png){width=100%}
+
+:::
+
