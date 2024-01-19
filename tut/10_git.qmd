@@ -7919,3 +7919,645 @@ system("convert +repage -density 300 -resize 20% resources/Fig9c.pdf resources/F
 ![](10_git_files/figure-html/drawGit9c.png){width=100%}
 
 :::
+
+
+## Revert
+
+As with `git reset`, `git revert` is not directly supported by
+Rstudio, hence the methods used in this section should be performed in
+the terminal. There is one exception to this, Rstudio is able to
+revert an modified file back to its state in the last commit.
+
+::: {.callout-note collapse="true"}
+## Re-establish repository
+
+```{r, replace=TRUE}
+#| label: git-reset3a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+```
+
+:::
+
+
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub(".*:", "", commits$comment), 15), "..")
+```
+
+Revert generates a new commit that removes the changes that were
+introduced by one or more of the most recent commits. Note, it does
+not revert to a particular commit, but rather undoes a commit. So, to
+roll back to ``r commits$hash[2]`` (the second
+last commit), we just have to revert the last commit
+(`HEAD`).
+
+
+```{bash}
+#| label: git-revert1a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git revert HEAD
+```
+
+However, if we explore the `reflog`, we can see the entire history
+
+```{r, replace=TRUE}
+#| label: git-rollback5b
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+
+```{r, replace=TRUE}
+#| label: git-rollback5a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rollback5c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+
+Notice the absence of `.gitignore`. Notice also that `dir1/f.tmp` is
+also present. Although this file was added at the same time as
+`.gitignore`, it was never committed and therefore is not altered with
+repo manipulations.
+
+If we list the files that are part of the repo:
+```{r, replace=TRUE}
+#| label: git-rollback5d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git ls-files
+```
+
+we will see that we are back to the state where only `file1` and
+`dir1/file2` are present.
+:::
+
+
+```{cat}
+#| label: Fig9d
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig9d.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_commit!20}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2) -- (commitshash3.west);
+
+\commit{right = 1.5cm of commitshash3}{commitshash7}{color_commit}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+
+\master{below = 1cm of commitshash7} 
+\HEAD{below = 0.1cm of master} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig9d.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig9d.tikz")) 
+  }
+
+system("xelatex -output-directory=resources resources/Fig9d.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig9d.pdf resources/Fig9d.png")
+```
+
+![](resources/Fig9d.png)
+
+::: {.callout-note collapse="true"}
+
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw9d
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit9d.png 
+```
+
+![](10_git_files/figure-html/drawGit9d.png){width=100%}
+
+:::
+
+::: {.callout-note collapse="true"}
+## Re-establish repository
+
+```{r, replace=TRUE}
+#| label: git-reset3a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+```
+
+:::
+
+
+If we had actually wanted to roll back to commit ``r commits$hash[1]``, 
+then we could do so by sequentially issuing `git revert`:
+
+```{bash}
+#| label: git-revert2a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git revert --no-commit HEAD
+git revert --no-commit HEAD~1
+git commit -m 'Rolled back'
+```
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rollback6b
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+
+```{r, replace=TRUE}
+#| label: git-rollback6a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+
+```{r, replace=TRUE}
+#| label: git-rollback6c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+
+Notice that `file2` is now also absent. If we list the files that are
+part of the repo:
+
+```{r, replace=TRUE}
+#| label: git-rollback6d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git ls-files
+```
+we will see that we are back to the state where only `file` is present
+:::
+
+```{cat}
+#| label: Fig9e
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig9e.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_commit!20}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2) -- (commitshash3.west);
+
+\commit{right = 1.5cm of commitshash3}{commitshash7}{color_commit}{commitshash7}{commitscomment7}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+
+\master{below = 1cm of commitshash7} 
+\HEAD{below = 0.1cm of master} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig9e.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig9e.tikz")) 
+  }
+
+system("xelatex -output-directory=resources resources/Fig9e.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig9e.pdf resources/Fig9e.png")
+```
+
+![](resources/Fig9e.png)
+
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw9e
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit9e.png 
+```
+
+![](10_git_files/figure-html/drawGit9e.png){width=100%}
+
+:::
+
+## Checkout and branching
+
+Once again, the methods outlined in this section are not directly
+supported by Rstudio. Please use the terminal instead.
+
+::: {.callout-note collapse="true"}
+## Re-establish repository
+
+```{r, replace=TRUE}
+#| label: git-reset3a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+```
+
+:::
+
+
+If we wanted to review the state of files corresponding to commit 
+``r commits$hash[2]``, we could checkout the code from that commit. This
+provides a way to travel back in time through your commits and explore
+the (tracked) files exactly as they were.
+
+```{r}
+#| label: bash3
+#| echo: false
+#| eval: true
+#| cache: false
+hash = read.fwf('~/tmp/Repo1/.git/logs/HEAD', widths=40)
+hash_commit = strtrim(hash$V1[3], width=5)
+knit_engines$set(bash1=function(options) {
+  engine=options$engine
+  options$code = gsub('#',hash_commit,options$code)
+  code = paste("-c",shQuote(paste(options$code, collapse="\n")))
+  code = paste(options$engine.opts,code)
+  cmd = 'bash'
+  out = system2(cmd, code, stdout=TRUE, stderr=TRUE, env=options$engine.env)
+  engine_output(options,options$code,out) 
+})
+
+```
+```{r, replace=TRUE}
+#| label: git-reset9e
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| warning: true
+#| message: true
+#| error: true
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git checkout #
+```
+
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-rollback7b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+
+```{r, replace=TRUE}
+#| label: git-rollback7a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+
+```{r, replace=TRUE}
+#| label: git-rollback7c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -ra -L 2 --charset ascii
+```
+
+Notice that `file2` is now also absent. If we list the files that are
+part of the repo:
+
+```{r, replace=TRUE}
+#| label: git-rollback7d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git ls-files
+```
+we will see that we are back to the state where only `file` is present
+:::
+
+```{cat}
+#| label: Fig9f
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig9f.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+      
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_commit!20}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_commit}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2) -- (commitshash3.west);
+
+\master{below = 1cm of commitshash3} 
+\HEAD{below = 1cm of commitshash2} 
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig9f.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig9f.tikz")) 
+  }
+
+system("xelatex -output-directory=resources resources/Fig9f.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig9f.pdf resources/Fig9f.png")
+```
+
+![](resources/Fig9f.png)
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw9f
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit9f.png 
+```
+
+![](10_git_files/figure-html/drawGit9f.png){width=100%}
+
+:::
+
+::: {.callout-note collapse="true"}
+## Rstudio git history representation
+
+If we go to the "History" tab of the "Review Changes" window, you will
+notice that the commit history has been truncated to reflect that we
+have gone back in commit history.
+
+![](resources/rstudio_gitrollback2.png)
+
+Nevertheless, if we select "All branches" from the dropdown menu, we
+can see the full commit history.
+
+![](resources/rstudio_gitrollback3.png)
+:::
+
+
+The output advises us that we are in a **detached HEAD state**.
+This occurs when a `commit` is checked out rather than a
+`branch`. Normally, when changes are committed, the new
+commit is added to the `HEAD` of the current branch.
+However, in a detached HEAD state, any commits that are made are not
+associated with any branch and will effectively be lost next time you
+checkout.
+
+So if for example, we then added another file (`file3`)..
+
+```{bash}
+#| label: git-checkout9
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+echo 'END' > file3
+git add file3
+git commit -m 'END added to file3'
+```
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+
+```{r, replace=TRUE}
+#| label: git-checkout9b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+```{r, replace=TRUE}
+#| label: git-checkout9a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+:::
+
+
+Now if we checked out `main`, the commit we made whilst in _detached
+head mode_ would be lost.
+
+```{bash}
+#| label: git-checkout10
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git checkout main
+```
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+```{r, replace=TRUE}
+#| label: git-checkout9c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+
+```{r, replace=TRUE}
+#| label: git-checkout9d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+:::
+
+If, having reviewed the state of a commit (by checking it out), we
+decided that we wanted to roll back to this state and develop further
+(make additional commits), we are effectively deciding to start a new
+branch that splits off at that commit. See the section on <a
+href="#Branching">Branching</a> for more details on how to do that.
