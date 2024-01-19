@@ -3067,3 +3067,107 @@ git log --oneline
 ```
 
 :::
+
+
+## More changes
+
+```{tikz}
+%| label: Fig2b
+%| engine: tikz
+%| echo: false
+%| cache: true
+%| dependson: common
+%| include: false
+%| class: tikz
+%| engine-opts:
+%|   template: "resources/tikz-minimal.tex"
+\input{resources/common.tikz}
+\tikzstyle{refText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+\begin{tikzpicture}
+\commit{}{A}{color_inactive}{}{}
+\draw [-,line width=3pt,draw=black!60] (A) -- ++(-1,0);
+\commit{right = 1cm of A}{B}{color_commit}{}{}
+\draw [-,line width=3pt,draw=black!60] (B) -- (A);
+\master{right = 0.5cm of B}\draw[->,line width=3pt,draw=black!60] (master) -- (B);
+\HEAD{right = 0.5cm of master}\draw[->,line width=3pt,draw=black!60] (HEAD) -- (master);
+\end{tikzpicture}  
+```
+```{bash}
+#| label: Fig2b-conv
+#| cache: false
+#| echo: false
+convert -trim +repage -density 300 -resize 20% 10_git_files/figure-html/Fig2b-1.pdf 10_git_files/figure-html/Fig2b-1.png  
+```
+
+![](10_git_files/figure-html/Fig2b-1.png)
+
+Whenever a file is added or modified, if the changes are to be
+tracked, the file needs to be added to the staging area. Lets
+demonstrate by modifying `file1` and adding an additional
+file (`file2`), this time to a subdirectory (`dir1`).
+
+::: {.panel-tabset}
+
+### Terminal
+
+```{bash}
+#| label: git-add4
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+echo '---------------' >> file1
+mkdir dir1
+echo '* Notes' > dir1/file2
+git add file1 dir1/file2
+```
+
+Now if we re-examine the status:
+
+```{bash}
+#| label: git-add5
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git status
+```
+
+### Rstudio
+
+1. modify `file1` by adding a number of hyphens under the `File 1`
+   like in the figure below
+   
+   ![](resources/rstudio_commit3.png)
+
+2. save the file. As you do so, you should notice that the file
+   reappears in the status panel (this time with a blue "M" to signify
+   that the file has been modified)
+3. to create the subdirectory, click on the "Add a new folder" icon
+   and then enter a name for the subdirectory in the popup box (as per
+   figure below)
+   
+   ![](resources/rstudio_commit4.png)
+   
+4. navigate to this new directory (`dir1`)
+5. click the "Create a new blank file in current directory" button and
+   select "Text file"
+6. enter a new filename (`file2`) into the popup box
+7. enter some text into this file (like in the figure below)
+
+   ![](resources/rstudio_commit5.png)
+   
+8. save the file and notice that the `dir1` directory is now also in
+   the git status panel (yet its status is "untracked")
+9. stage both `file1` and `dir1` (click on the corresponding checkboxes)
+
+   ![](resources/rstudio_commit6.png)
+:::
+
+10. clickV the "Commit" button
+11. you might like to explore the changes associated with each file
+12. enter a commit message (as in the figure below)
