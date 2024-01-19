@@ -2796,3 +2796,89 @@ cd .git
 ls -la
 tree
 ```
+
+::: {.callout-note collapse="true"}
+## Additional details about the commit
+
+The following modifications have occurred (in reverse order to how
+they actually occur):
+
+- The **main** _branch_ reference was created. There is currently only
+  a single branch (more on branches later). The branch reference point
+  to (indicates) which commit is the current commit within a branch.
+
+  ```{bash}
+  #| label: git-commit1a
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  cat .git/refs/heads/main
+  ```
+
+- A **commit** was created. This points to a **tree** (which itself
+  points to the blob representing `file1`) as well as other important
+  metadata (such as who made the commit and when). Since the time
+  stamp will be unique each time a snapshot is commited, so too the
+  name of the commit (as a SHA-1 checksum hash) will differ. **To
+  reiterate, the names of blobs and trees are determined by contents
+  alone, commit names are also incorporate commit timestamp and
+  details of the committer - and are thus virtually unique**.
+
+  ```{r}
+  #| label: bash1
+  #| echo: false
+  #| eval: true
+  #| cache: false
+  hash = scan('~/tmp/Repo1/.git/refs/heads/main', what='character')
+  hash_commit = strtrim(hash, width=5)
+  knit_engines$set(bash1=function(options) {
+    engine=options$engine
+    options$code = gsub('#',hash_commit,options$code)
+    code = paste("bash -c",shQuote(paste(options$code, collapse="\n")))
+    code = paste(options$engine_opts,code)
+    out = system(code,intern=TRUE)
+    engine_output(options,options$code,out) 
+  })
+  ```
+  
+  ```{r, replace=TRUE}
+  #| label: git-commit1b
+  #| echo: !expr -1
+  #| eval: false
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git cat-file commit #
+  ```
+
+- A **tree** object was created. This represents the directory tree of
+  the snapshot (commit) and thus points to the **blob**s.
+
+  ```{r, replace=TRUE}
+  #| label: git-commit1c
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git ls-tree #
+  ```
+  
+  Or most commonly (if interested in the latest commit):
+  
+  ```{r, replace=FALSE}
+  #| label: git-commit1d
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git ls-tree HEAD
+  ```
+::: 
