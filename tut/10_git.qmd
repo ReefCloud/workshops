@@ -3329,9 +3329,446 @@ system("convert +repage -density 300 -resize 20% resources/Fig-advanced4.pdf res
 ![](resources/Fig-advanced4.png)
 
 
+::: {.callout-note collapse="true"}
+## Another visual representation of the git
+```{bash}
+#| label: gitDraw4
+#| engine: bash
+#| cache: false
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit4.png 
+```
+
+![](10_git_files/figure-html/drawGit4.png)
+
+:::
+
+::: {.callout-note collapse="true"}
+## More information about staging changes to the repository
+
+So when **staging**, the following has been performed:
+
+- the `index` file has been updated
+
+  ```{bash}
+  #| label: git-modify1
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git ls-files --stage
+  ```
+
+- two new _blobs_ have been generated. One representing the modified
+  `file1` and the other representing the newly created `file2` in the
+  `dir1` folder. The _blob_ that represented the original `file1`
+  contents is still present and indeed is still the one currently
+  committed. _Blobs_ are not erased or modified.
+
+:::
 
 
+Now we will commit this snapshot.
 
-10. clickV the "Commit" button
-11. you might like to explore the changes associated with each file
-12. enter a commit message (as in the figure below)
+::: {.panel-tabset}
+
+### Terminal
+```{bash}
+#| label: git-commit5
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git commit -m 'Modified file1 and added file2 (in dir1)'
+```
+
+### Rstudio
+
+1. click the "Commit" button
+2. you might like to explore the changes associated with each file
+3. enter a commit message (as in the figure below)
+
+   ![](resources/rstudio_commit7.png)
+   
+4. click the "Commit" button
+5. after checking that the "Git Commit" popup does not contain any
+   errors, close the popup
+6. to explore the repository history, click towards the "History"
+   button on the top left corner of the "Review Changes" window
+
+   ![](resources/rstudio_commit8.png)
+   
+   This provides a graphical list of commits (in reverse chronological
+   order)
+
+7. once you have finished exploring the history, you can close the
+   "Review Changes" window
+:::
+
+
+::: {.callout-note collapse="true"}
+## More information about changes to the repository
+
+The following modifications occur:
+
+- the _master_ branch now points to the new _commit_.
+
+  ```{bash}
+  #| label: git-commit5a
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  cat .git/refs/heads/main
+  ```
+  ```{bash}
+  #| label: git-commit5b
+  #| echo: !expr -1
+  #| eval: true
+  #| cache: false
+  #| classes: bash
+  #| engine: bash
+  cd ~/tmp/Repo1
+  git reflog
+  ```
+
+- a new _commit_ was created. This points to a new root _tree_ object
+  and also points to the previous _commit_ (its _parent_).
+
+  ```{r}
+  #| label: bash2
+  #| echo: false
+  #| eval: true
+  #| cache: false
+  hash = scan('~/tmp/Repo1/.git/refs/heads/main', what='character')
+  hash_commit = strtrim(hash, width=5)
+  knit_engines$set(bash1=function(options) {
+    engine=options$engine
+    options$code = gsub('#',hash_commit,options$code)
+    code = paste("bash -c",shQuote(paste(options$code, collapse="\n")))
+    code = paste(options$engine_opts,code)
+    out = system(code,intern=TRUE)
+    engine_output(options,options$code,out) 
+  })
+  ```
+  
+  ```{r, replace=TRUE}
+  #| label: git-commit2b
+  #| echo: !expr -1
+  #| eval: false
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git cat-file commit #
+  ```
+
+- new root _tree_ was created. This points to a _blob_ representing
+  the modified `file1` as well as a newly created sub-directory _tree_
+  representing the `dir1` folder.
+
+  ```{r, replace=TRUE}
+  #| label: git-commit2c
+  #| echo: !expr -1
+  #| eval: false
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git ls-tree 2b61e
+  ```
+
+  ```{r, replace=TRUE}
+  #| label: git-commit2d
+  #| echo: !expr -1
+  #| eval: false
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git cat-file -p HEAD^{tree}
+  ```
+
+- a new sub-directory root _tree_ was created. This points to a
+  _blob_ representing the modified `file1` as well as
+  a newly created subtree _tree_ representing the
+  `file2` file within the `dir1` folder.
+
+  ```{r, replace=TRUE}
+  #| label: git-commit2e
+  #| echo: !expr -1
+  #| eval: false
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git ls-tree #
+  ```
+  
+  OR,
+  
+  ```{r, replace=TRUE}
+  #| label: git-commit2f
+  #| echo: !expr -1
+  #| eval: false
+  #| cache: false
+  #| classes: bash
+  #| engine: bash1
+  cd ~/tmp/Repo1
+  git ls-tree HEAD
+  ```
+
+:::
+
+
+```{cat}
+#| label: Fig-advanced5
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig-advanced5.tikz"
+
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\usetikzlibrary{arrows.meta}
+\definecolor{color_workspace}{rgb}{0.12,0.6,0.51}
+\definecolor{color_tree}{HTML}{9ACD32} %\definecolor{color_tree}{rgb}{0.78,0.86,0.27}
+\definecolor{color_commit}{rgb}{0.9,0.9,0.2}
+\definecolor{color_remote}{rgb}{1,0.55,0.15}
+\definecolor{color_master}{rgb}{0.36,0.27,0.87}
+\definecolor{color_head}{HTML}{6495ED} %\definecolor{color_head}{HTML}{6495ED}
+\definecolor{color_index}{HTML}{E0FFFF} %\definecolor{color_index}{rgb}{1,1,1}
+\definecolor{color_file}{rgb}{1,1,1}
+
+\tikzstyle{TARGET} = [font={\fontspec[Scale=2]{NotoSans-Regular}}] 
+\tikzstyle{CODE} = [font={\fontspec[Scale=2]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{TREE} = [font={\fontspec[Scale=1.5]{InconsolataSemiCondensed-Regular}}] 
+\tikzstyle{fileText} = [font={\fontspec[Scale=1.1]{InconsolataSemiCondensed-Regular}}] 
+
+%Define a file 
+\newcommand{\file}[4] {
+\def\corner{0.15in};
+\def\cornerradius{0.02in};
+\def\lwidth{0.02in};
+\def\h{0.5in};
+\def\w{0.85in};
+\def\nline{0};
+\def\iconmargin{0.1in};
+\def\topmargin{0.3in};
+\node at (#1) {\begin{tikzpicture}
+\coordinate (nw) at ($(-0.05in*1,-0.15in*1)$);
+\coordinate (#3) at (#1); 
+\coordinate (ne0) at ($(nw) + (\w, 0)$);
+\coordinate (ne1) at ($(ne0) - (\corner, 0)$);
+\coordinate (ne2) at ($(ne0) - (0, \corner)$);
+\coordinate (se) at ($(ne0) + (0, -\h)$); 
+\filldraw [-, line width = \lwidth, fill=#4] (nw) -- (ne1) -- (ne2)
+[rounded corners=\cornerradius]--(se) -- (nw|-se) -- cycle;
+\draw [-, line width = \lwidth] (ne1) [rounded corners=\cornerradius]-- (ne1|-ne2) -- (ne2);
+\node [anchor=north west,TREE] at (nw) {#2};
+\foreach \k in {0,...,\nline}
+{
+\draw [-, line width = \lwidth, line cap=round] 
+($(nw|-se) + (\iconmargin,\iconmargin) + (0,{(\k-1)/(\nline-1)*(\h - \iconmargin - \topmargin)})$)
+-- ++ ($(\w,0) - 2*(\iconmargin,0)$);
+}
+\end{tikzpicture}};
+}
+% end of file definition
+    
+\begin{tikzpicture}
+\coordinate (G_ul) at (0,0);
+\coordinate (G_ll) at ($(G_ul) +(0,-10)$);
+\coordinate (G_lr) at ($(G_ll) +(4,0)$);
+\coordinate (G_ur) at ($(G_ul) +(4,0)$);
+
+\node[TREE,anchor=west] at ($(G_ul) +(0,-0.5)$) (git) {.git/};
+\file{$(git.west) +(1.5,-2)$}{HEAD}{HEAD}{color_head}
+\file{$(HEAD) +(0,-2)$}{index}{index}{color_index}
+\draw[] (G_ul) -- (G_ll) -- (G_lr) -- (G_ur) -- cycle;
+
+%refs
+\node[TREE,anchor=west] at ($(G_ul) +(-5,-0.5)$) (git_ref) {.git/refs/};
+\file{$(git_ref.west) +(1.5,-2)$}{\textcolor{white}{master}}{master}{color_master}
+\draw[] ($(G_ul) +(-5,0)$) -- ++(0,-10) -- ++(4.9,0) -- ++(0,10) -- cycle;
+
+%files
+\node[TREE,anchor=west] at ($(G_ul) +(-21,-0.5)$) (root) {/};
+\file{$(root.west) +(1.7,-2)$}{\textcolor{black}{file1}}{file1}{color_file}
+\node[TREE,anchor=west] at ($(root |- file1) +(0.4,-2.5)$) (dir1) {dir1/};
+\draw [very thick] (root) -- (root |- file1) -- ++(0.2,0);
+\draw [very thick] (root) -- (root |- dir1) -- ++(0.2,0);
+\file{$(dir1.west) +(1.7,-1.0)$}{\textcolor{black}{file2}}{file2}{color_file}
+\draw [very thick] ($(dir1.west) +(0.2,-0.2)$) -- ($(dir1.west |- file2) +(0.2,0)$) -- ++(0.2,0);
+\begin{pgfonlayer}{background}
+\draw[fill=color_workspace!20] ($(G_ul) +(-21,0)$) -- ++(0,-10) -- ++(3.9,0) -- ++(0,10) -- cycle;
+\end{pgfonlayer}
+
+%objects
+\node[TREE,anchor=west] at ($(G_ul) +(-17,-0.5)$) (git_object) {.git/objects/};
+\file{$(git_object.west) +(1.5,-2)$}{\textcolor{black}{hashblob1}}{blob1}{color_workspace}
+\file{$(git_object.west) +(1.5,-3.5)$}{\textcolor{black}{hashblob3}}{blob2}{color_workspace}
+\file{$(git_object.west |- file2.north) +(1.5,-0)$}{\textcolor{black}{hashblob2}}{blob3}{color_workspace}
+\draw[] ($(G_ul) +(-17,0)$) -- ++(0,-10) -- ++(11.9,0) -- ++(0,10) -- cycle;
+
+%trees
+\file{$(blob1.west) +(5,0)$}{\textcolor{black}{hashtree1}}{tree1}{color_tree}
+\file{$($(blob3.west) !0.5! (blob3.west)$) +(3,0)$}{\textcolor{black}{hashtree3}}{tree2}{color_tree}
+\file{$($(blob2.west) !0.5! (blob3.west)$) +(5.75,0)$}{\textcolor{black}{hashtree2}}{tree3}{color_tree}
+               
+%commits
+\file{$(tree1.west) +(3,0)$}{\textcolor{black}{hashcommits1}}{commit1}{color_commit}
+\file{$(tree3.west) +(2.75,0)$}{\textcolor{black}{hashcommits2}}{commit2}{color_commit}
+
+%arrows
+\draw[->,very thick] ($(HEAD) +(-1,0)$) -- ($(master) +(1.2,0)$);
+\draw[->,very thick] ($(master) +(-1,0)$) -- ($(commit2) +(1.2,0)$);
+\draw[->,very thick] ($(commit1) +(-1,0)$) -- ($(tree1) +(1.2,0)$);
+\draw[->,very thick] ($(tree1) +(-1,0)$) -- ($(blob1) +(1.2,0)$);
+    
+
+\draw[->,very thick] ($(commit2) +(-1,0)$) -- ($(tree3) +(1.2,0)$);
+\draw[->,very thick] ($(tree3) +(-1,0)$) -- ($(tree2) +(1.2,0)$);
+\draw[->,very thick] ($(tree3) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\draw[->,very thick] ($(tree2) +(-1,0)$) -- ($(blob3) +(1.2,0)$);
+    
+\draw[->,very thick] ($(commit2) +(0,0.6)$) -- ($(commit1) +(0,-0.7)$);
+    
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob3) +(1.2,0)$);
+\draw[->,very thick] ($(index) +(-1,0)$) -- ($(blob2) +(1.2,0)$);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='asis'}
+library(knitr)
+# commit
+hash = scan("~/tmp/Repo1/.git/refs/heads/main", what = "character")
+
+hash_commits = c(hash_commits, strtrim(hash, width=5))
+
+# tree
+hash = system(paste0("cd ~/tmp/Repo1; git cat-file -p ", hash_commits[2]), intern = TRUE)
+hash = read.table(textConnection(hash[1]))
+hash_tree = c(hash_tree, strtrim(hash$V2, 5))
+hash=system(paste0('cd ~/tmp/Repo1; git cat-file -p HEAD^{tree}'), intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_tree = c(hash_tree, strtrim(hash$V3[hash$V2 == "tree"], 5))
+#blob
+hash = system('cd ~/tmp/Repo1; git ls-files --stage', intern=TRUE)
+hash = read.table(textConnection(hash))
+hash_blob = unique(c(hash_blob,strtrim(hash$V2,5)))
+
+system(paste0("sed -i 's/hashblob1/", hash_blob[1], "/g' resources/Fig-advanced5.tikz"))
+system(paste0("sed -i 's/hashblob2/", hash_blob[2], "/g' resources/Fig-advanced5.tikz"))
+system(paste0("sed -i 's/hashblob3/", hash_blob[3], "/g' resources/Fig-advanced5.tikz"))
+system(paste0("sed -i 's/hashtree1/", hash_tree[1], "/g' resources/Fig-advanced5.tikz"))
+system(paste0("sed -i 's/hashtree2/", hash_tree[2], "/g' resources/Fig-advanced5.tikz"))
+system(paste0("sed -i 's/hashtree3/", hash_tree[3], "/g' resources/Fig-advanced5.tikz"))
+system(paste0("sed -i 's/hashcommits1/", hash_commits[1], "/g' resources/Fig-advanced5.tikz"))
+system(paste0("sed -i 's/hashcommits2/", hash_commits[2], "/g' resources/Fig-advanced5.tikz"))
+system("xelatex -output-directory=resources resources/Fig-advanced5.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig-advanced5.pdf resources/Fig-advanced5.png")
+```
+
+  
+![](resources/Fig-advanced5.png)
+
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the git
+```{bash}
+#| label: gitDraw5
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit5.png 
+```
+
+![](10_git_files/figure-html/drawGit5.png){width=100%}
+
+:::
+
+::: {.callout-note collapse="true"}
+## More information about committing changes to the repository
+Committing staged changes creates an object under the `.git` tree.
+
+```{r, replace=TRUE}
+#| label: git-add5a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+tree -a --charset unicode
+```
+
+```{r, replace=TRUE}
+#| label: git-add5b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git cat-file -p HEAD
+```
+
+```{r, replace=TRUE}
+#| label: git-add5c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git cat-file -p HEAD^{tree}
+```
+
+```{r, replace=TRUE}
+#| label: git-add5d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --oneline
+```
+
+:::
+
+Now you might be wondering... What if I have modified many files and I
+want to stage them all. Do I really have to add each file
+individually? Is there not some way to add multiple files at a time?
+The answer of course is yes. To stage all files (including those in
+subdirectories) we issue the `git add .` _command_ (notice the dot).
+
+
+```{bash}
+#| label: git-add6
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git add .
+```
