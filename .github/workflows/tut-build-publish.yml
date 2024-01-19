@@ -109,6 +109,7 @@ jobs:
         run: |
           git config --global user.name "pcinereus"
           git config --global user.email "i.obesulus@gmail.com"
+          git config --global init.defaultBranch main
           
       # render tutorials
       - name: Make tutorials
