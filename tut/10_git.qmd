@@ -6627,37 +6627,45 @@ git reflog
 \draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
 
 %Bug fix
-\commit{right = 1.5cm of commitshash3}{commitshash7}{color_inactive}{commitshash7}{commitscomment7}
-\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash7.west);
+\commit{right = 1.5cm of commitshash3}{commitshash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash4.west);
 
 %New feature
-\commit{right = 1.5cm of commitshash7}{commitshash13}{color_inactive}{commitshash13}{commitscomment13}
-\draw [<-,line width=3pt,draw=black!60] (commitshash7.east) -- (commitshash13.west);
+\commit{right = 1.5cm of commitshash4}{commitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash4.east) -- (commitshash5.west);
 
 %Feature complete
-\commit{right = 1.5cm of commitshash13}{commitshash14}{color_commit}{commitshash14}{commitscomment14}
-\draw [<-,line width=3pt,draw=black!60] (commitshash13.east) -- (commitshash14.west);
+\commit{right = 1.5cm of commitshash5}{commitshash6}{color_commit}{commitshash6}{commitscomment6}
+\draw [<-,line width=3pt,draw=black!60] (commitshash5.east) -- (commitshash6.west);
 
-\master{below = 1cm of commitshash7} 
-\branch{below = 1cm of commitshash14}{Feature} 
+\master{below = 1cm of commitshash4} 
+\branch{below = 1cm of commitshash6}{Feature} 
 \HEAD{below = 0.1cm of Feature} 
 \end{tikzpicture}
 \end{preview}
 \end{document}
 ```
 
-```{r, cache=FALSE, echo=FALSE, results='asis'}
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
 library(knitr)
 
-commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+## commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+## commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+## commits = commits[rev(1:nrow(commits)),]
+## colnames(commits) <- c('hash','comment')
+## commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+## lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+## lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+## lookup = lookup %>% mutate(Ref = ifelse(grepl("main", V2), "main", NA))
+
+commits = system("cd ~/tmp/Repo1; git log --oneline | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
 commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
 commits = commits[rev(1:nrow(commits)),]
 colnames(commits) <- c('hash','comment')
-commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),10),'..')	
+#print(commits)
 
-lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
-lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
-lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
 # get the commits from .git/logs/HEAD
 for (i in 1:dim(commits)[1]) {
   system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig8a.tikz")) 
@@ -6666,6 +6674,7 @@ for (i in 1:dim(commits)[1]) {
 
 system("xelatex -output-directory=resources resources/Fig8a.tikz")
 system("convert +repage -density 300 -resize 20% resources/Fig8a.pdf resources/Fig8a.png")
+    
 ```
 
 ![](resources/Fig8a.png)
@@ -6675,3 +6684,4 @@ If the rebased commits were previously on a remote repository
 (hopefully you checked to make sure noone was relying on any of the
 commits that have been squashed), then it will be necessary to force a
 push on this repository.
+ 
