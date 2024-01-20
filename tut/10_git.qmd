@@ -8561,3 +8561,1065 @@ decided that we wanted to roll back to this state and develop further
 (make additional commits), we are effectively deciding to start a new
 branch that splits off at that commit. See the section on <a
 href="#Branching">Branching</a> for more details on how to do that.
+
+# Synching with remote repository
+
+When a project has multiple contributors, it is typical for there to
+be a remote repository against which each contributor can exchange
+their contributions. The remote repository comprises only the `.git`
+folder (and its contents), it never has a workspace. Files are rarely
+edited directly on the remote repository. Instead, it acts as a
+constantly available 'main' conduit between all contributors.
+
+A remote repository can be anywhere that you have permission to at
+least read from. Obviously, if you also want to contribute your local
+commits to the remote repository, you also need write access to that
+location. If you intend to collaborate, then the remote repository
+also needs to be in a location that all users can access at any time.
+
+For this demonstration, we will start by re-generating a repository
+that we made earlier on in this tutorial. This repository comprises a
+`main` branch along with an un-merged `Feature` branch.
+
+
+::: {.callout-note collapse="true"}
+## Commands to create the repository
+```{bash}
+#| label: git_status10
+#| classes: bash
+#| engine: bash
+#| cache: false
+#| echo: true
+#| eval: true
+rm -rf ~/tmp/Repo1
+mkdir ~/tmp/Repo1
+cd ~/tmp/Repo1
+git init 
+echo 'File 1' > file1
+git add file1
+git commit -m 'Initial repo and added file1'
+echo '---------------' >> file1
+mkdir dir1
+echo '* Notes' > dir1/file2
+git add file1 dir1/file2
+git commit -m 'Modified file1 and added file2 (in dir1)'
+echo '---' >> dir1/file2
+echo 'temp' > dir1/f.tmp
+echo '*.tmp' > .gitignore
+git add .
+git commit -m 'Modified file2, added .gitignore'
+git branch Feature
+git checkout Feature
+echo 'b' >> file1
+echo 'File 3' > dir1/file3
+git add .
+git commit -m 'New feature'
+git checkout main
+echo ' another bug fix' >> dir1/file2
+git add .
+git commit -m 'Bug fix in file1'
+git checkout Feature
+echo ' a modification' >> dir1/file3
+git add .
+git commit -m 'Feature complete'
+git checkout main
+
+git reflog
+git log --graph --decorate --oneline --all
+```
+:::
+
+```{cat}
+#| label: Fig10a
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig10a.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash5.west);
+
+\commit{above = 3cm of commitshash5}{commitshash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash4.south west);
+
+\commit{right = 1.5cm of commitshash4}{commitshash6}{color_inactive}{commitshash6}{commitscomment6}
+\draw [<-,line width=3pt,draw=black!60] (commitshash4.east) -- (commitshash6.west);
+\branch{below = 1cm of commitshash6}{Feature} 
+
+\master{below = 1cm of commitshash5} 
+\HEAD{below = 0.1cm of master} 
+\end{tikzpicture}
+
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='markup'}
+library(knitr)
+
+## commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+## commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+## commits = commits[rev(1:nrow(commits)),]
+## colnames(commits) <- c('hash','comment')
+## commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+## lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+## lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+## lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+commits = system("cd ~/tmp/Repo1; git log --oneline --all | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),10),'..')	
+#print(commits)
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig10a.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig10a.tikz")) 
+}
+
+system("xelatex -output-directory=resources resources/Fig10a.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig10a.pdf resources/Fig10a.png")
+```
+
+![](resources/Fig10a.png)
+
+
+## Simulate a remote repository locally
+
+For the purpose of this tutorial, we will create a remote repository
+that is on the same computer as the above repository that we have been
+working on. Whilst not the typical situation, it does mean that an
+external location and account is not necessary to follow along with
+the tutorial. As previously mentioned, the actual location of the
+remote repository is almost irrelevant to how you interact with it.
+Therefore, whether the remote repository is on the same computer or
+elsewhere in the world makes little difference (other than permissions
+and connections).
+
+This step is not supported directly by Rstudio - please use the terminal.
+
+```{R}
+#| label: makedirectory2
+#| cache: false
+#| echo: false
+unlink('~/tmp/RemoteRepo1', recursive=TRUE, force=TRUE)
+```
+```{bash}
+#| label: git-push1a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+mkdir ~/tmp/RemoteRepo1
+cd ~/tmp/RemoteRepo1
+git init --bare
+```
+
+Now that we have a remote repository - albeit empty at this stage - we
+return to our local repository and declare (add) the location of the
+remote repository using the `git remote add <name> <url>` _command_.
+In this command, an optional name can be supplied to refer to the
+remote repository (`<name>`). The compulsory `<url>` _argument_ is the
+address (location) of the remote repository.
+
+This step is not supported directly by Rstudio - please use the
+terminal.
+
+```{bash}
+#| label: git-push1b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git remote add origin ~/tmp/RemoteRepo1
+```
+
+To see what this has achieved, we can have a quick look at the
+`.git/config`
+
+```{bash}
+#| label: git-push1c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+cat .git/config
+```
+
+You should notice that there is now a 'remote' section with the name
+of 'origin' and the 'url' points to the location we nominated.
+
+### Pushing
+
+Currently the remote repository is empty. We will now push our local
+commit history to the remote repository. This is achieved via the `git
+push -u <name> <ref>` <i>command</i>. Here, `<name>` is the name of
+the remote repository ('origin') and `<ref>` is a reference the head
+of the commit chain we want to sync.
+
+
+::: {.panel-tabset}
+#### Terminal
+```{bash}
+#| label: git-push1d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git push -u origin main
+```
+
+#### Rstudio
+
+Rstudio does not have a direct means by which we can define the remote
+repository. Thus, we must start by entering the following into the
+terminal.
+
+```{bash}
+#| label: git-push1d
+#| echo: !expr -1
+#| eval: false
+#| cache: false
+#| classes: bash
+```
+
+Thereafter, you might notice that some up and down (push and pull
+respectively) buttons become active within the "git" panel.
+
+![](resources/rstudio_gitpull1.png)
+
+Now, after each subsequent commit, you can "push" your code to the
+remote repository simply by pushing the up (push) arrow.
+
+:::
+
+```{bash}
+#| label: git-push1e
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git reflog
+git log --graph --decorate --oneline --all
+```
+
+
+```{cat}
+#| label: Fig10b
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig10b.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+\begin{tikzpicture}
+
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash5.west);
+
+\commit{above = 3cm of commitshash5}{commitshash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash4.south west);
+
+\commit{right = 1.5cm of commitshash4}{commitshash6}{color_inactive}{commitshash6}{commitscomment6}
+\draw [<-,line width=3pt,draw=black!60] (commitshash4.east) -- (commitshash6.west);
+\branch{below = 1cm of commitshash6}{Feature} 
+
+\master{below = 1cm of commitshash5} 
+\HEAD{below = 0.1cm of master} 
+\node [anchor=north west,TARGET] at ($(commitshash1.south) + (0,-2cm)$) {Local Repository};
+
+\rcommit{right = 8cm of commitshash5}{rcommitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\rcommit{right = 1.5cm of rcommitshash1}{rcommitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash1) -- (rcommitshash2.west);
+\rcommit{right = 1.5cm of rcommitshash2}{rcommitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash2) -- (rcommitshash3.west);
+
+% new commit on main
+\rcommit{right = 1.5cm of rcommitshash3}{rcommitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash3.east) -- (rcommitshash5.west);
+
+%\rcommit{above = 3cm of rcommitshash5}{rcommitshash4}{color_inactive}{commitshash4}{commitscomment4}
+%\draw [<-,line width=3pt,draw=black!60] (rcommitshash3.north east) -- (rcommitshash4.south west);
+
+%\rcommit{right = 1.5cm of rcommitshash4}{rcommitshash6}{color_inactive}{commitshash6}{commitscomment6}
+%\draw [<-,line width=3pt,draw=black!60] (rcommitshash4.east) -- (rcommitshash6.west);
+%\rbranch{below = 1cm of rcommitshash6}{Feature} 
+
+\rmaster{below = 1cm of rcommitshash5} 
+\rHEAD{below = 0.1cm of rmaster} 
+%\rbranch{below = 1cm of rcommitshash6}{Feature} 
+
+\node [anchor=north west,TARGET] at ($(rcommitshash1.south) + (0,-2cm)$) (Remote) {Remote Repository};
+
+\draw [dashed] ($(rcommitshash1.west |- rcommitshash1.north west) +(-0.5cm,0.5cm)$) rectangle ($(rHEAD.south east) +(0.8cm,-0.5cm)$);
+
+\draw [->,very thick,dashed] ($(commitshash5.east) +(0.5cm,0)$) to [out=10,in=220] ($(rcommitshash1.east) +(-2cm,0)$);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+ 
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+#commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+#commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+#commits = commits[rev(1:nrow(commits)),]
+#colnames(commits) <- c('hash','comment')
+#commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+#lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+#lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+#lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+
+commits = system("cd ~/tmp/Repo1; git log --oneline --all | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),10),'..')	
+#print(commits)
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig10b.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig10b.tikz")) 
+}
+
+system("xelatex -output-directory=resources resources/Fig10b.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig10b.pdf resources/Fig10b.png")
+```
+
+![](resources/Fig10b.png)
+
+::: {.callout-note collapse="true"}
+## Another visual representation of the repository
+
+```{bash}
+#| label: gitDraw10b
+#| engine: bash
+#| echo: false
+./resources/git-draw --image-only --sha1-length 5 --hide-legend --hide-reflogs --git-dir ~/tmp/Repo1/.git --image-filename 10_git_files/figure-html/drawGit10b.png 
+```
+
+![](10_git_files/figure-html/drawGit10b.png){width=100%}
+
+:::
+
+**Note that when we pushed the commits to the remote repository, 
+we only pushed the `main` branch.  Consequently, the remote 
+repository only has a single branch.**
+
+## Cloning
+
+To collaborate with others on a repository, we start by **cloning**
+the repository you wish to collaborate on. So at the moment, we have
+the original repository (`~/tmp/Repo1`) created by user 1. We also
+have a remote repository (`~/tmp/RemoteRepo1`).  
+
+To demonstrate cloning (and collaborating), we will also assume the
+personal of user 2 and we will clone the remote repository to yet
+another local path (`~/tmp/MyRepo1`). Of course, this would not
+normally be on the same machine as the original repository, we are
+just doing it this way to simulate multiple users on the same machine.
+
+```{R}
+#| label: makedirectory3
+#| cache: false
+#| echo: false
+unlink('~/tmp/MyRepo1', recursive=TRUE, force=TRUE)
+```
+
+::: {.panel-tabset}
+#### Terminal
+
+```{bash}
+#| label: git-clone1a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git clone ~/tmp/RemoteRepo1 ~/tmp/MyRepo1
+```
+
+#### Rstudio
+
+1. click on the `Project` selector in the top right of the Rstudio
+   window (as highlighted by the red ellipse in the image below.
+
+   ![](resources/rstudio_init1a.png){width=100%}
+
+2. select `New Project` from the dropdown menu
+3. select `Version Control` form the Create Project panel
+4. select `Git` from the Create Project from Version Control panel
+5. provide a path to a remote repository.  Normally this URL would be 
+   for a location on a server such as Github, Gitlab, Bitbucket etc.  
+   However, for this demostration we will point to the remote repository
+   that we set up in the previous section (`~/tmp/RemoteRepo1`)
+6. provide a directory name in which to store this new cloned repository.
+   Normally this field is populated based on the name give in the URL.
+   However, in this case, it would suggest a name of `RemoteRepo1` 
+   which already exists (for the repository we are trying to clone), 
+   and we don't wish to overwrite that one.  I will instead offer
+   an alternative name (`MyRepo1`).
+7. we also need to supply a path to where this cloned repository 
+   will be stored.
+
+   ![](resources/rstudio_gitclone1.png)
+8. click the "Create Project" button.   
+:::
+
+The contents (and state) of `~/tmp/MyRepo1` should match that of
+`~/tmp/Repo1` (other than any files excluded due to a `.gitignore` or
+files not yet committed).
+
+```{r, replace=TRUE}
+#| label: git-clone1b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/MyRepo1
+tree -ra -L 2 --charset ascii
+```
+
+```{cat}
+#| label: Fig10c
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig10c.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+\begin{tikzpicture}
+
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash5.west);
+
+\commit{above = 3cm of commitshash5}{commitshash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash4.south west);
+
+\commit{right = 1.5cm of commitshash4}{commitshash6}{color_inactive}{commitshash6}{commitscomment6}
+\draw [<-,line width=3pt,draw=black!60] (commitshash4.east) -- (commitshash6.west);
+\branch{below = 1cm of commitshash6}{Feature} 
+
+\master{below = 1cm of commitshash5} 
+\HEAD{below = 0.1cm of master} 
+\node [anchor=north west,TARGET] at ($(commitshash1.south) + (0,-2cm)$) {Local Repository};
+\draw [fill=white, fill opacity = 0.5, draw=none] ($(commitshash1.west |- commitshash6.north west) +(-0.5cm,0.5cm)$) rectangle ($(commitshash6.east |- HEAD.south east) +(0.8cm,-0.5cm)$);
+
+\rcommit{right = 8cm of commitshash5}{rcommitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\rcommit{right = 1.5cm of rcommitshash1}{rcommitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash1) -- (rcommitshash2.west);
+\rcommit{right = 1.5cm of rcommitshash2}{rcommitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash2) -- (rcommitshash3.west);
+
+% new commit on main
+\rcommit{right = 1.5cm of rcommitshash3}{rcommitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash3.east) -- (rcommitshash5.west);
+
+%%\rcommit{above = 3cm of rcommitshash5}{rcommitshash4}{color_inactive}{commitshash4}{commitscomment4}
+%%\draw [<-,line width=3pt,draw=black!60] (rcommitshash3.north east) -- (rcommitshash4.south west);
+
+%%\rcommit{right = 1.5cm of rcommitshash4}{rcommitshash6}{color_inactive}{commitshash6}{commitscomment6}
+%%\draw [<-,line width=3pt,draw=black!60] (rcommitshash4.east) -- (rcommitshash6.west);
+%%\rbranch{below = 1cm of rcommitshash6}{Feature} 
+
+\rmaster{below = 1cm of rcommitshash5} 
+\rHEAD{below = 0.1cm of rmaster} 
+
+\node [anchor=north west,TARGET] at ($(rcommitshash1.south) + (0,-2cm)$) (Remote) {Remote Repository};
+
+\draw [dashed] ($(rcommitshash1.west |- rcommitshash1.north west) +(-0.5cm,0.5cm)$) rectangle ($(rHEAD.south east) +(0.8cm,-0.5cm)$);
+
+%\draw [->,very thick,dashed] ($(commitshash5.east) +(0.5cm,0)$) to [out=10,in=220] ($(rcommitshash1.east) +(-2cm,0)$);
+
+
+\commit{below = 5cm of commitshash1}{commits2hash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commits2hash1}{commits2hash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash1) -- (commits2hash2.west);
+\commit{right = 1.5cm of commits2hash2}{commits2hash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash2.east) -- (commits2hash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commits2hash3}{commits2hash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash3.east) -- (commits2hash5.west);
+
+%\commit{above = 3cm of commits2hash5}{commits2hash4}{color_inactive}{commitshash4}{commitscomment4}
+%\draw [<-,line width=3pt,draw=black!60] (commits2hash3.north east) -- (commits2hash4.south west);
+
+%\commit{right = 1.5cm of commits2hash4}{commits2hash6}{color_inactive}{commitshash6}{commitscomment6}
+%\draw [<-,line width=3pt,draw=black!60] (commits2hash4.east) -- (commits2hash6.west);
+%\branch{below = 1cm of commitshash6}{Feature} 
+
+\master{below = 1cm of commits2hash5} 
+\HEAD{below = 0.1cm of master} 
+\node [anchor=north west,TARGET] at ($(commits2hash1.south) + (0,-2cm)$) {Cloned Repository};
+\draw [<-,very thick,dashed] ($(commits2hash5.east) +(0.5cm,0)$) to [out=10,in=220] ($(rcommitshash1.east) +(-2cm,0)$);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+ 
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+#commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+#commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+#commits = commits[rev(1:nrow(commits)),]
+#colnames(commits) <- c('hash','comment')
+#commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+#lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+#lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+#lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+
+commits = system("cd ~/tmp/Repo1; git log --oneline --all | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),10),'..')	
+#print(commits)
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig10c.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig10c.tikz")) 
+}
+
+system("xelatex -output-directory=resources resources/Fig10c.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig10c.pdf resources/Fig10c.png")
+```
+
+![](resources/Fig10c.png)
+
+**Note that when cloning repository, all branches in the 
+remote repository are cloned.  However, since the remote
+repository only had one branch (`main`), so too the clone
+only has one branch.**
+
+
+
+Now as the collaborator (user 2), lets make a modification and push
+this change up to the remote repository.
+
+::: {.callout-important collapse="false"}
+## Important info about pushing to a remote repository 
+
+Before pushing any changes, it is absolutely vital that you adhere to
+the following steps:
+
+1. commit your changes - so that you have something new to push and
+   they are safe before the next step.
+2. pull (and if necessary reconcile - see the next section below) the
+   latest from the remote repository. **This is critical** as it
+   ensures that the changes you are pushing are against the latest
+   stage of the repository. Without this step, you might be pushing
+   changes that are based on a stage that is not longer current.
+3. push your changes
+:::
+
+
+::: {.panel-tabset}
+#### Terminal
+
+```{bash}
+#| label: git-clone2a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/MyRepo1
+git pull
+```
+```{bash}
+#| label: git-clone2b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/MyRepo1
+echo 'Something else' > file4
+git add file4
+git commit -m 'Added file4'
+```
+```{bash}
+#| label: git-clone2c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/MyRepo1
+git push -u origin main
+```
+
+#### Rstudio
+
+1. start by pulling the latest from the remote repository just incase 
+   there has been an change
+2. click on the "Create new blank file in the current directory" button 
+   and select "Text file" - name it `file4` 
+3. edit this file by adding the contents `Something else`
+4. save the file
+5. stage (add) the file
+6. commit the change with a message of "Added file4"
+7. push this commit either by clicking on the green up (push) arrow in
+   the "Review Changes" window or the same arrow in the git tab of the 
+   main Rstudio window.
+:::
+
+```{cat}
+#| label: Fig10d
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig10d.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+\begin{tikzpicture}
+
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash5.west);
+
+\commit{above = 3cm of commitshash5}{commitshash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash4.south west);
+
+\commit{right = 1.5cm of commitshash4}{commitshash6}{color_inactive}{commitshash6}{commitscomment6}
+\draw [<-,line width=3pt,draw=black!60] (commitshash4.east) -- (commitshash6.west);
+\branch{below = 1cm of commitshash6}{Feature} 
+
+\master{below = 1cm of commitshash5} 
+\HEAD{below = 0.1cm of master} 
+\node [anchor=north west,TARGET] at ($(commitshash1.south) + (0,-2cm)$) {Local Repository};
+\draw [fill=white, fill opacity = 0.5, draw=none] ($(commitshash1.west |- commitshash6.north west) +(-0.5cm,0.5cm)$) rectangle ($(commitshash6.east |- HEAD.south east) +(0.8cm,-0.5cm)$);
+
+\rcommit{right = 8cm of commitshash5}{rcommitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\rcommit{right = 1.5cm of rcommitshash1}{rcommitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash1) -- (rcommitshash2.west);
+\rcommit{right = 1.5cm of rcommitshash2}{rcommitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash2) -- (rcommitshash3.west);
+
+% new commit on main
+\rcommit{right = 1.5cm of rcommitshash3}{rcommitshash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash3.east) -- (rcommitshash4.west);
+
+\rcommit{right = 1.5cm of rcommitshash4}{rcommitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash4.east) -- (rcommitshash5.west);
+
+%%\rcommit{above = 3cm of rcommitshash5}{rcommitshash4}{color_inactive}{commitshash4}{commitscomment4}
+%%\draw [<-,line width=3pt,draw=black!60] (rcommitshash3.north east) -- (rcommitshash4.south west);
+
+%%\rcommit{right = 1.5cm of rcommitshash4}{rcommitshash6}{color_inactive}{commitshash6}{commitscomment6}
+%%\draw [<-,line width=3pt,draw=black!60] (rcommitshash4.east) -- (rcommitshash6.west);
+%%\rbranch{below = 1cm of rcommitshash6}{Feature} 
+
+\rmaster{below = 1cm of rcommitshash5} 
+\rHEAD{below = 0.1cm of rmaster} 
+
+\node [anchor=north west,TARGET] at ($(rcommitshash1.south) + (0,-2cm)$) (Remote) {Remote Repository};
+
+\draw [dashed] ($(rcommitshash1.west |- rcommitshash1.north west) +(-0.5cm,0.5cm)$) rectangle ($(rHEAD.south east) +(0.8cm,-0.5cm)$);
+
+%\draw [->,very thick,dashed] ($(commitshash5.east) +(0.5cm,0)$) to [out=10,in=220] ($(rcommitshash1.east) +(-2cm,0)$);
+
+
+\commit{below = 5cm of commitshash1}{commits2hash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commits2hash1}{commits2hash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash1) -- (commits2hash2.west);
+\commit{right = 1.5cm of commits2hash2}{commits2hash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash2.east) -- (commits2hash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commits2hash3}{commits2hash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash3.east) -- (commits2hash4.west);
+
+\commit{right = 1.5cm of commits2hash4}{commits2hash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [->,line width=3pt,draw=black!60] (commits2hash4.east) -- (commits2hash5.west);
+
+%\commit{right = 1.5cm of commits2hash4}{commits2hash6}{color_inactive}{commitshash6}{commitscomment6}
+%\draw [<-,line width=3pt,draw=black!60] (commits2hash4.east) -- (commits2hash6.west);
+%\branch{below = 1cm of commitshash6}{Feature} 
+
+\master{below = 1cm of commits2hash5} 
+\HEAD{below = 0.1cm of master} 
+\node [anchor=north west,TARGET] at ($(commits2hash1.south) + (0,-2cm)$) {Cloned Repository};
+\draw [<-,very thick,dashed] ($(commits2hash5.east) +(0.5cm,0)$) to [out=10,in=220] ($(rcommitshash1.east) +(-2cm,0)$);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+ 
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+#commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+#commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+#commits = commits[rev(1:nrow(commits)),]
+#colnames(commits) <- c('hash','comment')
+#commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+#lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+#lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+#lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+
+commits = system("cd ~/tmp/Repo1; git log --oneline --all | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),10),'..')	
+#print(commits)
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig10d.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig10d.tikz")) 
+}
+
+zcommits = system("cd ~/tmp/MyRepo1; git log --oneline --all | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+zcommits = read.table(textConnection(zcommits), header=FALSE, strip.white=TRUE, sep='\t')
+zcommits = zcommits[rev(1:nrow(zcommits)),]
+colnames(zcommits) <- c('hash','comment')
+zcommits$comment <- paste0(strtrim(gsub('.*:','',zcommits$comment),10),'..')	
+#print(zcommits)
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(zcommits)[1]) {
+  system(paste0("sed -i 's/commits2hash",i,"\\([\\.\\})]\\)/", zcommits$hash[i], "\\1/g' resources/Fig10d.tikz")) 
+    system(paste0("sed -i 's/commits2comment",i,"\\([\\.\\})]\\)/", zcommits$comment[i], "\\1/g' resources/Fig10d.tikz")) 
+}
+
+system("xelatex -output-directory=resources resources/Fig10d.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig10d.pdf resources/Fig10d.png")
+```
+
+![](resources/Fig10d.png)
+
+Notice how the second (cloned. `MyRepo1`) repository and the 
+remote repository (`RemoteRepo1`) are one commit ahead of the 
+original local repository (`Repo1`).  For `Repo1` to be in sync
+with `MyRepo1`, the original user will have to pull the 
+remote repository changes manually.
+
+
+## Pulling
+
+Retrieving a commit chain (_pulling_) from a remote repository is
+superficially the opposite of _pushing_. Actually, technically it is two
+actions: 
+
+- a _fetch_ that retrieves the remote information and uses it to
+  create a _branch_ off your local repository (the name of this branch
+  is made from the name of the remote and the branch that was
+  fetched - e.g. `origin/master`).
+
+- a _merge_ that merges this branch into the main repository. 
+
+These actions can be performed individually, however, they are more
+typically performed together via the `git pull` _command_. 
+
+To illustrate, lets return to being user 1 and we will pull the
+changes contributed by user 2 in the section above.
+
+```{bash}
+#| label: git-pull1a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git pull
+```
+
+The associated message informs us that upon pulling, a file (`file4`)
+has been added. Any conflicts arising from the _merging_ stage of the
+pull can be resolved in the usual manner of opening the conflicted
+file(s) making manual edits and then committing the changes.
+
+
+```{bash}
+#| label: git-pull3a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git reflog
+```
+
+```{bash}
+#| label: git-pull3b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+
+```{bash}
+#| label: git-pull3c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/MyRepo1
+git reflog
+```
+```{bash}
+#| label: git-pull3d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/MyRepo1
+git log --graph --decorate --oneline --all
+```
+```{bash}
+#| label: git-pull3e
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/RemoteRepo1
+git reflog
+git log --graph --decorate --oneline --all
+```
+
+```{cat}
+#| label: Fig10e
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig10e.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+\begin{tikzpicture}
+
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash5.west);
+
+\commit{above = 3cm of commitshash5}{commitshash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash4.south west);
+
+\commit{right = 1.5cm of commitshash4}{commitshash6}{color_inactive}{commitshash6}{commitscomment6}
+\draw [<-,line width=3pt,draw=black!60] (commitshash4.east) -- (commitshash6.west);
+\branch{below = 1cm of commitshash6}{Feature} 
+
+\commit{right = 1.5cm of commitshash5}{commitshash7}{color_commit}{commits2hash5}{commits2comment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash5.east) -- (commitshash7.west);
+
+\master{below = 1cm of commitshash7} 
+\HEAD{below = 0.1cm of master} 
+\node [anchor=north west,TARGET] at ($(commitshash1.south) + (0,-2cm)$) {Local Repository};
+%\draw [fill=white, fill opacity = 0.5, draw=none] ($(commitshash1.west |- commitshash6.north west) +(-0.5cm,0.5cm)$) rectangle ($(commitshash6.east |- HEAD.south east) +(0.8cm,-0.5cm)$);
+
+\rcommit{right = 8cm of commitshash5}{rcommitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\rcommit{right = 1.5cm of rcommitshash1}{rcommitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash1) -- (rcommitshash2.west);
+\rcommit{right = 1.5cm of rcommitshash2}{rcommitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash2) -- (rcommitshash3.west);
+
+% new commit on main
+\rcommit{right = 1.5cm of rcommitshash3}{rcommitshash5}{color_inactive}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash3.east) -- (rcommitshash5.west);
+
+\rcommit{right = 1.5cm of rcommitshash5}{rcommitshash6}{color_commit}{commits2hash5}{commits2comment5}
+\draw [<-,line width=3pt,draw=black!60] (rcommitshash5.east) -- (rcommitshash6.west);
+
+%%\rcommit{above = 3cm of rcommitshash5}{rcommitshash4}{color_inactive}{commitshash4}{commitscomment4}
+%%\draw [<-,line width=3pt,draw=black!60] (rcommitshash3.north east) -- (rcommitshash4.south west);
+
+%%\rcommit{right = 1.5cm of rcommitshash4}{rcommitshash6}{color_inactive}{commitshash6}{commitscomment6}
+%%\draw [<-,line width=3pt,draw=black!60] (rcommitshash4.east) -- (rcommitshash6.west);
+%%\rbranch{below = 1cm of rcommitshash6}{Feature} 
+
+\rmaster{below = 1cm of rcommitshash6} 
+\rHEAD{below = 0.1cm of rmaster} 
+
+\node [anchor=north west,TARGET] at ($(rcommitshash1.south) + (0,-2cm)$) (Remote) {Remote Repository};
+
+\draw [dashed] ($(rcommitshash1.west |- rcommitshash1.north west) +(-0.5cm,0.5cm)$) rectangle ($(rHEAD.south east) +(0.8cm,-0.5cm)$);
+
+%\draw [->,very thick,dashed] ($(commitshash5.east) +(0.5cm,0)$) to [out=10,in=220] ($(rcommitshash1.east) +(-2cm,0)$);
+
+\draw [<-,very thick,dashed] ($(commitshash7.east) +(0.5cm,0)$) to [out=10,in=220] ($(rcommitshash1.east) +(-2cm,0)$);
+
+\commit{below = 5cm of commitshash1}{commits2hash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commits2hash1}{commits2hash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash1) -- (commits2hash2.west);
+\commit{right = 1.5cm of commits2hash2}{commits2hash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash2.east) -- (commits2hash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commits2hash3}{commits2hash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commits2hash3.east) -- (commits2hash4.west);
+
+\commit{right = 1.5cm of commits2hash4}{commits2hash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [->,line width=3pt,draw=black!60] (commits2hash4.east) -- (commits2hash5.west);
+
+%\commit{right = 1.5cm of commits2hash4}{commits2hash6}{color_inactive}{commitshash6}{commitscomment6}
+%\draw [<-,line width=3pt,draw=black!60] (commits2hash4.east) -- (commits2hash6.west);
+%\branch{below = 1cm of commitshash6}{Feature} 
+
+\master{below = 1cm of commits2hash5} 
+\HEAD{below = 0.1cm of master} 
+\node [anchor=north west,TARGET] at ($(commits2hash1.south) + (0,-2cm)$) {Cloned Repository};
+%\draw [<-,very thick,dashed] ($(commits2hash5.east) +(0.5cm,0)$) to [out=10,in=220] ($(rcommitshash1.east) +(-2cm,0)$);
+
+\draw [fill=white, fill opacity = 0.5, draw=none] ($(commits2hash1.west |- commits2hash5.north west) +(-0.5cm,0.5cm)$) rectangle ($(commits2hash5.east |- HEAD.south east) +(0.8cm,-0.5cm)$);
+\end{tikzpicture}
+\end{preview}
+\end{document}
+```
+ 
+```{r, cache=FALSE, echo=FALSE, results='markdown'}
+library(knitr)
+
+#commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+#commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+#commits = commits[rev(1:nrow(commits)),]
+#colnames(commits) <- c('hash','comment')
+#commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+#lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+#lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+#lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+
+commits = system("cd ~/tmp/Repo1; git log --oneline --all | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),10),'..')	
+#print(commits)
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig10e.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig10e.tikz")) 
+}
+
+zcommits = system("cd ~/tmp/MyRepo1; git log --oneline --all | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+zcommits = read.table(textConnection(zcommits), header=FALSE, strip.white=TRUE, sep='\t')
+zcommits = zcommits[rev(1:nrow(zcommits)),]
+colnames(zcommits) <- c('hash','comment')
+zcommits$comment <- paste0(strtrim(gsub('.*:','',zcommits$comment),10),'..')	
+#print(zcommits)
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(zcommits)[1]) {
+  system(paste0("sed -i 's/commits2hash",i,"\\([\\.\\})]\\)/", zcommits$hash[i], "\\1/g' resources/Fig10e.tikz")) 
+    system(paste0("sed -i 's/commits2comment",i,"\\([\\.\\})]\\)/", zcommits$comment[i], "\\1/g' resources/Fig10e.tikz")) 
+}
+
+system("xelatex -output-directory=resources resources/Fig10e.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig10e.pdf resources/Fig10e.png")
+```
+
+![](resources/Fig10e.png)
+
+
+## Github as a remote repository
+ 

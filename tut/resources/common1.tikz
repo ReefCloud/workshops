@@ -37,6 +37,16 @@
   \node [below,commentText,text=gray] at ($(#2.south) +(0,-0.5)$) {#5};
 }
 
+\newcommand{\rcommit}[5]{
+\node [#1,inner sep=0,outer sep=0] (#2) {
+\begin{tikzpicture}[#1]
+\draw [#1] node [draw=black!40!#3,fill=#3,shape=rectangle,minimum width=1.3cm,minimum height=1.3cm,line width=3pt] (x) {};
+%\node [below,hashText] at (x.south) {#4};
+\end{tikzpicture}
+};
+\node [below,hashText] at (#2.south) {#4};
+\node [below,commentText,text=gray] at ($(#2.south) +(0,-0.5)$) {#5};
+}
 \newcommand{\commitz}[6]{
   \node [#1] (#2) {
     \begin{tikzpicture}[#1]
@@ -58,4 +68,16 @@
 
 \newcommand{\branch}[2] {
   \node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (#2) {#2};
+}
+
+\newcommand{\rmaster}[1] {
+\node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (rmaster) {origin/main};
+}
+
+\newcommand{\rHEAD}[1] {
+\node [#1,rectangle,fill=color_HEAD,draw=black!20!color_HEAD,line width=2pt,refText,minimum height=0.8cm] (rHEAD) {origin/HEAD};
+}
+
+\newcommand{\rbranch}[2] {
+  \node [#1,rectangle,fill=color_branch,draw=black!20!color_branch,line width=2pt,refText,minimum height=0.8cm] (#2) {origin/#2};
 }
