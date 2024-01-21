@@ -9622,4 +9622,348 @@ system("convert +repage -density 300 -resize 20% resources/Fig10e.pdf resources/
 
 
 ## Github as a remote repository
- 
+
+# Resolving conflicts
+
+In Git, conflicts arise when changes made in different branches cannot
+be automatically merged. This typically happens when two branches
+modify the same part of a file and the changes overlap. Think of it
+like two writers revising the same sentence differently. Conflicts
+usually arise when merging or rebasing branches.
+
+When git identifies a conflict, it will mark the conflicting areas
+(with sets of plain text fences - see below), and it's then up to the
+user to resolve them manually by making edits the conflicted file(s)
+and choosing which changes to keep. After resolving conflicts, the
+changes can be staged, and the merge or rebase can be completed.
+Conflict resolution is an essential skill in collaborative Git
+workflows, ensuring smooth integration of changes from multiple
+contributors.
+
+Recall that pulling from a remote repository is a to stage process.
+Firstly the new commits are "fetched" to a new temporary branch and
+then this branch is merged into the local repository. Hence, conflicts
+can occur when pulling from remote repositories. Conflict resolution
+in such cases is as outlined above.
+
+To illustrate a git conflict, we will start with a very simple
+repository, create a branch and then concurrently make edits to the
+same part of the same file on each branch before attempting to merge
+the branches together.  
+
+
+::: {.callout-note collapse="true"}
+## Commands to create the repository
+```{bash}
+#| label: git_status11
+#| classes: bash
+#| engine: bash
+#| cache: false
+#| echo: true
+#| eval: true
+rm -rf ~/tmp/Repo1
+mkdir ~/tmp/Repo1
+cd ~/tmp/Repo1
+git init 
+echo 'File 1' > file1
+git add file1
+git commit -m 'Initial repo and added file1'
+echo '---------------' >> file1
+mkdir dir1
+echo '* Notes' > dir1/file2
+git add file1 dir1/file2
+git commit -m 'Modified file1 and added file2 (in dir1)'
+echo '---' >> dir1/file2
+echo 'temp' > dir1/f.tmp
+echo '*.tmp' > .gitignore
+git add .
+git commit -m 'Modified file2, added .gitignore'
+git branch Feature
+git checkout Feature
+echo 'some text added on Feature branch' >> file1
+echo 'File 3' > dir1/file3
+git add .
+git commit -m 'New feature'
+git checkout main
+echo ' a bug fix on the main branch' >> file1
+git add .
+git commit -m 'Bug fix in file1'
+
+git reflog
+git log --graph --decorate --oneline --all
+```
+:::
+
+```{cat}
+#| label: Fig11a
+#| echo: true
+#| cache: false
+#| class: tikz 
+#| engine.opts:
+#|   file: "resources/Fig11a.tikz"
+\documentclass{minimal}
+\usepackage[paperwidth=35cm,paperheight=10cm,hmargin=0cm,vmargin=0cm]{geometry}
+%\usepackage[hmargin=0cm,vmargin=0cm]{geometry}
+\usepackage{fontspec}
+\usepackage[xelatex,active,tightpage]{preview}
+\renewcommand{\baselinestretch}{0.75} 
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+\begin{document}
+\include{preview}
+\begin{preview}
+
+\input{resources/common1.tikz}
+
+\begin{tikzpicture}
+\commit{}{commitshash1}{color_inactive}{commitshash1}{commitscomment1}
+\commit{right = 1.5cm of commitshash1}{commitshash2}{color_inactive}{commitshash2}{commitscomment2}
+\draw [<-,line width=3pt,draw=black!60] (commitshash1) -- (commitshash2.west);
+
+\commit{right = 1.5cm of commitshash2}{commitshash3}{color_inactive}{commitshash3}{commitscomment3}
+\draw [<-,line width=3pt,draw=black!60] (commitshash2.east) -- (commitshash3.west);
+
+% new commit on main
+\commit{right = 1.5cm of commitshash3}{commitshash5}{color_commit}{commitshash5}{commitscomment5}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.east) -- (commitshash5.west);
+
+\commit{above = 3cm of commitshash5}{commitshash4}{color_inactive}{commitshash4}{commitscomment4}
+\draw [<-,line width=3pt,draw=black!60] (commitshash3.north east) -- (commitshash4.south west);
+
+%\commit{right = 1.5cm of commitshash4}{commitshash6}{color_inactive}{commitshash6}{commitscomment6}
+%\draw [<-,line width=3pt,draw=black!60] (commitshash4.east) -- (commitshash6.west);
+\branch{below = 1cm of commitshash4}{Feature} 
+
+\master{below = 1cm of commitshash5} 
+\HEAD{below = 0.1cm of master} 
+\end{tikzpicture}
+
+\end{preview}
+\end{document}
+```
+
+```{r, cache=FALSE, echo=FALSE, results='markup'}
+library(knitr)
+
+## commits = system("cd ~/tmp/Repo1; git reflog | awk '{ print $1,\"\\t\",substr($0, index($0,$4)) }'", intern=TRUE)
+## commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+## commits = commits[rev(1:nrow(commits)),]
+## colnames(commits) <- c('hash','comment')
+## commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),15),'..')
+
+## lookup = system("cd ~/tmp/Repo1; git log --oneline --decorate main | awk '{ print $1,\"\\t\",substr($0, index($0,$2)) }'", intern=TRUE)
+## lookup = read.table(textConnection(lookup), header=FALSE, sep='\t')
+## lookup = lookup %>% mutate(Ref=ifelse(grepl('main',V2),'main',NA))
+commits = system("cd ~/tmp/Repo1; git log --oneline --all | awk '{ print $1,\"\\t\",substr($0, 9) }'", intern=TRUE)
+commits = read.table(textConnection(commits), header=FALSE, strip.white=TRUE, sep='\t')
+commits = commits[rev(1:nrow(commits)),]
+colnames(commits) <- c('hash','comment')
+commits$comment <- paste0(strtrim(gsub('.*:','',commits$comment),10),'..')	
+#print(commits)
+# get the commits from .git/logs/HEAD
+for (i in 1:dim(commits)[1]) {
+  system(paste0("sed -i 's/commitshash",i,"\\([\\.\\})]\\)/", commits$hash[i], "\\1/g' resources/Fig11a.tikz")) 
+    system(paste0("sed -i 's/commitscomment",i,"\\([\\.\\})]\\)/", commits$comment[i], "\\1/g' resources/Fig11a.tikz")) 
+}
+
+system("xelatex -output-directory=resources resources/Fig11a.tikz")
+system("convert +repage -density 300 -resize 20% resources/Fig11a.pdf resources/Fig11a.png")
+```
+
+![](resources/Fig11a.png)
+
+
+
+::: {.panel-tabset}
+#### Terminal
+
+```{bash}
+#| label: git-conflict1
+#| echo: !expr -1
+#| eval: true
+#| error: true
+#| cache: false
+#| classes: bash
+cd ~/tmp/Repo1
+git merge Feature --no-edit
+```
+
+#### Rstudio
+
+Merging is not directly supported by Rstudio, please use the 
+terminal.
+
+:::
+
+
+Hmmm. It appears that there is a conflict (although we should not be
+supprised since we deliberately set the repository up to have a conflict!). 
+If we explore the a `git diff`, we will see that on the `master` and 
+`Feature` _branches_ have incompatible changes.
+
+::: {.callout-note collapse="true"}
+## More information about the conflict
+
+```{bash}
+#| label: git_branch8a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| error: true
+#| message: true
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git status
+```
+
+The above status informs us that whilst we were able to successfully 
+merge in the changes in `dir1/file3`, the modifications in `file1`
+remain unmerged (due to conflicts).
+
+If we run a `git diff` on the two branches, we will be able to 
+identify all the differences within all comparable files between the 
+two branches.
+
+```{bash}
+#| label: git_branch8b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git diff main Feature
+```
+
+The output indicates that `dir/file3` does not exist on the `main` 
+branch - this is not a conflict.  However, for `file1`, we see that
+line three differs between the two branches.
+
+It is not so much that they have both made changes to the same file,
+it is more that the changes are to the same part of the file. Lets
+look at the contents of `file1` in the commit that is the common
+ancester of both _branches_:
+
+```{bash}
+#| label: git_branch8c
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git cat-file -p main^:file1
+```
+
+So prior to branching, the `file1` file had two lines of text.
+
+In the latest commit on the `main` branch, the `file1` has added 
+a third line with text about a bug fix.
+
+```{bash}
+#| label: git_branch8d
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git cat-file -p main:file1
+```
+
+Yet on the `Feature` branch, the third line of the `file1` file
+contains `some text added on Feature branch`.
+
+```{bash}
+#| label: git_branch8e
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git cat-file -p Feature:file1
+```
+
+So the source of this conflict evidently is the third line of
+the `file1` file.
+
+:::
+
+
+We can see that the changes made to `file1` are inconsistent. We need to decide
+which edits (if any) we want to use. Recall that the change made in `main` was to
+address a bug or issue. Perhaps this bug or issue does not arise with
+the new Feature and thus is superfluous. Alternatively, it might be
+that this bug fix is required by both branches (if so, we probably
+should have introduced it to the `Feature` _branch_ at the same time
+as the `main` anyway....
+
+Lets address the conflict by rolling back `file1` from the `main` _branch_.
+
+The following figures depict the `file1` file with conflicts (left) and once
+resolved (right).
+
+![](resources/rstudio_gitconflict1.png)
+![](resources/rstudio_gitconflict2.png)
+
+
+::: {.panel-tabset}
+#### Terminal
+
+Normally we would resolve this issue using a code editor to
+edit the actual changes in the file back to the desired condition.
+However as we only have the one change and this demo is fully
+scripted, I will instead roll back (checkout) this one file from the
+earlier commit on the `main` branch.
+
+```{bash}
+#| label: git_branch8f
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash
+cd ~/tmp/Repo1
+git checkout main^ file1
+git add .
+git commit -m 'Merge in Feature'
+```
+
+#### Rstudio
+
+1. open `file1` for editing
+2. make the necessary changes to the text
+3. save the file
+4. stage (add) the file (you may have to click on the checkbox twice 
+   before the tick appears)
+5. commit the changes with a message like "Merge in Feature" 
+:::
+
+
+::: {.callout-note collapse="true"}
+## More information about this repository
+```{r, replace=TRUE}
+#| label: git-conflict2a
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git reflog
+```
+
+```{r, replace=TRUE}
+#| label: git-conflict2b
+#| echo: !expr -1
+#| eval: true
+#| cache: false
+#| classes: bash
+#| engine: bash1
+cd ~/tmp/Repo1
+git log --graph --decorate --oneline --all
+```
+:::
+
