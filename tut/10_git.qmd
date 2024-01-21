@@ -9623,6 +9623,188 @@ system("convert +repage -density 300 -resize 20% resources/Fig10e.pdf resources/
 
 ## Github as a remote repository
 
+GitHub provides the world's leading centralized platform for version 
+control, collaboration, and project management, facilitating seamless
+teamwork, tracking changes, and ensuring the integrity and accessibility
+of code repositories throughout the software development lifecycle.
+
+Although anyone can explore (read) public repositories on github, only 
+those with github accounts can contribute and collaborate.
+
+### Setup Github account
+
+To create a **free** github account:
+
+1. visit <https://github.com> and click "Sign up for github"
+2. register by providing your prefered email address, a username and
+   a password when prompted
+3. to complete the account activation, you will need to verify your 
+   details via an email sent to your nominated email address
+
+As of the start of 2024, github now requires Two-Factor Authentication
+(2FA) for enhanced security.  Whenever you login to github (or are
+prompted for a password, you will also need to use 2FA. To setup 2FA:
+
+1. click on your profile picture in the top right corner.
+2. select "Settings" from the dropdown menu.
+3. select "Password and authentication" in the left sidebar.
+4. under "Two-factor authentication" section, click "Enable".
+5. choose your preferred method (authenticator app or SMS) and follow 
+   the prompts to set it up.
+
+Passwords and Two-Factor Authentication (2FA) are used when you (as a
+human) securely login and interact directly with the GitHub website.
+However, it is also possible to have other tools (such as `git`)
+interact with Github on your behalf via an Application Programming
+Interfacet (API).  Passwords/2FA are not appropriate to authenticate 
+these machine to machine communications.  Instead, Github requires the
+use of a Personal Access Token (PAT). PATs offer a more secure and granular 
+approach, allowing users to control access without exposing their
+account password.
+
+To generate a Personal Access Token (PAT):
+
+1. click on your profile picture in the top right corner.
+2. select "Settings" from the dropdown menu.
+3. select "Developer settings" from the bottom of the left sidebar.
+4. select "Personal access tokens" from the left sidebar.
+5. select "Tokens (classic)" from the dropdown menu
+6. click "Generate new token"
+7. select "Generate new token (classic)" from the dropdown menu
+8. at this point you will likely be prompted for your password
+9. provide a "note" - this is more of a short description of what the
+   token is to be used for (in the example below, I have entered "git push/pull"
+   to remind me that this is a simple token for regular push/pull interaction
+   between my local and remote repositories).
+
+   ![](resources/rstudio_githubtoken1.png)
+
+   You also need to provide an expiration. Although not secure or recommended,
+   I have selected "No expiration" as I don't want to have to re-do my PAT
+   across multiple machines too regularly.
+
+   Finally, you also need to indicate **scope** (what activities you are granting permission
+   for the tools to be able to perform).  In this case, I have ticked the 
+   "repo" box.  This grants general rea/write access to my repositories.  I have 
+   not granted permission for more administration like activities such as 
+   managing teams, deleting repositories, etc - these activities I am happy to 
+   perform myself via the website.
+10. click "Generate token" and securely copy the generated token.  Until this is stored
+    safely (see below) do not close the page, because Github will never show you this
+    PAT again.
+
+:::: {.indented}
+::: {.callout-important collapse="false"}
+
+Important: Store your PAT safely as you won't be able to see it again!
+Ideally, you should store this PAT in a digital wallet. Digital
+wallets vary according to operating systems. R users might like to use
+the `r` function from the `asdf` package (which you will need to
+install prior) as follows in order to store the PAT.
+
+**In an R console, enter:**
+
+```{r}
+#| label: PAT
+#| cache: false
+#| echo: true
+#| eval: false
+gitcreds::gitcreds_set()
+```
+
+When propted for a password, paste in the copied PAT that hopefully is still in your
+clipboard - else you might need to re-copy it.
+
+To confirm that you have successfully stored your PAT in your wallet, you can:
+```{r}
+#| label: PAT2
+#| cache: false
+#| echo: true
+#| eval: false
+gitcreds::gitcreds_get()
+```
+
+and confirm that it indicates that there is a hidden password.
+
+
+:::
+::::
+
+### Create remote Github repository
+
+1. login to your Github account
+2. either: 
+
+   a. click on the "Create new.." button (with the plus sign) to the
+      right of your profile picture in the top right corner and select
+      "New repository" from the dropdown menu
+      
+   b. click on "Repositories" from the top horizontal menu followed by
+      the big green "New" button
+   
+   ![](resources/rstudio_github1.png)
+   
+3. fill out the details of the Create a new repository for similar to
+   the following
+   
+   ![](resources/rstudio_github2.png)
+   
+   In particular:
+   
+   - give the repository a name. Typically use the same name as you
+      used for the local repository to avoid confusion
+   
+   - provide a description. Along with the name, this field is
+      searchable so the more detailed it is, the more likely your
+      repository will be discoverable by others as well as yourself in
+      the future
+   - indicate the privacy level. This affects whether your repository
+     is discoverable and readable by anyone (public) or just those you
+     invite (private)
+   - ideally, you also want to include a README file and license in
+     your repository. However, if you enable either of these options
+     in the form, Github will bypass providing a screen with some
+     additional instructions that many find useful for linking your
+     local and remote repository. So on this occasion, we will leave
+     these options as they are
+4. click the "Create repository" button at the bottom of the page
+5. Github will present you with the following page:
+
+   ![](resources/rstudio_github3.png){width=100%}
+
+   This page presents three alternative sets of instructions that you
+   run locally (on your machine) in order to establish a link between
+   the local and remote repository. You need to run the appropriate
+   set of commands in your local terminal
+   
+   - if no local repository exists, follow the first set of instructions
+   - if you already have a local repository (**as is the case with
+     this demonstration**), follow the second set of instructions
+   - if you intend to import a repository from a different versioning
+     system, follow the last set of instructions
+6. once you have run the above commands locally, you can refresh the
+   Github page and you will be presented with your remote repository.
+   From here you can navigate through your code, manage privileges
+   etc.
+   
+If you would like to allow others to collaborate with you on your
+repository, then regardless of whether the repository is public or
+private, you will need to invite them as a collaborator.  To do so:
+
+1. click on "Settings" from the horizontal menu bar
+2. click on "Collaborators" from the left sidebar (you may then be
+   asked to submit your password)
+3. click on the green "Add people" button
+4. in the popup, enter either the username, full name or email address
+   of the person you want to invite to collaborate with you. Once you
+   click the "Select a collaborator above" and select the appropriate
+   candidate, this person will be sent an invite via email.
+5. nominate the role that this collaborator can assume (e.g. what
+   capacity does the collaborator have to edit, invite others, alter
+   settings, delete the repository etc)
+6. repeat steps 3-4 for each additional collaborator you wish to
+   invite
+   
 # Resolving conflicts
 
 In Git, conflicts arise when changes made in different branches cannot
