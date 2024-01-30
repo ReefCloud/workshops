@@ -52,6 +52,7 @@ jobs:
             any::GGally
             any::plotrix
             any::PBSmapping
+            any::gmodels
 
       - name: install tinytex
         uses: r-lib/actions/setup-tinytex@v2
