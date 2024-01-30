@@ -50,6 +50,7 @@ jobs:
             any::mvabund
             any::pander
             any::GGally
+            anu::plotrix
 
       - name: install tinytex
         uses: r-lib/actions/setup-tinytex@v2
