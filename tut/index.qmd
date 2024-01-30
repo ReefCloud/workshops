@@ -30,7 +30,7 @@ analyses with R. The topics covered progress from introductory and
 foundational through to more advanced and as such, the tutorials are
 intended to be consumed and worked through largely in the order laid
 out in the sidebar menu to the left.
-
+ 
 # Format of tutorials 
 
 ## R code

@@ -9,6 +9,10 @@ project:
     - 04_data_wrangling.qmd
     - 05_grammar_of_graphics.qmd
     - 10_git.qmd
+    - 20_basic_principles.qmd
+    - 21_statistical_philosophies.qmd
+    - 22_estimation.qmd
+    - 30_glm.qmd
 
 website:
   title: ReefCloud R/Statistics resources
@@ -45,6 +49,22 @@ website:
         contents:
         - href: 10_git.qmd
           text: Introduction to git
+          icon: house
+      - section: Statistical principles
+        contents:
+        - href: 20_basic_principles.qmd
+          text: Basic principles
+          icon: house
+        - href: 21_statistical_philosophies.qmd
+          text: Statistical philosophies
+          icon: house
+        - href: 22_estimation.qmd
+          text: Estimation and inference
+          icon: house
+      - section: Linear modelling
+        contents:
+        - href: 30_glm.qmd
+          text: Generalised linear models
           icon: house
 
 format:

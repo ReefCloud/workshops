@@ -484,5 +484,4 @@ Sublime Text boasts multiple cursors, supports extensions through
 Package Control, and provides ample customization options.
 
 
-
 :::

@@ -5138,5 +5138,4 @@ knitr::kable(data.geo, table.attr = "class=\"paperTable\"", format='html')
 ```{r vlookup2, cache=FALSE, error = TRUE, warning = TRUE}
 data.bio |> left_join(data.geo)
 ```
-
 :::
