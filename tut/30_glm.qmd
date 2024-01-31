@@ -39,12 +39,14 @@ Load the necessary libraries
 #| warning: false
 #| message: false
 #| cache: false
-library(tidyverse) #for data wrangling and plotting
-library(gganimate) #for animations
-library(gridExtra) #for additional plotting routines
-library(ggfortify) #for regression diagnostics (autoplot)
-library(DHARMa)    #for simulated residuals
-library(glmmTMB)   #for GLM(M)'s
+library(tidyverse)   #for data wrangling and plotting
+library(gganimate)   #for animations
+library(gridExtra)   #for additional plotting routines
+library(ggfortify)   #for regression diagnostics (autoplot)
+library(DHARMa)      #for simulated residuals
+library(performance) #for model diagnostics
+library(glmmTMB)     #for GLM(M)'s
+library(gmodels)     #for additional statistics
 ```
 
 # Preamble

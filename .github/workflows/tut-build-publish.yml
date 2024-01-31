@@ -60,6 +60,7 @@ jobs:
             any::ggfortify
             any::DHARMa
             any::glmmTMB
+            any::performance
 
       - name: install tinytex
         uses: r-lib/actions/setup-tinytex@v2
