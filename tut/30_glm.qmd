@@ -45,6 +45,7 @@ library(gridExtra)   #for additional plotting routines
 library(ggfortify)   #for regression diagnostics (autoplot)
 library(DHARMa)      #for simulated residuals
 library(performance) #for model diagnostics
+library(see)         #for model diagnostics
 library(glmmTMB)     #for GLM(M)'s
 library(gmodels)     #for additional statistics
 ```

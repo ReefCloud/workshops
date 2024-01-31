@@ -61,6 +61,7 @@ jobs:
             any::DHARMa
             any::glmmTMB
             any::performance
+            any::see
 
       - name: install tinytex
         uses: r-lib/actions/setup-tinytex@v2
