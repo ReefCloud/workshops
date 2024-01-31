@@ -55,6 +55,11 @@ jobs:
             any::gmodels
             any::mvtnorm
             any::coda
+            any::gganimate
+            any::gridExtra
+            any::ggfortify
+            any::DHARMa
+            any::glmmTMB
 
       - name: install tinytex
         uses: r-lib/actions/setup-tinytex@v2
