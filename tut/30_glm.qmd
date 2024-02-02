@@ -48,6 +48,7 @@ library(performance) #for model diagnostics
 library(see)         #for model diagnostics
 library(glmmTMB)     #for GLM(M)'s
 library(gmodels)     #for additional statistics
+library(MASS)        #for neg binom glm
 ```
 
 # Preamble
@@ -109,7 +110,7 @@ and by how much. That is, these approaches are very good at
 prediction, but unsuitable for estimation and inference testing.
 
 
-# Linear models
+# Overview of linear models
 
 Correlation and regression are techniques used to examine associations
 and relationships between continuous variables collected on the same
@@ -452,12 +453,12 @@ their associated estimable parameters ($\beta_1,~\beta_2,~...$).
 
 For a data set comprising of $p$ groups and $n$ replicates within each
 group, the linear model is: $$y_{ij} = \mu + \beta_1(dummy_1)_{ij} +
-\beta_2(dummy_2)_{ij} + .... + \varepsilon_{ij}$$ where $i$ represents
-the treatment levels (from 1 to $p$) and $j$ represents the set of
-replicates (from 1 to $n$) within the $i^{th}$ group. Hence, $y_{ij}$
-represents the $j^{th}$ observation of the response variable within
-the $i^{th}$ group and $(dummy_1)_{ij}$ represents the dummy code for
-the $j^{th}$ replicate within the $i^{th}$ group of the first dummy
+\beta_2(dummy_2)_{ij} + .... + \varepsilon_{ij}$$ where $j$ represents
+the treatment levels (from 1 to $p$) and $i$ represents the set of
+replicates (from 1 to $n$) within the $j^{th}$ group. Hence, $y_{ij}$
+represents the $i^{th}$ observation of the response variable within
+the $j^{th}$ group and $(dummy_1)_{ij}$ represents the dummy code for
+the $i^{th}$ replicate within the $j^{th}$ group of the first dummy
 variable (first treatment level). 
 
 ::: {.columns}
@@ -514,14 +515,13 @@ $$y_{ij}=\beta_0+\beta_1(dummy_1)_{ij} + \beta_2(dummy_2)_{ij}
 +\beta_3(dummy_3)_{ij} + \varepsilon_{ij}$$ 
 
 is **over-parameterized** (as we are attempting to estimate four
-parameters from three populations, see <a
-href="#linearmodelsEstimation">Estimation</a>).
-
+parameters from three populations, see [the tutorial on
+estimation](22_estimation.html).
 
 An effects model for a factor with $p$ groups, will have $p+1$
-parameters (the overall mean $\mu$ plus the $p$ $\alpha$ parameters),
+parameters (the overall mean $\mu$ plus the $p$ $\beta$ parameters),
 and thus the linear effects model is considered to be
-**over-parameterized**. Given that $\alpha_i=\mu_i - \mu$, it is only
+**over-parameterized**. Given that $\beta_j=\mu_j - \mu$, it is only
 possible to estimate $p-1$ orthogonal (independent) parameters. For
 example, once $\mu$ and $p-1$ of the effects parameters have been
 estimated, the final effects parameter is no longer _free to vary_ and
@@ -535,12 +535,12 @@ of two alternative parameterizations:
 
 - **means parameterization** - removing one of the parameters from the
   effects model (either the overall mean ($\mu$) or one of the
-  treatment effects ($\alpha_i$) parameters - a procedure rarely used
+  treatment effects ($\beta_j$) parameters - a procedure rarely used
   in a frequentist framework in biology). When it is the overall mean
   that is removed, then each of the regression parameters represent
   the mean of a group.
 
-  $$y_i = \beta_p+\varepsilon_i, \hspace{2cm}\text{where}~p= \text{number of levels of the factor}$$
+  $$y_{ij} = \beta_j+\varepsilon_{ij}, \hspace{2cm}\text{where}~j= 1:\text{number of levels of the factor}$$
   $$\begin{pmatrix}
     2\\3\\4\\6\\7\\8\\10\\11\\12
   \end{pmatrix} = 
@@ -555,19 +555,20 @@ of two alternative parameterizations:
   $$
 
 - **effects parameterization** - generating a new set ($p-1$) of
-  effects parameters ($\beta^*_{q}$, where $q$ represents the set of
-  orthogonal parameters from 2 to $p$) each of which represent a
+  effects parameters ($\beta_{j}$, where $j$ represents the set of
+  orthogonal parameters from 1 to $p-1$) each of which represent a
   linear combination of groups rather than a single group effect. That
-  is, each $\beta^*$ can include varying contributions from any
-  number of the groups and are not restricted to a single contrast of
-  ($=\beta_p-\beta$). For example, one of the parameters might represent
-  the difference in means between two groups or the difference in
-  means between one group and the average of two other groups. $$y_i =
-  \beta_0+\beta_p+\varepsilon_i, \hspace{2cm}\text{where}~p= 2:p$$ In the
-  effects parameterization, $\mu$ typically represents the mean of one
-  of the groups (a reference group) and each of the $\beta$ effects
-  represent the difference between subsequent group means and the
-  reference group.
+  is, each $\beta$ can include varying contributions from any number
+  of the groups and are not restricted to a single contrast of
+  ($=\beta_j-\beta$). For example, one of the parameters might
+  represent the difference in means between two groups or the
+  difference in means between one group and the average of two other
+  groups. $$y_{ij} = \beta_0+\beta_j+\varepsilon_{ij},
+  \hspace{2cm}\text{where}~j= 1:(p-1)$$ In the effects
+  parameterization, $\mu$ typically represents the mean of one of the
+  groups (a reference group) and each of the $\beta$ effects represent
+  the difference between subsequent group means and the reference
+  group.
 
   $$\begin{pmatrix}
     2\\3\\4\\6\\7\\8\\10\\11\\12
@@ -576,22 +577,21 @@ of two alternative parameterizations:
 	1&0&0\\1&0&0\\1&0&0\\1&1&0\\1&1&0\\1&1&0\\1&0&1\\1&0&1\\1&0&1
   \end{pmatrix} \times
   \begin{pmatrix}
-	\beta_1\\\beta_2\\\beta_3\\\beta_4
+	\beta_0\\\beta_1\\\beta_2\\\beta_3
   \end{pmatrix} + 
   \begin{pmatrix}	\varepsilon_1\\\varepsilon_2\\\varepsilon_3\\\varepsilon_4&\\\varepsilon_5\\\varepsilon_6\\\varepsilon_7&\\\varepsilon_8\\\varepsilon_9
   \end{pmatrix}
   $$
 
-
 The reduced number of effects parameters are defined through the use
-of a matrix of `contrast coefficients'. Note, the new set of effects
+of a matrix of **contrast coefficients**. Note, the new set of effects
 parameters should incorporate the overall relational effects of each
 of the groups equally such that each group maintains an equal
 contribution to the overall model fit. The contrast coefficients are
 responsible for determining how the model is re-parameterized into an
 orthogonal model matrix.
 
-A number of `pre-fabricated', contrast matrices exist (to yield
+A number of _pre-fabricated_, contrast matrices exist (to yield
 commonly used model matrices), each of which estimate a different set
 of specific comparisons between treatment combinations. We will
 explore each of these with Motivating example 3 in subsequent sections
@@ -632,18 +632,36 @@ response variable within the $j^{th}$ group of the factor.
 This tutorial will blend theoretical discussions with actual
 calculations and model fits. I believe that by bridging the divide
 between theory and application, we all gain better understanding. The
-applied components of this tutorial will be motivated by two
-fabricated data sets - one that simulates samples drawn from a
-Gaussian (normal) distribution and one that simulates samples drawn
-from a Poisson distribution.
+applied components of this tutorial will be motivated by numerous
+fabricated data sets. The advantage of simulated data over real data
+is that with simulated data, we know the 'truth' and can therefore
+gauge the accuracy of estimates.
 
-The advantage of simulated data over real data is that with simulated
-data, we know the 'truth' and can therefore gauge the accuracy of
-estimates.
+The motivating examples are:
+
+- **Example 1** - simulated samples drawn from a Gaussian (normal)
+  distribution reminiscent of data collected on measurements (such as
+  body mass)
+- **Example 2** - simulated Gaussian samples drawn three different
+  populations representing three different treatment levels (e.g. body
+  masses of three different species)
+- **Example 3** - simulated samples drawn from a Poisson distribution
+  reminiscent of count data (such as number of individuals of a
+  species within quadrats)
+- **Example 4** - simulated samples drawn from a Negative Binomial
+  distribution reminiscent of over-dispersed count data (such as
+  number of individuals of a species that tends to aggregate in
+  groups)
+- **Example 5** - simulated samples drawn from a Bernoulli (binomial
+  with $n = 1$) distribution reminiscent of binary data (such as the
+  presence/absence of a species within sites)
+- **Example 6** - simulated samples drawn from a Binomial distribution
+  reminiscent of proportional data (such as counts of a particular
+  taxa out of a total number of individuals)
 
 ::: {.panel-tabset}
 
-## Motivating example 1 (Paussian data)
+## Example 1 (Gaussian data)
 
 Lets formally simulate the data illustrated above. The underlying
 process dictates that on average a one unit change in the predictor
@@ -714,8 +732,41 @@ var(dat$y)
 sd(dat$y)
 ```
 
+## Example 2 (categorical predictor)
 
-## Motivating example 2 (Poisson data)
+As previously described, categorical predictors are transformed into
+dummy codes prior to the fitting of the linear model. We will simulate
+a small data set with a single categorical predictor comprising a
+control and two treatment levels ('mediam', 'high'). To simplify
+things we will assume a Gaussian distribution, however most of the
+modelling steps would be the same regardless of the chosen
+distribution.
+
+The data will be drawn from three Gaussian distributions with a
+standard deviation of 4 and means of 20, 15 and 10. We will draw a
+total of 12 observations, four from each of the three populations.
+
+```{r}
+#| label: sim2
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(123)
+beta_0 <- 20
+beta <- c(-5, -10)
+sigma <- 4
+n <- 12
+x <- gl(3, 4, 12, labels = c('control', 'medium', 'high'))
+y <- (model.matrix(~x) %*% c(beta_0, beta)) + rnorm(12, 0, sigma)
+dat2 <- data.frame(x = x, y = y)
+dat2
+ggplot(data = dat2) + 
+geom_point(aes(y = y, x = x)) 
+```
+
+## Example 3 (Poisson data)
 
 The Poisson distribution is only parameterized by a single parameter
 ($\lambda$) which represents both the mean and variance. Furthermore,
@@ -734,44 +785,12 @@ only constant on the scale of the link function. When it is back
 transformed onto the natural scale (scale of the data), it takes on a
 different meaning and interpretation.
 
-We will chose $\beta_0$ to represent a value of 2 when `x=0`. As for
+We will chose $\beta_0$ to represent a value of 1 when `x=0`. As for
 the 'effect' of the predictor on the response, lets say that for every
-one unit increase in the predictor the response increaes by 50% (on
+one unit increase in the predictor the response increases by 40% (on
 the natural scale). Hence, on the log scale, the slope will be
-$log(1.5)=$ `r log(1.5)`.
+$log(1.5)=$ `r log(1.4)`.
 
-
-```{r}
-#| label: sim2
-#| eval: true
-#| echo: true
-#| fig-height: 3
-#| fig-width: 3
-#| warning: false
-set.seed(123)
-beta <- c(2, 1.50)
-beta <- log(beta)
-n <- 10
-dat2 <- data.frame(x=seq(from = 1, to = 10, len = n)) |>
-    mutate(y = rpois(n, lambda = exp(beta[1] + beta[2]*x)))
-dat2
-ggplot(data = dat2) + 
-geom_point(aes(y = y, x = x)) 
-```
-
-## Motivating example 3 (categorical predictor)
-
-As previously described, categorical predictors are transformed into
-dummy codes prior to the fitting of the linear model. We will simulate
-a small data set with a single categorical predictor comprising a
-control and two treatment levels ('mediam', 'high'). To simplify
-things we will assume a Gaussian distribution, however most of the
-modelling steps would be the same regardless of the chosen
-distribution.
-
-The data will be drawn from three Gaussian distributions with a
-standard deviation of 4 and means of 20, 15 and 10. We will draw a
-total of 12 observations, four from each of the three populations.
 
 ```{r}
 #| label: sim3
@@ -781,17 +800,177 @@ total of 12 observations, four from each of the three populations.
 #| fig-width: 3
 #| warning: false
 set.seed(123)
-beta_0 <- 20
-beta <- c(-5, -10)
-sigma <- 4
-n <- 12
-x <- gl(3, 4, 12, labels = c('control', 'medium', 'high'))
-y <- (model.matrix(~x) %*% c(beta_0, beta)) + rnorm(12, 0, sigma)
-dat3 <- data.frame(x = x, y = y)
+beta <- c(1, 1.40)
+beta <- log(beta)
+n <- 10
+dat3 <- data.frame(x=seq(from = 1, to = 10, len = n)) |>
+    mutate(y = rpois(n, lambda = exp(beta[1] + beta[2]*x)))
 dat3
 ggplot(data = dat3) + 
 geom_point(aes(y = y, x = x)) 
 ```
+
+## Example 4 (NB data)
+
+In theory, count data should follow a Poisson distribution and
+therefore have properties like mean equal to variance (e.g.
+$\textnormal{Dispersion}=\frac{\sigma}{\mu}=1$). However as simple
+linear models are low dimensional representations of a system, it is
+often unlikely that such a simple model can capture all the
+variability in the response (counts). For example, if we were
+modelling the abundance of a species of intertidal snail within
+quadrats in relation to water depth, it is highly likely that water
+depth alone drives snail abundance. There are countless other
+influences that the model has not accounted for. As a result, the
+observed data might be more variable than a Poisson (of a particular
+mean) would expect and in such cases, the model is over-dispersed
+(more variance than expected).
+
+Over dispersed models under-estimate the variability and thus
+precision in estimates resulting in inflated confidence in outcomes
+(elevated Type I errors).
+
+There are numerous causes of over-dispersed count data (one of which
+is eluded to above). These are:
+
+- additional sources of variability not being accounted for in the
+  model (see above)
+- when the items being counted aggregate together. Although the
+  underlying items may have been generated by a Poisson process, the
+  items clump together. When the items are counted, they are more
+  likely to be in either in relatively low or relatively high
+  numbers - hence the data are more varied than would be expected from
+  their overall mean.
+- imperfect detection resulting in excessive zeros. Again the
+  underlying items may have been generated by a Poisson process,
+  however detecting and counting the items might not be completely
+  straight forward (particularly for more cryptic items). Hence, the
+  researcher may have recorded no individuals in a quadrat and yet
+  there was one or more present, they were just not obvious and were
+  not detected. That is, layered over the Poisson process is another
+  process that determines the detectability. So while the Poisson
+  might expect a certain proportion of zeros, the observed data might
+  have a substantially higher proportion of zeros - and thus higher
+  variance.
+
+This example will generate data that is drawn from a negative binomial
+distribution so as to broadly represent any one of the above causes.
+
+We will chose $\beta_0$ to represent a value of 1 when `x=0`. As for
+the 'effect' of the predictor on the response, lets say that for every
+one unit increase in the predictor the response increases by 40% (on
+the natural scale). Hence, on the log scale, the slope will be
+$log(1.5)=$ `r log(1.4)`. Finally, the dispersion parameter (ratio of
+variance to mean) will be 10.
+
+
+```{r}
+#| label: sim4
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(234)
+beta <- c(1, 1.40)
+beta <- log(beta)
+n <- 10
+size <- 10
+dat4 <- data.frame(x = seq(from = 1, to = 10, len = n)) |>
+    mutate(
+        mu = exp(beta[1] + beta[2] * x),
+        y = rnbinom(n, size = size, mu =  mu)
+    )
+dat4
+ggplot(data = dat4) + 
+geom_point(aes(y = y, x = x)) 
+```
+
+## Example 5 (Binary data)
+
+Binary data (presence/absence, dead/alive, yes/no, heads/tails, etc)
+pose unique challenges for linear modeling. Linear regression,
+designed for continuous outcomes, may not be directly applicable to
+binary responses. The nature of binary data violates assumptions of
+normality and homoscedasticity, which are fundamental to linear
+regression. Furthermore, linear models may predict probabilities
+outside the [0, 1] range, leading to unrealistic predictions.
+
+This example will generate data that is drawn from a bernoulli
+distribution so as to broadly represent presence/absence data.
+
+We will chose $\beta_0$ to represent the odds of a value of 1 when
+$x=0$ equal to $0.02$. This is equivalent to a probability of $y$
+being zero when $x=0$ of $\frac{0.02}{1+0.02}=0.0196$. E.g., at low
+$x$, the response is likely to be close to 0. For every one unit
+increase in $x$, we will stipulate a 2 times increase in odds that
+the expected response is equal to 1.
+
+
+```{r}
+#| label: sim5
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(234)
+beta <- c(0.02, 2)
+beta <- log(beta)
+n <- 10
+dat5 <- data.frame(x = seq(from = 1, to = 10, len = n)) |>
+    mutate(
+        y = as.numeric(rbernoulli(n, p = plogis(beta[1] + beta[2] * x)))
+    )
+dat5
+ggplot(data = dat5) + 
+geom_point(aes(y = y, x = x)) 
+```
+
+## Example 6 (Binomial data)
+
+Similar to binary data, proportional (binomial) data tend to violate
+normality and homogeneity of variance (particularly as mean
+proportions approach either 0% or 100%.
+
+This example will generate data that is drawn from a binomial
+distribution so as to broadly represent proportion data.
+
+We will chose $\beta_0$ to represent the odds of a particular trial
+(e.g. an individual) being of a particular type (e.g. species 1) when
+$x=0$ and to equal to $0.02$. This is equivalent to a probability of
+$y$ being of the focal type when $x=0$ of
+$\frac{0.02}{1+0.02}=0.0196$. E.g., at low $x$, the the probability
+that an individual is taxa 1 is likely to be close to 0. For every one
+unit increase in $x$, we will stipulate a 2.5 times increase in odds
+that the expected response is equal to 1.
+
+For this example, we will also convert the counts into proportions
+($y2$) by division with the number of trials ($5$).
+
+```{r}
+#| label: sim6
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(123)
+beta <- c(0.02, 2.5)
+beta <- log(beta)
+n <- 10
+trials <- 5
+dat6 <- data.frame(x = seq(from = 1, to = 10, len = n)) |>
+    mutate(
+      count = as.numeric(rbinom(n, size = trials, prob = plogis(beta[1] + beta[2] * x))),
+      total = trials,
+      y = count/total
+    )
+dat6
+ggplot(data = dat6) + 
+geom_point(aes(y = y, x = x)) 
+```
+
 
 :::
 
@@ -1537,7 +1716,7 @@ assumptions will be explored and detailed.
 
 ::: {.panel-tabset}
 
-## Motivating example 1
+## Example 1 (Gaussian data)
 
 :::: {.panel-tabset}
 
@@ -1630,7 +1809,8 @@ dat |>
   reserved until after exploring the additional diagnostics that are
   only available after fitting the model.
 
-## Motivating example 2
+
+## Example 2 (categorical predictor)
 
 :::: {.panel-tabset}
 
@@ -1644,95 +1824,6 @@ dat |>
 #| fig-width: 3
 #| fig-height: 3
 dat2 |> 
-  ggplot(aes(y = y)) +
-  geom_boxplot()
-```
-
-:::::: 
-
-:::::: {.column width="48%"}
-**Conclusions**
-
-- there is strong evidence of non-normality
-- each segment of the boxplot should get progressively larger
-
-:::::: 
-::::: 
-
-### Homogeneity of variance
-
-::::: {.columns}
-:::::: {.column width="48%"}
-
-```{r}
-#| label: eda2b
-#| fig-width: 3
-#| fig-height: 3
-dat2 |> 
-  ggplot(aes(y = y, x = x)) +
-  geom_smooth(method = "lm") +
-  geom_point()
-```
-
-:::::: 
-
-:::::: {.column width="48%"}
-**Conclusions**
-
-- the spread of noise does not look random along the line of best fit.
-- homogeneity of variance is difficult to assess in the presence of
-  distributional issues (such as non-normality in this case) as they
-  can result in non-linearity (apparent here)
-
-:::::: 
-::::: 
-
-### Linearity
-
-::::: {.columns}
-:::::: {.column width="48%"}
-
-```{r}
-#| label: eda2c
-#| fig-width: 3
-#| fig-height: 3
-dat2 |> 
-  ggplot(aes(y = y, x = x)) +
-  geom_smooth(method = "lm") +
-  geom_point()
-```
-
-:::::: 
-
-:::::: {.column width="48%"}
-**Conclusions**
-
-- the data do not appear to be linear
-
-:::::: 
-::::: 
-::::
-
-
-**Conclusions**
-
-- there are obvious violations of the linear regression model assumptions
-- we should consider a different model that does not assume normality
-
-## Motivating example 3 (categorical predictor)
-
-:::: {.panel-tabset}
-
-### Normality
-
-::::: {.columns}
-:::::: {.column width="48%"}
-
-```{r}
-#| label: eda3a
-#| fig-width: 3
-#| fig-height: 3
-dat3 |> 
   ggplot(aes(y = y, x = x)) +
   geom_boxplot()
 ```
@@ -1752,10 +1843,10 @@ dat3 |>
 :::::: {.column width="48%"}
 
 ```{r}
-#| label: eda3b
+#| label: eda2b
 #| fig-width: 3
 #| fig-height: 3
-dat3 |> 
+dat2 |> 
   ggplot(aes(y = y, x = x)) +
   geom_boxplot()
 ```
@@ -1789,6 +1880,361 @@ between two points can only ever be linear)....
 - no evidence of non-normality
 - no evidence of non-homogeneity of variance
 
+
+## Example 3 (Poisson data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda3a
+#| fig-width: 3
+#| fig-height: 3
+dat3 |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- there is strong evidence of non-normality
+- each segment of the boxplot should get progressively larger
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda3b
+#| fig-width: 3
+#| fig-height: 3
+dat3 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise does not look random along the line of best fit.
+- homogeneity of variance is difficult to assess in the presence of
+  distributional issues (such as non-normality in this case) as they
+  can result in non-linearity (apparent here)
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda3c
+#| fig-width: 3
+#| fig-height: 3
+dat3 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the data do not appear to be linear
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are obvious violations of the linear regression model assumptions
+- we should consider a different model that does not assume normality
+
+
+## Example 4 (NB data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda4a
+#| fig-width: 3
+#| fig-height: 3
+dat4 |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- there is strong evidence of non-normality
+- each segment of the boxplot should get progressively larger
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda4b
+#| fig-width: 3
+#| fig-height: 3
+dat4 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise does not look random along the line of best fit.
+- homogeneity of variance is difficult to assess in the presence of
+  distributional issues (such as non-normality in this case) as they
+  can result in non-linearity (apparent here)
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda4c
+#| fig-width: 3
+#| fig-height: 3
+dat4 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the data do not appear to be linear
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are obvious violations of the linear regression model assumptions
+- we should consider a different model that does not assume normality
+
+## Example 5 (Binary data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda5a
+#| fig-width: 3
+#| fig-height: 3
+dat5 |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- clearly a set of 0's and 1's cant be normally distributied.
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda5b
+#| fig-width: 3
+#| fig-height: 3
+dat5 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise does not look random (or equal) along the line
+  of best fit.
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda5c
+#| fig-width: 3
+#| fig-height: 3
+dat5 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the data are clearly not linear
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are obvious violations of the linear regression model assumptions
+- we should consider a different model that does not assume normality
+
+## Example 6 (Binomial data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda6a
+#| fig-width: 3
+#| fig-height: 3
+dat6 |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- distribution is not normal and is truncated
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda6b
+#| fig-width: 3
+#| fig-height: 3
+dat6 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise does not look random (or equal) along the line
+  of best fit.
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda6c
+#| fig-width: 3
+#| fig-height: 3
+dat6 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- although there is no evidence of non-linearity from this small data
+  set, it is worth noting that the line of best fit does extend
+  outside the logical response range [0.1] within the range of
+  observed $x$ values. That is, a simple linear model would predict
+  proportions higher than 100% at high values of $x$
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are obvious violations of the linear regression model assumptions
+- we should consider a different model that does not assume normality
 :::
 
 # Data standardisation
@@ -1924,9 +2370,21 @@ enhance the performance and stability of statistical models:
 
 # Ordinary Least Squares (OLS)
 
+The following tabbed content will work through fitting OLS to each of
+the example data sets. Only the first two example data sets (Example
+1 - Gaussian and Example 2 - categorical) satisfy the assumptions of
+OLS. The other examples are included primarily so that we can see
+what the model diagnostics look like when one or more assumptions are
+violated.
+
+For Example 1 - Gaussian, we will fit the model three ways (on raw
+predictor values, on centered predictor values and on standardised
+predictor values). The purpose of this is to illustrate how these
+choices impact on the diagnostics and interpretation of the model. 
+
 ::: {.panel-tabset}
 
-## Motivating example 1
+## Example 1 (Gaussian data)
 
 The Ordinary Least Squares (**OLS**) estimate of a **parameter** (e.g
 the mean, $\mu$) is the value of this parameter that minimize the sum
@@ -2207,11 +2665,16 @@ beta
 
 ::::
 
+
+::::::: {.panel-tabset .nav-pills}
+
+## Raw predictor
+
 :::: {.panel-tabset}
 
 
 
-### Linear regression via `lm()`
+### Fit model via `lm()`
 
 $$
 y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
@@ -2225,14 +2688,14 @@ dat.lm <- lm(y~x, data = dat)
 dat.lm
 ```
 
-::::
+### Model diagnostics
 
 Having fit the model, it is vital that we review a range of regression
 diagnostics so as to assess the goodness of fit of the model. This
 step definitively confirms the model assumptions.
 
 
-:::: {.panel-tabset}
+::::: {.panel-tabset}
 
 ### Autoplot
 
@@ -2506,84 +2969,178 @@ dat.resid |> testQuantiles()
 ## testSpatialAutocorrelation(fert.resid,  x=,  y=) # needs x and y coordinates
 ## testTemporalAutocorrelation(fert.resid,  time=) # needs time
 ```
-::::
 
-## Motivating example 2
+:::::
 
-Exploratory data analysis suggested that a simple linear model of the form
+### Summarise model
 
-$$
-y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
-$$
-
-might not be appropriate for the motivating example 2 data. To see how
-this manifests in the fitted model and diagnostics, lets fit the model
-via OLS anyway.
-
-:::: {.panel-tabset}
-### Linear regression via `lm()`
-
-$$
-y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
-$$
+Since the diagnostics do not reveal any issues, we are free to explore
+the model summaries
 
 ```{r}
-#| label: lm2
+#| label: summary1a
 #| eval: true
 #| echo: true
 #| cache: false
-dat2.lm <- lm(y~x, data = dat2)
-dat2.lm
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.lm |> summary()
+dat.lm |> confint()
 ```
+
+**Interpretation**:
+
+- when $x=0$, $y$ is expected to be `r round(coef(dat.lm)[1], 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by `r round(coef(dat.lm)[2], 3)` (the slope)
+- the slope could be as low as `r round(confint(dat.lm)[2,1], 3)` or as high as 
+  `r round(confint(dat.lm)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*summary(dat.lm)$r.squared, 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
 ::::
 
-And now to explore the regression diagnostics.
+## Centered predictor
 
 :::: {.panel-tabset}
+
+
+### Fit model via `lm()`
+
+$$
+y_i = \beta_0+\beta_1\times (x_i - \bar{x}) +\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+
+This whole process, can be more conveniently wrapped into a simple function within R called `lm()`. 
+
+```{r lm1b, results='markdown', eval=TRUE}
+dat1b.lm <- lm(y ~ scale(x, scale = FALSE), data = dat)
+dat1b.lm
+```
+
+### Model diagnostics
+
+Having fit the model, it is vital that we review a range of regression
+diagnostics so as to assess the goodness of fit of the model. This
+step definitively confirms the model assumptions.
+
+
+::::: {.panel-tabset}
 
 ### Autoplot
 
 ```{r} 
-#| label: lm_diagnostics2a
+#| label: lm_diagnostics1b
 #| eval: true
 #| echo: true
 #| cache: false
-dat2.lm |> 
+dat1b.lm |> 
   autoplot(which = 1:6, ncol = 2, label.size = 3)
 ```
 
-**Conclusions**:
+When supplied with a fitted linear model, the `autoplot()` function generates a
+set of standard diagnostic regression plots:
 
-- there is a clear non-linear pattern remaining in the residual plot
-  indicative of a persistent non-linear trend
-- there is some evidence that the tails of the Q-Q plot are starting
-  to diverge from the line. This usually implies that the nominated
-  distribution (in this case gaussian) is not capturing the underlying
-  distribution appropriately.
-- the 10th observation has a large (>0.8) Cook's D value suggesting
-  that it was overly influential
-
+- the top left plot is a residual plot: Ideally, there should not be
+  any patterns in the residual plot. Of particular concern would be if
+  there was a wedge (funnel) shape (indicative of unequal variances)
+  or some curved shape (indicative of having fit a linear trend
+  through non-linear data).
+- the top right plot is a Q-Q normal plot: This figure plots the
+  quantiles of the residuals against the quantiles that would be
+  expected if the data were drawn from a normal distribution. Ideally,
+  the points should be close to the dashed line. Deviations from this
+  line at the tails signify potential non-normality.
+- the middle left plot is a standardised residual plot. This has a
+  similar interpretation to the residual plot.
+- the middle right plot displays the cooks distance values associated
+  with each observation. Cook's distance is a measure of the influence
+  of each point on the estimated parameter values. This is a
+  combination of residuals (measure of outlierness along the y-axis)
+  and leverage (measure of outlierness along the x-axis). Essentially,
+  it estimates variations in regression coefficients after removing
+  each observation (one by one). Ideally, all the values should be
+  under 0.8. Numbers above the bars indicate the observation number -
+  this can be useful to identify which observations are influential.
+- the bottom left plot displays the trend between residuals and
+  leverage. In the event of large Cook's distance, this can help
+  identify whether the issues are due to residuals or leverage.
+- the bottom right plot displays the trend between Cook's distance and
+  leverage.
+  
 ### Influence measures
 
+Statistical models assume that all observations have the same
+influence (weight) on the estimates. Outliers (unusually small or
+large observations) are problematic as they tend to have higher
+influence on estimates. They tend to "pull" the estimates (that is
+bias the estimates) towards themselves.
+
+There are numerous measures of observation influence.
+
+- **residuals** - the deviations (along the y-axis) between observed
+  and expected values. Observations that have relatively large
+  residuals (an order of magnitude greater than the others) can be
+  viewed as potentially overly influential.
+- **leverage** - the deviations along the x-axis. That is, how unusual
+  is each predictor observation. For experimental designs, this is
+  usually not an issue since the observed values of predictors are
+  under the control of the experiment (we set what values of the
+  predictor we wish to explore a response to). However, for natural
+  experiments (e.g. surveys), the experimenter has less control over
+  the range of predictor values observed.
+- **Cook's distance** - this is a metric of influence that combines
+  together residuals and leverage. The values can range from 0
+  (typical influence) to 1 (highly influential). Values greater than
+  **0.8** should be viewed as overly influential and scrutinised further.
+
+Cook's distance (`cook.d`) and leverage (`hat`) are displayed in
+tabular form.
+
 ```{r}
-#| label: validateModel2a
+#| label: validateModelb
 #| eval: true
 #| echo: true
 #| cache: false
-dat2.lm |> influence.measures()
-dat2.lm |> fortify()
+dat1b.lm |> influence.measures()
+dat1b.lm |> fortify()
 ```
 
-**Conclusions**:
-
-- the 10th observation has a large (>0.8) Cook's D value suggesting
-  that it was overly influential
+In this case, no observations would be considered overly influential.
 
 ### Performance model checking
 
 
+The `performance` package provides a similar set of visual diagnostics:
+
+- the top left plot is a "Posterior predictive plot"". This plot
+  features the density of the observed response (thick green line)
+  along with a collection of random realisations predicted from the
+  model. The point of this diagnostic is to see whether the
+  predictions are broadly consistent with the input data. If the
+  densities of realisations and observed data are not well aligned, it
+  might imply that the model is not a good fit.
+- the top right and middle left two plots are residual and standard
+  residual plots. Ideally, these should show no patterns in the
+  residuals
+- the middle right plot is an influence plot that plots residuals
+  against leverage with contours to help identify large Cook's D
+  values. Points should not fall outside the 0.8 contours (if
+  present).
+- the bottom left plot is a form of Q-Q plot that plots the distribution
+  (density) of the residuals from observed data (y-axis) against those
+  based on an exact normal (or other nominated) distribution. Ideally,
+  the points should all lay along the green horizontal line.
+
 ```{r}
-#| label: validateModel2a1
+#| label: validateModela1b
 #| eval: true
 #| echo: true
 #| cache: false
@@ -2591,24 +3148,61 @@ dat2.lm |> fortify()
 #| warning: false
 #| fig-height: 10
 #| fig-width: 8
-dat2.lm |> performance::check_model()
-dat2.lm |> performance::check_outliers()
+dat1b.lm |> performance::check_model()
+dat1b.lm |> performance::check_outliers()
 ```
 
 **Conclusions**:
 
-- the observed density and simulated densities in the Posterior
-  Predictive Check plot are inconsistent 
-  - the peaks are not aligned
-- there is clear evidence of a non-linear trend in the residuals plot
-- the 10th observation has high Cook's D value
-- dots do not fall along the Q-Q plot line (particularly the one in
-  the tails)
+- there are no alarming signs from any of the diagnostics
 
 ### DHARMa (simulated) residuals
 
+Although an exploration of model residuals can provide important insights into
+the goodness of fit and conformity of a model to the underlying assumptions,
+diagnosing issues is a bit of a fine art.  This difficulty is exacerbated when
+the residuals are being calculated from some models (e.g logistic regression
+models) where it is difficult to separate out nefarious patterns from the
+specific patterns expected of the specific model.
+
+The `DHARMa` package generates standardised residuals via simulation and uses
+these as the basis of a range of tools to diagnose common modelling issues
+including outliers, heterogeneity, over-dispersion, autocorrelation.
+
+New observations simulated from the fitted model are used to calculate a
+cumulative density function (CDF) that describes the probability profile of
+each observation. Thereafter, the residual of an observation is calculated as
+the value of the CDF that corresponds to the actual observed value:
+
+- a value of 0 indicates that the observed value was less than all simulated values
+- a value of 1 indicates that the observed value was greater than all simulated values
+- a value of 0.5 indicates that have the observed value were greater than all
+simulated values from a correctly specified model, these quantile residuals
+should be uniformly distributed
+
+This approach ensures that all residuals have the same interpretation
+irrespective of the model and distribution selected.
+
+Exploring DHARMa residuals begins with running the `simulateResiduals()`
+function. If this is done with `plot=TRUE`, a pair of diagnostic plots with a
+range of diagnostic tests will be provided as side effects.
+
+- the left hand plot is a Q-Q plot (ideally all points should be close
+  to the red line).
+  - the KS (Kolmogorov-Smirnov) test tests whether the (in this case
+    simulated) are likely to have been drawn from the nominated
+    distribution (in this case Gaussian).
+  - the Dispersion test tests whether the standard deviation of the
+    data is equal to that of the simulated data
+  - the Outlier test tests for the prevalence of outliers (when
+    observed values are outside the simulated range)
+- the right hand plot is a residual plot. Ideally, there should be no patterns
+  in the residuals. To help identify any patterns, quantile trends are
+  overlayed. Ideally, there should be a flat black line at each of the quantiles
+  of 0.25, 0.5 and 0.75.
+
 ```{r}
-#| label: validateModel2b1
+#| label: validateModelb1b
 #| eval: true
 #| echo: true
 #| cache: false
@@ -2616,18 +3210,481 @@ dat2.lm |> performance::check_outliers()
 #| warning: false
 #| fig-height: 4
 #| fig-width: 8
-dat2.resid <- dat2.lm |> 
+dat.resid <- dat1b.lm |> 
   simulateResiduals(plot = TRUE)
+```
+
+Alternatively, once the simulated residuals have been generated,
+individual tests can be explored.
+
+- residuals.  This includes:
+
+  - a Q-Q plot (same as above)
+  - a plot of simulated dispersion values (histogram) as well as the
+    standardised observed dispersion (red line). Dispersion is the
+    ratio of variance to mean and on a non-standardized scale should
+    ideally be 1. Higher values indicate overdispersion. More about
+    this issue will be discussed later on in the tutorial. For the
+    plot, the red line should fall well within the range of the
+    underlying histogram. If the red line is off to the right, it
+    suggests that the model might be over-dispersed. If the red line
+    is to the left, it suggests under-dispersion.
+  - histogram of outliers. The red line (if present) indicates the
+    presence of outliers.
+ 
+  The figures are accompanied by formal statistical tests. These tests
+  should be reviewed, however, be aware that they are typically more
+  sensitive than the assumptions they seek to explore. So while it is
+  important to review them in order to identify potential issues,
+  significant tests need not be considered indicators of complete
+  model failure.
+  
+```{r}
+#| label: validateModelb2b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+## To run tests of KS (uniformity),  dispersion and outliers
+dat.resid |> testResiduals()
+```
+
+- uniformity
+```{r}
+#| label: validateModelb3b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testUniformity()
+```
+- dispersion
+
+```{r}
+#| label: validateModelb4b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testDispersion()
+```
+- outliers
+
+```{r}
+#| label: validateModelb5b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testOutliers()
+```
+- quantiles
+
+```{r}
+#| label: validateModelb6b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testQuantiles()
+## The above fits quantile gams at 0.25,  0.5 and 0.75
+## testSpatialAutocorrelation(fert.resid,  x=,  y=) # needs x and y coordinates
+## testTemporalAutocorrelation(fert.resid,  time=) # needs time
+```
+
+:::::
+
+### Summarise model
+
+Since the diagnostics do not reveal any issues, we are free to explore
+the model summaries
+
+```{r}
+#| label: summary1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat1b.lm |> summary()
+dat1b.lm |> confint()
+```
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be `r round(coef(dat1b.lm)[1], 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by `r round(coef(dat1b.lm)[2], 3)` (the slope)
+- the slope could be as low as `r round(confint(dat1b.lm)[2,1], 3)` or as high as 
+  `r round(confint(dat1b.lm)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*summary(dat1b.lm)$r.squared, 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+::::
+
+## Standardised predictor
+
+:::: {.panel-tabset}
+
+
+### Fit model via `lm()`
+
+$$
+y_i = \beta_0+\beta_1\times (x_i - \bar{x})/\sigma_{x} +\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+
+This whole process, can be more conveniently wrapped into a simple function within R called `lm()`. 
+
+```{r lm1c, results='markdown', eval=TRUE}
+dat1c.lm <- lm(y ~ scale(x), data = dat)
+dat1c.lm
+```
+
+### Model diagnostics
+
+Having fit the model, it is vital that we review a range of regression
+diagnostics so as to assess the goodness of fit of the model. This
+step definitively confirms the model assumptions.
+
+
+::::: {.panel-tabset}
+
+### Autoplot
+
+```{r} 
+#| label: lm_diagnostics1c
+#| eval: true
+#| echo: true
+#| cache: false
+dat1c.lm |> 
+  autoplot(which = 1:6, ncol = 2, label.size = 3)
+```
+
+When supplied with a fitted linear model, the `autoplot()` function generates a
+set of standard diagnostic regression plots:
+
+- the top left plot is a residual plot: Ideally, there should not be
+  any patterns in the residual plot. Of particular concern would be if
+  there was a wedge (funnel) shape (indicative of unequal variances)
+  or some curved shape (indicative of having fit a linear trend
+  through non-linear data).
+- the top right plot is a Q-Q normal plot: This figure plots the
+  quantiles of the residuals against the quantiles that would be
+  expected if the data were drawn from a normal distribution. Ideally,
+  the points should be close to the dashed line. Deviations from this
+  line at the tails signify potential non-normality.
+- the middle left plot is a standardised residual plot. This has a
+  similar interpretation to the residual plot.
+- the middle right plot displays the cooks distance values associated
+  with each observation. Cook's distance is a measure of the influence
+  of each point on the estimated parameter values. This is a
+  combination of residuals (measure of outlierness along the y-axis)
+  and leverage (measure of outlierness along the x-axis). Essentially,
+  it estimates variations in regression coefficients after removing
+  each observation (one by one). Ideally, all the values should be
+  under 0.8. Numbers above the bars indicate the observation number -
+  this can be useful to identify which observations are influential.
+- the bottom left plot displays the trend between residuals and
+  leverage. In the event of large Cook's distance, this can help
+  identify whether the issues are due to residuals or leverage.
+- the bottom right plot displays the trend between Cook's distance and
+  leverage.
+  
+### Influence measures
+
+Statistical models assume that all observations have the same
+influence (weight) on the estimates. Outliers (unusually small or
+large observations) are problematic as they tend to have higher
+influence on estimates. They tend to "pull" the estimates (that is
+bias the estimates) towards themselves.
+
+There are numerous measures of observation influence.
+
+- **residuals** - the deviations (along the y-axis) between observed
+  and expected values. Observations that have relatively large
+  residuals (an order of magnitude greater than the others) can be
+  viewed as potentially overly influential.
+- **leverage** - the deviations along the x-axis. That is, how unusual
+  is each predictor observation. For experimental designs, this is
+  usually not an issue since the observed values of predictors are
+  under the control of the experiment (we set what values of the
+  predictor we wish to explore a response to). However, for natural
+  experiments (e.g. surveys), the experimenter has less control over
+  the range of predictor values observed.
+- **Cook's distance** - this is a metric of influence that combines
+  together residuals and leverage. The values can range from 0
+  (typical influence) to 1 (highly influential). Values greater than
+  **0.8** should be viewed as overly influential and scrutinised further.
+
+Cook's distance (`cook.d`) and leverage (`hat`) are displayed in
+tabular form.
+
+```{r}
+#| label: validateModelc
+#| eval: true
+#| echo: true
+#| cache: false
+dat1c.lm |> influence.measures()
+dat1c.lm |> fortify()
+```
+
+In this case, no observations would be considered overly influential.
+
+### Performance model checking
+
+
+The `performance` package provides a similar set of visual diagnostics:
+
+- the top left plot is a "Posterior predictive plot"". This plot
+  features the density of the observed response (thick green line)
+  along with a collection of random realisations predicted from the
+  model. The point of this diagnostic is to see whether the
+  predictions are broadly consistent with the input data. If the
+  densities of realisations and observed data are not well aligned, it
+  might imply that the model is not a good fit.
+- the top right and middle left two plots are residual and standard
+  residual plots. Ideally, these should show no patterns in the
+  residuals
+- the middle right plot is an influence plot that plots residuals
+  against leverage with contours to help identify large Cook's D
+  values. Points should not fall outside the 0.8 contours (if
+  present).
+- the bottom left plot is a form of Q-Q plot that plots the distribution
+  (density) of the residuals from observed data (y-axis) against those
+  based on an exact normal (or other nominated) distribution. Ideally,
+  the points should all lay along the green horizontal line.
+
+```{r}
+#| label: validateModela1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat1c.lm |> performance::check_model()
+dat1c.lm |> performance::check_outliers()
 ```
 
 **Conclusions**:
 
-- the Q-Q plot is okay
-- there is clear evidence of a non-linear trend persisting in the
-  residuals
-::::
+- there are no alarming signs from any of the diagnostics
 
-## Motivating example 3
+### DHARMa (simulated) residuals
+
+Although an exploration of model residuals can provide important insights into
+the goodness of fit and conformity of a model to the underlying assumptions,
+diagnosing issues is a bit of a fine art.  This difficulty is exacerbated when
+the residuals are being calculated from some models (e.g logistic regression
+models) where it is difficult to separate out nefarious patterns from the
+specific patterns expected of the specific model.
+
+The `DHARMa` package generates standardised residuals via simulation and uses
+these as the basis of a range of tools to diagnose common modelling issues
+including outliers, heterogeneity, over-dispersion, autocorrelation.
+
+New observations simulated from the fitted model are used to calculate a
+cumulative density function (CDF) that describes the probability profile of
+each observation. Thereafter, the residual of an observation is calculated as
+the value of the CDF that corresponds to the actual observed value:
+
+- a value of 0 indicates that the observed value was less than all simulated values
+- a value of 1 indicates that the observed value was greater than all simulated values
+- a value of 0.5 indicates that have the observed value were greater than all
+simulated values from a correctly specified model, these quantile residuals
+should be uniformly distributed
+
+This approach ensures that all residuals have the same interpretation
+irrespective of the model and distribution selected.
+
+Exploring DHARMa residuals begins with running the `simulateResiduals()`
+function. If this is done with `plot=TRUE`, a pair of diagnostic plots with a
+range of diagnostic tests will be provided as side effects.
+
+- the left hand plot is a Q-Q plot (ideally all points should be close
+  to the red line).
+  - the KS (Kolmogorov-Smirnov) test tests whether the (in this case
+    simulated) are likely to have been drawn from the nominated
+    distribution (in this case Gaussian).
+  - the Dispersion test tests whether the standard deviation of the
+    data is equal to that of the simulated data
+  - the Outlier test tests for the prevalence of outliers (when
+    observed values are outside the simulated range)
+- the right hand plot is a residual plot. Ideally, there should be no patterns
+  in the residuals. To help identify any patterns, quantile trends are
+  overlayed. Ideally, there should be a flat black line at each of the quantiles
+  of 0.25, 0.5 and 0.75.
+
+```{r}
+#| label: validateModelb1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat1c.lm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+Alternatively, once the simulated residuals have been generated,
+individual tests can be explored.
+
+- residuals.  This includes:
+
+  - a Q-Q plot (same as above)
+  - a plot of simulated dispersion values (histogram) as well as the
+    standardised observed dispersion (red line). Dispersion is the
+    ratio of variance to mean and on a non-standardized scale should
+    ideally be 1. Higher values indicate overdispersion. More about
+    this issue will be discussed later on in the tutorial. For the
+    plot, the red line should fall well within the range of the
+    underlying histogram. If the red line is off to the right, it
+    suggests that the model might be over-dispersed. If the red line
+    is to the left, it suggests under-dispersion.
+  - histogram of outliers. The red line (if present) indicates the
+    presence of outliers.
+ 
+  The figures are accompanied by formal statistical tests. These tests
+  should be reviewed, however, be aware that they are typically more
+  sensitive than the assumptions they seek to explore. So while it is
+  important to review them in order to identify potential issues,
+  significant tests need not be considered indicators of complete
+  model failure.
+  
+```{r}
+#| label: validateModelb2c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+## To run tests of KS (uniformity),  dispersion and outliers
+dat.resid |> testResiduals()
+```
+
+- uniformity
+```{r}
+#| label: validateModelb3c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testUniformity()
+```
+- dispersion
+
+```{r}
+#| label: validateModelb4c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testDispersion()
+```
+- outliers
+
+```{r}
+#| label: validateModelb5c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testOutliers()
+```
+- quantiles
+
+```{r}
+#| label: validateModelb6c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testQuantiles()
+## The above fits quantile gams at 0.25,  0.5 and 0.75
+## testSpatialAutocorrelation(fert.resid,  x=,  y=) # needs x and y coordinates
+## testTemporalAutocorrelation(fert.resid,  time=) # needs time
+```
+
+:::::
+
+### Summarise model
+
+Since the diagnostics do not reveal any issues, we are free to explore
+the model summaries
+
+```{r}
+#| label: summary1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat1c.lm |> summary()
+dat1c.lm |> confint()
+```
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since standardised), $y$ is expected to be `r round(coef(dat1c.lm)[1], 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of
+  approximately 34% of the range of $x$ since standardised), the
+  expected value of $y$ increases by `r round(coef(dat1c.lm)[2], 3)`
+  (the slope)
+- the slope could be as low as `r round(confint(dat1c.lm)[2,1], 3)` or as high as 
+  `r round(confint(dat1c.lm)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*summary(dat1c.lm)$r.squared, 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+::::
+::::::
+
+## Example 2 (categorical data)
 
 For this demonstration, we will fit a range of models that vary only
 in the contrast paramterisations so that we can appreciate the ways
@@ -2667,12 +3724,12 @@ contrasts to use, however, as treatment contrasts are the default,
 this is not necessary.
 
 ```{r}
-#| label: lm3a1
+#| label: lm2a1
 #| eval: true
 #| echo: true
 #| cache: false
 model.matrix(~x,
-    data = dat3,
+    data = dat2,
     contrasts.arg = list(x = "contr.treatment")
 )
 ```
@@ -2680,21 +3737,21 @@ model.matrix(~x,
 To fit a model with treatment contrasts
 
 ```{r}
-#| label: lm3a2
+#| label: lm2a2
 #| eval: true
 #| echo: true
 #| cache: false
-dat3a.lm <- lm(y ~ x, data = dat3)
-dat3a.lm
+dat2a.lm <- lm(y ~ x, data = dat2)
+dat2a.lm
 ```
 
 **Interpretation**
 
-- the mean of the first group is `r coef(dat3a.lm)[1]`
+- the mean of the first group is `r coef(dat2a.lm)[1]`
 - the difference between the means of the first and second group (i.e.
-  the effect of the second group over the first) is `r coef(dat3a.lm)[2]`
+  the effect of the second group over the first) is `r coef(dat2a.lm)[2]`
 - the difference between the means of the first and third group (i.e.
-  the effect of the third group over the first) is `r coef(dat3a.lm)[3]`
+  the effect of the third group over the first) is `r coef(dat2a.lm)[3]`
 
 
 ### Means parameterisation
@@ -2719,31 +3776,31 @@ Note that for means parameterisation, it is simply a matter of
 dropping the intercept (`-1`).
 
 ```{r}
-#| label: lm3b1
+#| label: lm2b1
 #| eval: true
 #| echo: true
 #| cache: false
 model.matrix(~-1 + x,
-    data = dat3
+    data = dat2
 )
 ```
 
 To fit a model with treatment contrasts
 
 ```{r}
-#| label: lm3b2
+#| label: lm2b2
 #| eval: true
 #| echo: true
 #| cache: false
-dat3b.lm <- lm(y ~ -1 + x, data = dat3)
-dat3b.lm
+dat2b.lm <- lm(y ~ -1 + x, data = dat2)
+dat2b.lm
 ```
 
 **Interpretation**
 
-- the mean of the first group is `r coef(dat3b.lm)[1]`
-- the mean of the second group is `r coef(dat3b.lm)[2]`
-- the mean of the third group is `r coef(dat3b.lm)[3]`
+- the mean of the first group is `r coef(dat2b.lm)[1]`
+- the mean of the second group is `r coef(dat2b.lm)[2]`
+- the mean of the third group is `r coef(dat2b.lm)[3]`
 
 ### Sum to zero contrasts
 
@@ -2766,12 +3823,12 @@ You might notice that the last group is completely omitted.
 : {.sm .paperTable tbl-colwidths="[10,70, 20]"}
 
 ```{r}
-#| label: lm3c1
+#| label: lm2c1
 #| eval: true
 #| echo: true
 #| cache: false
 model.matrix(~ x,
-  data = dat3,
+  data = dat2,
   contrasts.arg = list(x = "contr.sum")
 )
 ```
@@ -2779,26 +3836,26 @@ model.matrix(~ x,
 To fit a model with sum to zero contrasts
 
 ```{r}
-#| label: lm3c2
+#| label: lm2c2
 #| eval: true
 #| echo: true
 #| cache: false
-dat3c.lm <- lm(y ~ x,
-    data = dat3,
+dat2c.lm <- lm(y ~ x,
+    data = dat2,
     contrasts = list(x = "contr.sum")
 )
-dat3c.lm
+dat2c.lm
 ```
 
 **Interpretation**
 
-- the mean of the groups is `r coef(dat3c.lm)[1]`
+- the mean of the groups is `r coef(dat2c.lm)[1]`
 - the difference between the grand mean (mean of all groups) and mean
   of the first group (i.e. the effect of the first group over the
-  average) is `r coef(dat3c.lm)[2]`
+  average) is `r coef(dat2c.lm)[2]`
 - the difference between the grand mean (mean of all groups) and mean
   of the second group (i.e. the effect of the second group over the
-  average) is `r coef(dat3c.lm)[3]`
+  average) is `r coef(dat2c.lm)[3]`
 
 
 ### Helmert contrasts
@@ -2822,12 +3879,12 @@ You might notice that the last group is completely omitted.
 : {.sm .paperTable tbl-colwidths="[10,70, 20]"}
 
 ```{r}
-#| label: lm3d1
+#| label: lm2d1
 #| eval: true
 #| echo: true
 #| cache: false
 model.matrix(~x,
-    data = dat3,
+    data = dat2,
     contrasts.arg = list(x = "contr.helmert")
 )
 ```
@@ -2835,24 +3892,24 @@ model.matrix(~x,
 To fit a model with Helmert contrasts
 
 ```{r}
-#| label: lm3d2
+#| label: lm2d2
 #| eval: true
 #| echo: true
 #| cache: false
-dat3d.lm <- lm(y ~ x,
-    data = dat3,
+dat2d.lm <- lm(y ~ x,
+    data = dat2,
     contrasts = list(x = "contr.helmert")
 )
-dat3d.lm
+dat2d.lm
 ```
 
 **Interpretation**
 
-- the mean of the groups is `r coef(dat3d.lm)[1]`
+- the mean of the groups is `r coef(dat2d.lm)[1]`
 - the difference between the mean of the first group and the mean
-  of the first and second groups is `r coef(dat3d.lm)[2]`
+  of the first and second groups is `r coef(dat2d.lm)[2]`
 - the difference between the mean of the second group and the mean
-  of the second and third groups is `r coef(dat3d.lm)[2]`
+  of the second and third groups is `r coef(dat2d.lm)[2]`
   
 ### Polynomial contrasts
 
@@ -2880,12 +3937,12 @@ You might notice that the last group is completely omitted.
 : {.sm .paperTable tbl-colwidths="[10,70, 20]"}
 
 ```{r}
-#| label: lm3e1
+#| label: lm2e1
 #| eval: true
 #| echo: true
 #| cache: false
 model.matrix(~x,
-    data = dat3,
+    data = dat2,
     contrasts.arg = list(x = "contr.poly")
 )
 ```
@@ -2893,23 +3950,23 @@ model.matrix(~x,
 To fit a model with polynomial contrasts
 
 ```{r}
-#| label: lm3e2
+#| label: lm2e2
 #| eval: true
 #| echo: true
 #| cache: false
-dat3e.lm <- lm(y ~ x,
-    data = dat3,
+dat2e.lm <- lm(y ~ x,
+    data = dat2,
     contrasts = list(x = "contr.poly")
 )
-dat3e.lm
+dat2e.lm
 ```
 
 **Interpretation**
 
-- the mean of the groups is `r coef(dat3e.lm)[1]`
-- $y$ declines at a rate of `r coef(dat3e.lm)[2]` per level of the
+- the mean of the groups is `r coef(dat2e.lm)[1]`
+- $y$ declines at a rate of `r coef(dat2e.lm)[2]` per level of the
   group ($x$). There is a negative relationship.
-- the rate of quadratic curvature is `r coef(dat3e.lm)[3]`. Since this
+- the rate of quadratic curvature is `r coef(dat2e.lm)[3]`. Since this
   value is negative, it suggests that the gradient of the trend (slope),
   declines with $x$.
 
@@ -2944,36 +4001,36 @@ might hvae no interpretation at all).
 
 
 ```{r}
-#| label: lm3f1
+#| label: lm2f1
 #| eval: true
 #| echo: true
 #| cache: false
 # define potential contrast matrix for comparing group G1 with the average of groups G2 and G3
 library(gmodels)
-contrasts(dat3$x) <- make.contrasts(rbind(c(1, -0.5, -0.5)))
-contrasts(dat3$x)
-model.matrix(~x, data =  dat3)
+contrasts(dat2$x) <- make.contrasts(rbind(c(1, -0.5, -0.5)))
+contrasts(dat2$x)
+model.matrix(~x, data =  dat2)
 ```
 
 To fit a model with user defined contrasts
 
 ```{r}
-#| label: lm3f2
+#| label: lm2f2
 #| eval: true
 #| echo: true
 #| cache: false
-dat3f.lm <- lm(y ~ x,
-    data = dat3,
+dat2f.lm <- lm(y ~ x,
+    data = dat2,
     contrasts = list(x = make.contrasts(rbind(c(1, -0.5, -0.5))))
 )
-dat3f.lm
+dat2f.lm
 ```
 
 **Interpretation**
 
-- the mean of the groups is `r coef(dat3f.lm)[1]`
+- the mean of the groups is `r coef(dat2f.lm)[1]`
 - the difference between the first group and the average of the second
-  and third groups is `r coef(dat3f.lm)[2]`
+  and third groups is `r coef(dat2f.lm)[2]`
 - since we did not define a second contrast, R has just added one in
   that satisfies orthogonality - this one obviously has no
   interpretation.
@@ -2992,7 +4049,7 @@ model (unless the sample sizes within groups vary substantially).
 #### Treatment contrasts
 
 ```{r}
-#| label: validateModel3a
+#| label: validateModel2a
 #| eval: true
 #| echo: true
 #| cache: false
@@ -3000,14 +4057,14 @@ model (unless the sample sizes within groups vary substantially).
 #| warning: false
 #| fig-height: 4
 #| fig-width: 8
-dat.resid <- dat3a.lm |> 
+dat.resid <- dat2a.lm |> 
   simulateResiduals(plot = TRUE)
 ```
 
 #### Means parameterisation
 
 ```{r}
-#| label: validateModel3b
+#| label: validateModel2b
 #| eval: true
 #| echo: true
 #| cache: false
@@ -3015,14 +4072,14 @@ dat.resid <- dat3a.lm |>
 #| warning: false
 #| fig-height: 4
 #| fig-width: 8
-dat.resid <- dat3b.lm |> 
+dat.resid <- dat2b.lm |> 
   simulateResiduals(plot = TRUE)
 ```
 
 #### Sum to zero contrasts
 
 ```{r}
-#| label: validateModel3c
+#| label: validateModel2c
 #| eval: true
 #| echo: true
 #| cache: false
@@ -3030,14 +4087,14 @@ dat.resid <- dat3b.lm |>
 #| warning: false
 #| fig-height: 4
 #| fig-width: 8
-dat.resid <- dat3c.lm |> 
+dat.resid <- dat2c.lm |> 
   simulateResiduals(plot = TRUE)
 ```
 
 #### Helmert contrasts
 
 ```{r}
-#| label: validateModel3d
+#| label: validateModel2d
 #| eval: true
 #| echo: true
 #| cache: false
@@ -3045,14 +4102,14 @@ dat.resid <- dat3c.lm |>
 #| warning: false
 #| fig-height: 4
 #| fig-width: 8
-dat.resid <- dat3d.lm |> 
+dat.resid <- dat2d.lm |> 
   simulateResiduals(plot = TRUE)
 ```
 
 #### Polynomial contrasts
 
 ```{r}
-#| label: validateModel3e
+#| label: validateModel2e
 #| eval: true
 #| echo: true
 #| cache: false
@@ -3060,14 +4117,14 @@ dat.resid <- dat3d.lm |>
 #| warning: false
 #| fig-height: 4
 #| fig-width: 8
-dat.resid <- dat3e.lm |> 
+dat.resid <- dat2e.lm |> 
   simulateResiduals(plot = TRUE)
 ```
 
 #### User defined contrasts
 
 ```{r}
-#| label: validateModel3f
+#| label: validateModel2f
 #| eval: true
 #| echo: true
 #| cache: false
@@ -3075,24 +4132,534 @@ dat.resid <- dat3e.lm |>
 #| warning: false
 #| fig-height: 4
 #| fig-width: 8
-dat.resid <- dat3f.lm |> 
+dat.resid <- dat2f.lm |> 
   simulateResiduals(plot = TRUE)
 ```
 ::::
 
+
+## Example 3 (Poisson data)
+
+Exploratory data analysis suggested that a simple linear model of the form
+
+$$
+y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+might not be appropriate for the motivating example 3 data. To see how
+this manifests in the fitted model and diagnostics, lets fit the model
+via OLS anyway.
+
+:::: {.panel-tabset}
+### Fit model via `lm()`
+
+$$
+y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+```{r}
+#| label: lm3
+#| eval: true
+#| echo: true
+#| cache: false
+dat3.lm <- lm(y~x, data = dat3)
+dat3.lm
+```
+
+### Model diagnostics
+
+And now to explore the regression diagnostics.
+
+::::: {.panel-tabset}
+
+### Autoplot
+
+```{r} 
+#| label: lm_diagnostics3a
+#| eval: true
+#| echo: true
+#| cache: false
+dat3.lm |> 
+  autoplot(which = 1:6, ncol = 2, label.size = 3)
+```
+
+**Conclusions**:
+
+- there is a clear non-linear pattern remaining in the residual plot
+  indicative of a persistent non-linear trend
+- there is some evidence that the tails of the Q-Q plot are starting
+  to diverge from the line. This usually implies that the nominated
+  distribution (in this case gaussian) is not capturing the underlying
+  distribution appropriately.
+- the 10th observation has a large (>0.8) Cook's D value suggesting
+  that it was overly influential
+
+### Influence measures
+
+```{r}
+#| label: validateModel3a
+#| eval: true
+#| echo: true
+#| cache: false
+dat3.lm |> influence.measures()
+dat3.lm |> fortify()
+```
+
+**Conclusions**:
+
+- the 10th observation has a large (>0.8) Cook's D value suggesting
+  that it was overly influential
+
+### Performance model checking
+
+
+```{r}
+#| label: validateModel3a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat3.lm |> performance::check_model()
+dat3.lm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- the observed density and simulated densities in the Posterior
+  Predictive Check plot are inconsistent 
+  - the peaks are not aligned
+- there is clear evidence of a non-linear trend in the residuals plot
+- the 10th observation has high Cook's D value
+- dots do not fall along the Q-Q plot line (particularly the one in
+  the tails)
+
+### DHARMa (simulated) residuals
+
+```{r}
+#| label: validateModel3b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat3.resid <- dat3.lm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**:
+
+- the Q-Q plot is okay
+- there is clear evidence of a non-linear trend persisting in the
+  residuals
+:::::
+
+### Summarise model
+
+Since the model diagnostics indicated violations of the assumptions,
+we will not explore the model summaries
+
+::::
+
+
+## Example 4 (NB data)
+
+Exploratory data analysis suggested that a simple linear model of the form
+
+$$
+y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+might not be appropriate for the motivating example 4 data. To see how
+this manifests in the fitted model and diagnostics, lets fit the model
+via OLS anyway.
+
+:::: {.panel-tabset}
+### Fit model via `lm()`
+
+$$
+y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+```{r}
+#| label: lm4
+#| eval: true
+#| echo: true
+#| cache: false
+dat4.lm <- lm(y~x, data = dat4)
+dat4.lm
+```
+
+### Model diagnostics
+
+And now to explore the regression diagnostics.
+
+::::: {.panel-tabset}
+
+### Autoplot
+
+```{r} 
+#| label: lm_diagnostics4a
+#| eval: true
+#| echo: true
+#| cache: false
+dat4.lm |> 
+  autoplot(which = 1:6, ncol = 2, label.size = 3)
+```
+
+**Conclusions**:
+
+- there is a clear non-linear pattern remaining in the residual plot
+  indicative of a persistent non-linear trend
+- there is evidence that the tails of the Q-Q plot have diverge from
+  the line. This usually implies that the nominated distribution (in
+  this case gaussian) is not capturing the underlying distribution
+  appropriately.
+- the 10th observation has a large (>0.8) Cook's D value suggesting
+  that it was overly influential
+
+### Influence measures
+
+```{r}
+#| label: validateModel4a
+#| eval: true
+#| echo: true
+#| cache: false
+dat4.lm |> influence.measures()
+dat4.lm |> fortify()
+```
+
+**Conclusions**:
+
+- the 10th observation has a large (>0.8) Cook's D value suggesting
+  that it was overly influential
+
+### Performance model checking
+
+
+```{r}
+#| label: validateModel4a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat4.lm |> performance::check_model()
+dat4.lm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- the observed density and simulated densities in the Posterior
+  Predictive Check plot are inconsistent 
+  - the peaks are not aligned
+- there is clear evidence of a non-linear trend in the residuals plot
+- the 10th observation has high Cook's D value
+- dots do not fall along the Q-Q plot line (particularly those in
+  the tails)
+
+### DHARMa (simulated) residuals
+
+```{r}
+#| label: validateModel4b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat4.resid <- dat4.lm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**:
+
+- the Q-Q plot is starting to deviate from the linear line
+- there is clear evidence of a non-linear trend persisting in the
+  residuals
+
+:::::
+
+
+### Summarise model
+
+Since the model diagnostics indicated violations of the assumptions,
+we will not explore the model summaries
+
+
+::::
+
+## Example 5 (Binary data)
+
+Exploratory data analysis suggested that a simple linear model of the form
+
+$$
+y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+might not be appropriate for the motivating example 4 data. To see how
+this manifests in the fitted model and diagnostics, lets fit the model
+via OLS anyway.
+
+:::: {.panel-tabset}
+### Fit model via `lm()`
+
+$$
+y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+```{r}
+#| label: lm5
+#| eval: true
+#| echo: true
+#| cache: false
+dat5.lm <- lm(y~x, data = dat5)
+dat5.lm
+```
+
+### Model diagnostics
+
+And now to explore the regression diagnostics.
+
+::::: {.panel-tabset}
+
+### Autoplot
+
+```{r} 
+#| label: lm_diagnostics5a
+#| eval: true
+#| echo: true
+#| cache: false
+dat5.lm |> 
+  autoplot(which = 1:6, ncol = 2, label.size = 3)
+```
+
+**Conclusions**:
+
+- the regular residual plot is not interpretable for binary data. It
+  will just show two, angled clouds of points (one associated with the
+  0 values, the other associated with the 1's). there is a clear
+  non-linear pattern remaining in the residual plot indicative of a
+  persistent non-linear trend
+- there is evidence that the tails of the Q-Q plot have diverge from
+  the line. This usually implies that the nominated distribution (in
+  this case gaussian) is not capturing the underlying distribution
+  appropriately.
+
+### Influence measures
+
+```{r}
+#| label: validateModel5a
+#| eval: true
+#| echo: true
+#| cache: false
+dat5.lm |> influence.measures()
+dat5.lm |> fortify()
+```
+
+**Conclusions**:
+
+- there are no obvious issues with the influence values
+
+### Performance model checking
+
+```{r}
+#| label: validateModel5a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat5.lm |> performance::check_model()
+dat5.lm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- the observed density and simulated densities in the Posterior
+  Predictive Check plot are inconsistent 
+  - the observed data show two peaks (associated with 0's and 1's)
+  - the posterior predictions show a single peak between 0 and 1
+- there is clear evidence of a non-linear trend in the standardised
+  residuals plot
+- dots do not fall along the Q-Q plot line (particularly those in
+  the tails)
+
+### DHARMa (simulated) residuals
+
+```{r}
+#| label: validateModel5b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat5.resid <- dat5.lm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**:
+
+- interesting the simulated residuals look acceptable, although the
+  Q-Q plot is clearly not following the reference line
+
+:::::
+
+### Summarise model
+
+Since the model diagnostics indicated violations of the assumptions,
+we will not explore the model summaries
+::::
+
+
+## Example 6 (Binomial data)
+
+Exploratory data analysis suggested that a simple linear model of the form
+
+$$
+y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+might not be appropriate for the motivating example 4 data. To see how
+this manifests in the fitted model and diagnostics, lets fit the model
+via OLS anyway.
+
+:::: {.panel-tabset}
+### Fit model via `lm()`
+
+$$
+y_i = \beta_0+\beta_1\times x_i+\varepsilon_i \hspace{1cm}\varepsilon_i\sim{}\mathcal{N}(0, \sigma^2)
+$$
+
+```{r}
+#| label: lm6
+#| eval: true
+#| echo: true
+#| cache: false
+dat6.lm <- lm(y~x, data = dat6)
+dat6.lm
+```
+
+### Model diagnostics
+
+And now to explore the regression diagnostics.
+
+::::: {.panel-tabset}
+
+### Autoplot
+
+```{r} 
+#| label: lm_diagnostics6a
+#| eval: true
+#| echo: true
+#| cache: false
+dat6.lm |> 
+  autoplot(which = 1:6, ncol = 2, label.size = 3)
+```
+
+**Conclusions**:
+
+- the regular residual plot is not interpretable for binary data. It
+  will just show two, angled clouds of points (one associated with the
+  0 values, the other associated with the 1's). there is a clear
+  non-linear pattern remaining in the residual plot indicative of a
+  persistent non-linear trend
+- there is evidence that the tails of the Q-Q plot have diverge from
+  the line. This usually implies that the nominated distribution (in
+  this case gaussian) is not capturing the underlying distribution
+  appropriately.
+
+### Influence measures
+
+```{r}
+#| label: validateModel6a
+#| eval: true
+#| echo: true
+#| cache: false
+dat6.lm |> influence.measures()
+dat6.lm |> fortify()
+```
+
+**Conclusions**:
+
+- there are no obvious issues with the influence values
+
+### Performance model checking
+
+```{r}
+#| label: validateModel6a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat6.lm |> performance::check_model()
+dat6.lm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- the observed density and simulated densities in the Posterior
+  Predictive Check plot are inconsistent 
+  - the observed data show two peaks (associated with 0's and 1's)
+  - the posterior predictions show a single peak between 0 and 1
+- there is clear evidence of a non-linear trend in the standardised
+  residuals plot
+- dots do not fall along the Q-Q plot line (particularly those in
+  the tails)
+
+### DHARMa (simulated) residuals
+
+```{r}
+#| label: validateModel6b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat6.resid <- dat6.lm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**:
+
+- interesting the simulated residuals look acceptable
+
+:::::
+
+### Summarise model
+
+Since the model diagnostics indicated violations of the assumptions,
+we will not explore the model summaries
+::::
+
+
 :::
-
-
 # Generalised linear models
 
-::: {.callout-tip}
+## Summary
 
-This upcoming section contains a lot of detail that some might find
-excessive and unnecessary if we only need to know how to fit a
+The callout below contains a lot of detail that some might find
+excessive and unnecessary if you only need to know how to fit a
 Generalised Linear Model (GLM). Whilst it is useful to have a more
 in-depth understanding of the concepts and mathematics behind
-statistical routines, the follwing summary might suffice for those
-seeking a quicker overview.
+statistical routines in preparation to fitting models, the follwing
+summary might suffice for those seeking a quicker overview.
 
 The essential points are:
 
@@ -3129,7 +4696,9 @@ The essential points are:
 If all you desire is a overview, you can now skip down to the section
 on Fitting GLM's.
 
-:::
+
+::::::: {.callout-note collapse="true"}
+## Details about Maximum Likelihood and Optimasation
 
 Recall from the previous section that the simple linear model can be written as:
 $$
@@ -4204,11 +5773,21 @@ Which is again very similar the empirical estimates.
 
 :::
 
+
+:::::::
+
 ## Fitting GLM's
 
 :::: {.panel-tabset}
-### Motivating example 1
 
+
+### Example 1 (Gaussian data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Fit the model
 $$
 \begin{align}
 y_i \sim{}& N(\mu_i, \sigma^2)\\
@@ -4229,9 +5808,8 @@ dat.glm
 And to explore the diagnostics
 
 
-::::: {.panel-tabset}
 
-### Performance model checking
+##### Performance model checking
 ```{r}
 #| label: glm_validateModela1
 #| eval: true
@@ -4251,7 +5829,7 @@ dat.glm |> performance::check_outliers()
   data
 
 
-### DHARMa (simulated) residuals
+##### DHARMa (simulated) residuals
 
 ```{r}
 #| label: glm_validateModelb1
@@ -4270,10 +5848,246 @@ dat.resid <- dat.glm |>
 
 - no obvious issues with these diagnostics
 
+##### Summarise model
+
+```{r}
+#| label: summary_glm1a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.glm |> summary()
+dat.glm |> confint()
+dat.glm |> performance::r2()
+```
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be `r round(fixef(dat.glm)[[1]][1], 3)` (the
+  y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by `r round(fixef(dat.glm)[[1]][2], 3)` (the slope)
+- the slope could be as low as `r round(confint(dat.glm)[2,1], 3)` or as high as 
+  `r round(confint(dat.glm)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
 :::::
 
-### Motivating example 2
+#### Centered predictor
+::::: {.panel-tabset}
 
+##### Fit the model
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm1b
+#| eval: true
+#| echo: true
+#| cache: false
+dat1b.glm <- glmmTMB(y ~ scale(x, scale = FALSE), data = dat)
+dat1b.glm
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateModela1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat1b.glm |> performance::check_model()
+dat1b.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModelb1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat1b.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat1b.glm |> summary()
+dat1b.glm |> confint()
+dat1b.glm |> performance::r2()
+```
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be `r round(fixef(dat1b.glm)[[1]][1], 3)` (the
+  y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the range of $x$), the expected value of $y$
+  increases by `r round(fixef(dat1b.glm)[[1]][2], 3)` (the slope)
+- the slope could be as low as `r round(confint(dat1b.glm)[2,1], 3)` or as high as 
+  `r round(confint(dat1b.glm)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat1b.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm1c
+#| eval: true
+#| echo: true
+#| cache: false
+dat1c.glm <- glmmTMB(y ~ scale(x), data = dat)
+dat1c.glm
+```
+
+And to explore the diagnostics
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateModela1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat1c.glm |> performance::check_model()
+dat1c.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModelb1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat1c.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat1c.glm |> summary()
+dat1c.glm |> confint()
+dat1c.glm |> performance::r2()
+```
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be `r round(fixef(dat1c.glm)[[1]][1], 3)` (the
+  y-intercept).
+- for every one unit change in $x$ (which represents a span of
+  approximately 34% of the range of $x$ since standardised), the
+  expected value of $y$ increases by `r
+  round(fixef(dat1c.glm)[[1]][2], 3)` (the slope)
+- the slope could be as low as `r round(confint(dat1c.glm)[2,1], 3)` or as high as 
+  `r round(confint(dat1c.glm)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat1c.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+:::::::
+
+### Example 3 (Poisson data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+##### Fit the model
 Given that exploratory data analysis suggested that the assumptions
 were not likely to be met for a simple gaussian model and that this
 was subsequently confirmed when we explored the diagnostics resulting
@@ -4289,22 +6103,21 @@ $$
 
 
 ```{r}
-#| label: glm2
+#| label: glm3
 #| eval: true
 #| echo: true
 #| cache: false
-dat2.glm <- glmmTMB(y~x, data = dat2, family = poisson(link = "log"))
-dat2.glm
+dat3.glm <- glmmTMB(y~x, data = dat3, family = poisson(link = "log"))
+dat3.glm
 ```
 
 And to explore the diagnostics
 
 
-::::: {.panel-tabset}
 
-### Performance model checking
+##### Performance model checking
 ```{r}
-#| label: glm_validateMode2a1
+#| label: glm_validateMode3a1
 #| eval: true
 #| echo: true
 #| cache: false
@@ -4312,8 +6125,8 @@ And to explore the diagnostics
 #| warning: false
 #| fig-height: 10
 #| fig-width: 8
-dat2.glm |> performance::check_model()
-dat2.glm |> performance::check_outliers()
+dat3.glm |> performance::check_model()
+dat3.glm |> performance::check_outliers()
 ```
 
 **Conclusions**:
@@ -4322,10 +6135,10 @@ dat2.glm |> performance::check_outliers()
   data
 
 
-### DHARMa (simulated) residuals
+##### DHARMa (simulated) residuals
 
 ```{r}
-#| label: glm_validateModel2b1
+#| label: glm_validateModel3b1
 #| eval: true
 #| echo: true
 #| cache: false
@@ -4333,7 +6146,7 @@ dat2.glm |> performance::check_outliers()
 #| warning: false
 #| fig-height: 4
 #| fig-width: 8
-dat.resid <- dat2.glm |> 
+dat.resid <- dat3.glm |> 
   simulateResiduals(plot = TRUE)
 ```
 
@@ -4341,7 +6154,1641 @@ dat.resid <- dat2.glm |>
 
 - no obvious issues with these diagnostics
 
+##### Summarise model
+
+```{r}
+#| label: summary_glm3a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat3.glm |> summary()
+dat3.glm |> confint()
+dat3.glm |> performance::r2()
+```
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$, $y$ is expected to be exp(`r round(fixef(dat3.glm)[[1]][1], 3)`) = 
+  `r round(exp(fixef(dat3.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by exp(`r round(fixef(dat3.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat3.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat3.glm)[[1]][2]) - 1), 3)`% 
+  increase in the response per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat3.glm)[2,1], 3)` or
+  as high as `r round(confint(dat3.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat3.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat3.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat3.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
 :::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Pois(\lambda_i)\\
+log(\lambda_i) =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm3b
+#| eval: true
+#| echo: true
+#| cache: false
+dat3b.glm <- glmmTMB(y ~ scale(x, scale = FALSE), data = dat3, family = poisson(link = "log"))
+dat3b.glm
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateMode3a1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat3b.glm |> performance::check_model()
+dat3b.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel3b1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat3b.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm3b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat3b.glm |> summary()
+dat3b.glm |> confint()
+dat3b.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be exp(`r round(fixef(dat3b.glm)[[1]][1], 3)`) = 
+  `r round(exp(fixef(dat3b.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by exp(`r round(fixef(dat3b.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat3b.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat3b.glm)[[1]][2]) - 1), 3)`% 
+  increase in the response per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat3b.glm)[2,1], 3)` or
+  as high as `r round(confint(dat3b.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat3b.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat3b.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat3b.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Pois(\lambda_i)\\
+log(\lambda_i) =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm3c
+#| eval: true
+#| echo: true
+#| cache: false
+dat3c.glm <- glmmTMB(y ~ scale(x), data = dat3, family = poisson(link = "log"))
+dat3c.glm
+```
+
+And to explore the diagnostics
+
+##### Performance model checking
+
+```{r}
+#| label: glm_validateMode3a1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat3c.glm |> performance::check_model()
+dat3c.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel3b1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat3c.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm3c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat3c.glm |> summary()
+dat3c.glm |> fixef()
+dat3c.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be exp(`r round(fixef(dat3c.glm)[[1]][1], 3)`) = 
+  `r round(exp(fixef(dat3c.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the 
+  range of $x$ since standardised), the expected value of $y$
+  increases by exp(`r round(fixef(dat3c.glm)[[1]][2], 3)`) =
+  `r round(exp(fixef(dat3c.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat3c.glm)[[1]][2]) - 1), 3)`% 
+  increase in the response per one unit change in (standardised) $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat3c.glm)[2,1], 3)` or
+  as high as `r round(confint(dat3c.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat3c.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat3c.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat3c.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+:::::::
+
+### Example 4 (NB data)
+
+::::::: {.panel-tabset}
+
+#### Raw predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a Negative
+Binomial regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& NB(\lambda_i, \phi)\\
+log(\lambda_i) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm4
+#| eval: true
+#| echo: true
+#| cache: false
+dat4.glm <- glmmTMB(y~x, data = dat4, family = nbinom2(link = "log"))
+dat4.glm
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateMode4a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat4.glm |> performance::check_model()
+dat4.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel4b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat4.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+```{r}
+#| label: glm_validateModel4b2
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testDispersion()
+```
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm4a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat4.glm |> summary()
+dat4.glm |> confint()
+dat4.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$, $y$ is expected to be exp(`r round(fixef(dat4.glm)[[1]][1], 3)`) = 
+  `r round(exp(fixef(dat4.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by exp(`r round(fixef(dat4.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat4.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat4.glm)[[1]][2]) - 1), 3)`% 
+  increase in the response per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat4.glm)[2,1], 3)` or
+  as high as `r round(confint(dat4.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat4.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat4.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat4.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& NB(\lambda_i, \phi)\\
+log(\lambda_i) =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm4b
+#| eval: true
+#| echo: true
+#| cache: false
+dat4b.glm <- glmmTMB(y ~ scale(x, scale = FALSE), data = dat4, family = nbinom2(link = "log"))
+dat4b.glm
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateMode4a1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat4b.glm |> performance::check_model()
+dat4b.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel4b1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat4b.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm4b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat4b.glm |> summary()
+dat4b.glm |> confint()
+dat4b.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be exp(`r round(fixef(dat4b.glm)[[1]][1], 3)`) = 
+  `r round(exp(fixef(dat4b.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by exp(`r round(fixef(dat4b.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat4b.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat4b.glm)[[1]][2]) - 1), 3)`% 
+  increase in the response per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat4b.glm)[2,1], 3)` or
+  as high as `r round(confint(dat4b.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat4b.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat4b.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat4b.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& NB(\lambda_i, \phi)\\
+log(\lambda_i) =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm4c
+#| eval: true
+#| echo: true
+#| cache: false
+dat4c.glm <- glmmTMB(y ~ scale(x), data = dat4, family = nbinom2(link = "log"))
+dat4c.glm
+```
+
+And to explore the diagnostics
+
+##### Performance model checking
+
+```{r}
+#| label: glm_validateMode4a1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat4c.glm |> performance::check_model()
+dat4c.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel4b1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat4c.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm4c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat4c.glm |> summary()
+dat4c.glm |> confint()
+dat4c.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be exp(`r round(fixef(dat4c.glm)[[1]][1], 3)`) = 
+  `r round(exp(fixef(dat4c.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the 
+  range of $x$ since standardised), the expected value of $y$
+  increases by exp(`r round(fixef(dat4c.glm)[[1]][2], 3)`) =
+  `r round(exp(fixef(dat4c.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat4c.glm)[[1]][2]) - 1), 3)`% 
+  increase in the response per one unit change in (standardised) $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat4c.glm)[2,1], 3)` or
+  as high as `r round(confint(dat4c.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat4c.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat4c.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat4c.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+:::::::
+
+### Example  5 (Binary data)
+
+::::::: {.panel-tabset}
+
+#### Raw predictor
+
+::::: {.panel-tabset}
+
+##### Fit model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a
+Bernoulli (Binomial with number of trials = 1) regression model. The
+model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi, 1)\\
+logit(\frac{\pi}{1-\pi}) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm5
+#| eval: true
+#| echo: true
+#| cache: false
+dat5.glm <- glmmTMB(y ~ x, data = dat5, family = binomial(link = "logit"))
+dat5.glm
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateMode5a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat5.glm |> performance::check_model()
+dat5.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel5b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat5.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+```{r}
+#| label: glm_validateModel5b2
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testDispersion()
+```
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm5a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat5.glm |> summary()
+dat5.glm |> confint()
+dat5.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$:
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(fixef(dat5.glm)[[1]][1], 3)`) = 
+    `r round(exp(fixef(dat5.glm)[[1]][1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(fixef(dat5.glm)[[1]][1], 3)`) = 
+    `r round(plogis(fixef(dat5.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the odds of $y$
+  increases by exp(`r round(fixef(dat5.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat5.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat5.glm)[[1]][2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat5.glm)[2,1], 3)` or
+  as high as `r round(confint(dat5.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat5.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat5.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat5.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+
+:::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, 1)\\
+log(\frac{\pi_i}{1-\pi_i}) =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm5b
+#| eval: true
+#| echo: true
+#| cache: false
+dat5b.glm <- glmmTMB(y ~ scale(x, scale = FALSE), data = dat5, family = binomial(link = "logit"))
+dat5b.glm
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateMode5a1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat5b.glm |> performance::check_model()
+dat5b.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel5b1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat5b.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm5b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat5b.glm |> summary()
+dat5b.glm |> confint()
+dat5b.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered):
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(fixef(dat5b.glm)[[1]][1], 3)`) = 
+    `r round(exp(fixef(dat5b.glm)[[1]][1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(fixef(dat5b.glm)[[1]][1], 3)`) = 
+    `r round(plogis(fixef(dat5b.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the odds of $y$
+  increases by exp(`r round(fixef(dat5b.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat5b.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat5b.glm)[[1]][2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat5b.glm)[2,1], 3)` or
+  as high as `r round(confint(dat5b.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat5b.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat5b.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat5b.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, \phi)\\
+log(\frac{\pi_i}{1-\pi}) =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm5c
+#| eval: true
+#| echo: true
+#| cache: false
+dat5c.glm <- glmmTMB(y ~ scale(x), data = dat5, family = binomial(link = "logit"))
+dat5c.glm
+```
+
+And to explore the diagnostics
+
+##### Performance model checking
+
+```{r}
+#| label: glm_validateMode5a1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat5c.glm |> performance::check_model()
+dat5c.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel5b1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat5c.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm5c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat5c.glm |> summary()
+dat5c.glm |> confint()
+dat5c.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered):
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(fixef(dat5c.glm)[[1]][1], 3)`) = 
+    `r round(exp(fixef(dat5c.glm)[[1]][1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(fixef(dat5c.glm)[[1]][1], 3)`) = 
+    `r round(plogis(fixef(dat5c.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the 
+  range of $x$ since standardised), the odds of $y$
+  increases by exp(`r round(fixef(dat5c.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat5c.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat5c.glm)[[1]][2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in (standardised) $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat5c.glm)[2,1], 3)` or
+  as high as `r round(confint(dat5c.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat5c.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat5c.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat5c.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+:::::::
+
+### Example  6 (Binomial data)
+
+::::::: {.panel-tabset}
+
+#### Raw predictor
+
+::::: {.panel-tabset}
+
+##### Fit model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a Binomial
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi, n)\\
+logit(\frac{\pi}{1-\pi}) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm6
+#| eval: true
+#| echo: true
+#| cache: false
+dat6.glm <- glmmTMB(cbind(count, total - count) ~ x, data = dat6, family = binomial(link = "logit"))
+dat6.glm
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateMode6a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat6.glm |> performance::check_model()
+dat6.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel6b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat6.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+```{r}
+#| label: glm_validateModel6b2
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testDispersion()
+```
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm6a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat6.glm |> summary()
+dat6.glm |> confint()
+dat6.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$:
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(fixef(dat6.glm)[[1]][1], 3)`) = 
+    `r round(exp(fixef(dat6.glm)[[1]][1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(fixef(dat6.glm)[[1]][1], 3)`) = 
+    `r round(plogis(fixef(dat6.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the odds of $y$
+  increases by exp(`r round(fixef(dat6.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat6.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat6.glm)[[1]][2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat6.glm)[2,1], 3)` or
+  as high as `r round(confint(dat6.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat6.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat6.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat6.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, n)\\
+log(\frac{\pi_i}{1-\pi_i}) =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm6b
+#| eval: true
+#| echo: true
+#| cache: false
+dat6b.glm <- glmmTMB(cbind(count, total - count) ~ scale(x, scale = FALSE), data = dat6, family = binomial(link = "logit"))
+dat6b.glm
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateMode6a1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat6b.glm |> performance::check_model()
+dat6b.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel6b1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat6b.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm6b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat6b.glm |> summary()
+dat6b.glm |> confint()
+dat6b.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered):
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(fixef(dat6b.glm)[[1]][1], 3)`) = 
+    `r round(exp(fixef(dat6b.glm)[[1]][1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(fixef(dat6b.glm)[[1]][1], 3)`) = 
+    `r round(plogis(fixef(dat6b.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the odds of $y$
+  increases by exp(`r round(fixef(dat6b.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat6b.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat6b.glm)[[1]][2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat6b.glm)[2,1], 3)` or
+  as high as `r round(confint(dat6b.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat6b.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat6b.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat6b.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, n)\\
+log(\frac{\pi_i}{1-\pi}) =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glm6c
+#| eval: true
+#| echo: true
+#| cache: false
+dat6c.glm <- glmmTMB(cbind(count, total - count) ~ scale(x), data = dat6, family = binomial(link = "logit"))
+dat6c.glm
+```
+
+And to explore the diagnostics
+
+##### Performance model checking
+
+```{r}
+#| label: glm_validateMode6a1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat6c.glm |> performance::check_model()
+dat6c.glm |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModel6b1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat6c.glm |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glm6c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat6c.glm |> summary()
+dat6c.glm |> confint()
+dat6c.glm |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered):
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(fixef(dat6c.glm)[[1]][1], 3)`) = 
+    `r round(exp(fixef(dat6c.glm)[[1]][1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(fixef(dat6c.glm)[[1]][1], 3)`) = 
+    `r round(plogis(fixef(dat6c.glm)[[1]][1]), 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the 
+  range of $x$ since standardised), the odds of $y$
+  increases by exp(`r round(fixef(dat6c.glm)[[1]][2], 3)`) =  
+  `r round(exp(fixef(dat6c.glm)[[1]][2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(fixef(dat6c.glm)[[1]][2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in (standardised) $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat6c.glm)[2,1], 3)` or
+  as high as `r round(confint(dat6c.glm)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat6c.glm)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat6c.glm)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat6c.glm)[[2]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+:::::::
 
 ::::
 
@@ -4534,6 +7981,10 @@ optim.IRLS <- function(X, y, family, iter.max=25, abs.tol=1e-06) {
 
 :::
 
+
+::: {.callout-note collapse="true"}
+### Manual calculations
+
 Note, when the family is Gaussian, the above is simplified to the OLS form:
 
 $$
@@ -4566,15 +8017,15 @@ So what if we modified the response such that it was some positive
 integers and we nominate a Poisson distribution..
 
 ```{r optim.IRLS.fit2, results='markdown', eval=TRUE}
-optim.IRLS(cbind(rep(1,length(dat2$y))), dat2$y, family=poisson)
-exp(optim.IRLS(cbind(rep(1,length(dat2$y))), dat2$y, family=poisson)$B.optim)
+optim.IRLS(cbind(rep(1,length(dat3$y))), dat3$y, family=poisson)
+exp(optim.IRLS(cbind(rep(1,length(dat3$y))), dat3$y, family=poisson)$B.optim)
 ```
 
-After `r optim.IRLS(cbind(rep(1,length(dat2$y))), dat2$y,
+After `r optim.IRLS(cbind(rep(1,length(dat3$y))), dat3$y,
 family=poisson)$Iter` iterations, the algorithm converged on an
-estimate of `r optim.IRLS(cbind(rep(1,length(dat2$y))), dat2$y,
+estimate of `r optim.IRLS(cbind(rep(1,length(dat3$y))), dat3$y,
 family=poisson)$B.optim`, which on the natural scale would be `r
-exp(optim.IRLS(cbind(rep(1,length(dat2$y))), dat2$y,
+exp(optim.IRLS(cbind(rep(1,length(dat3$y))), dat3$y,
 family=poisson)$B.optim)`.
 
 In R, there is an inbuilt function called `glm()` that fits
@@ -4582,14 +8033,14 @@ generalized linear models by default via iterative re-weighted least
 squares.
 
 ```{r optim.IRLS.fit3, results='markdown', eval=TRUE}
-glm(y ~ 1, data=dat2, family = poisson(link = "log"))
+glm(y ~ 1, data=dat3, family = poisson(link = "log"))
 ```
 
 And now we will explore the full model:
 
 ```{r optim.IRLS.fit4, results='markdown', eval=TRUE}
-X = model.matrix(~x, dat2)
-irls = optim.IRLS(X, dat2$y, family = poisson)
+X = model.matrix(~x, dat3)
+irls = optim.IRLS(X, dat3$y, family = poisson)
 irls
 exp(irls$B.optim)
 ```
@@ -4598,6 +8049,2024 @@ Both estimates are very close to the parameters on which the simulated
 data were generated, and identical to those returned from the inbuilt
 `glm()` __function__.
 
+:::
+
+
+:::: {.panel-tabset}
+
+### Example 1 (Gaussian data)
+
+::::::: {.panel-tabset}
+
 ```{r optim.IRLS.fit5, results='markdown', eval=TRUE}
-glm(y ~ x, data=dat2, family = poisson(link = "log"))
+glm(y ~ x, data=dat3, family = poisson(link = "log"))
 ```
+
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Fit the model
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw1
+#| eval: true
+#| echo: true
+#| cache: false
+dat.glmw <- glm(y~x, data = dat)
+dat.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateModelaglmw1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat.glmw |> performance::check_model()
+dat.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModelbglmw1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw1a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.glmw |> summary()
+dat.glmw |> confint()
+dat.glmw |> performance::r2()
+```
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be `r round(coef(dat.glmw)[1], 3)` (the
+  y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by `r round(coef(dat.glmw)[2], 3)` (the slope)
+- the slope could be as low as `r round(confint(dat.glmw)[2,1], 3)` or as high as 
+  `r round(confint(dat.glmw)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Centered predictor
+::::: {.panel-tabset}
+
+##### Fit the model
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw1b
+#| eval: true
+#| echo: true
+#| cache: false
+dat1b.glmw <- glm(y ~ scale(x, scale = FALSE), data = dat)
+dat1b.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateModelaglmw1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat1b.glmw |> performance::check_model()
+dat1b.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModelbglmw1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat1b.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat1b.glmw |> summary()
+dat1b.glmw |> confint()
+dat1b.glmw |> performance::r2()
+```
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be `r round(coef(dat1b.glmw)[1], 3)` (the
+  y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the range of $x$), the expected value of $y$
+  increases by `r round(coef(dat1b.glmw)[2], 3)` (the slope)
+- the slope could be as low as `r round(confint(dat1b.glmw)[2,1], 3)` or as high as 
+  `r round(confint(dat1b.glmw)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat1b.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw1c
+#| eval: true
+#| echo: true
+#| cache: false
+dat1c.glmw <- glm(y ~ scale(x), data = dat)
+dat1c.glmw
+```
+
+And to explore the diagnostics
+
+
+##### Performance model checking
+```{r}
+#| label: glm_validateModelaglmw1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat1c.glmw |> performance::check_model()
+dat1c.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glm_validateModelbglmw1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat1c.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat1c.glmw |> summary()
+dat1c.glmw |> confint()
+dat1c.glmw |> performance::r2()
+```
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be `r round(coef(dat1c.glmw)[1], 3)` (the
+  y-intercept).
+- for every one unit change in $x$ (which represents a span of
+  approximately 34% of the range of $x$ since standardised), the
+  expected value of $y$ increases by `r
+  round(fixef(dat1c.glmw)[2], 3)` (the slope)
+- the slope could be as low as `r round(confint(dat1c.glmw)[2,1], 3)` or as high as 
+  `r round(confint(dat1c.glmw)[2,2], 3)` (95% confidence interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat1c.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+:::::::
+
+### Example 3 (Poisson data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+##### Fit the model
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Pois(\lambda_i)\\
+log(\lambda_i) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw3
+#| eval: true
+#| echo: true
+#| cache: false
+dat3.glmw <- glm(y~x, data = dat3, family = poisson(link = "log"))
+dat3.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glmw_validateModel3a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat3.glmw |> performance::check_model()
+dat3.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel3b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat3.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw3a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat3.glmw |> summary()
+dat3.glmw |> confint()
+dat3.glmw |> performance::r2()
+```
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$, $y$ is expected to be exp(`r round(coef(dat3.glmw)[1], 3)`) = 
+  `r round(exp(coef(dat3.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by exp(`r round(coef(dat3.glmw)[2], 3)`) =  
+  `r round(exp(coef(dat3.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat3.glmw)[2]) - 1), 3)`% 
+  increase in the response per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat3.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat3.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat3.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat3.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat3.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Pois(\lambda_i)\\
+log(\lambda_i) =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw3b
+#| eval: true
+#| echo: true
+#| cache: false
+dat3b.glmw <- glm(y ~ scale(x, scale = FALSE), data = dat3, family = poisson(link = "log"))
+dat3b.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glmw_validateMode3a1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat3b.glmw |> performance::check_model()
+dat3b.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel3b1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat3b.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw3b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat3b.glmw |> summary()
+dat3b.glmw |> confint()
+dat3b.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be exp(`r round(coef(dat3b.glmw)[1], 3)`) = 
+  `r round(exp(coef(dat3b.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by exp(`r round(coef(dat3b.glmw)[2], 3)`) =  
+  `r round(exp(coef(dat3b.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat3b.glmw)[2]) - 1), 3)`% 
+  increase in the response per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat3b.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat3b.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat3b.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat3b.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat3b.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Pois(\lambda_i)\\
+log(\lambda_i) =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw3c
+#| eval: true
+#| echo: true
+#| cache: false
+dat3c.glmw <- glm(y ~ scale(x), data = dat3, family = poisson(link = "log"))
+dat3c.glmw
+```
+
+And to explore the diagnostics
+
+##### Performance model checking
+
+```{r}
+#| label: glmw_validateMode3a1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat3c.glmw |> performance::check_model()
+dat3c.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel3b1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat3c.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw3c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat3c.glmw |> summary()
+dat3c.glmw |> confint()
+dat3c.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be exp(`r round(coef(dat3c.glmw)[1], 3)`) = 
+  `r round(exp(coef(dat3c.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the 
+  range of $x$ since standardised), the expected value of $y$
+  increases by exp(`r round(coef(dat3c.glmw)[2], 3)`) =
+  `r round(exp(coef(dat3c.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat3c.glmw)[2]) - 1), 3)`% 
+  increase in the response per one unit change in (standardised) $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat3c.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat3c.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat3c.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat3c.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat3c.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+:::::::
+
+
+### Example 4 (NB data)
+
+::::::: {.panel-tabset}
+
+#### Raw predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a Negative
+Binomial regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& NB(\lambda_i, \phi)\\
+log(\lambda_i) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw4
+#| eval: true
+#| echo: true
+#| cache: false
+dat4.glmw <- MASS::glm.nb(y~x, data = dat4)
+dat4.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glmw_validateMode4a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat4.glmw |> performance::check_model()
+dat4.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel4b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat4.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+```{r}
+#| label: glmw_validateModel4b2
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testDispersion()
+```
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw4a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat4.glmw |> summary()
+dat4.glmw |> confint()
+dat4.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$, $y$ is expected to be exp(`r round(coef(dat4.glmw)[1], 3)`) = 
+  `r round(exp(coef(dat4.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by exp(`r round(coef(dat4.glmw)[2], 3)`) = 
+  `r round(exp(coef(dat4.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat4.glmw)[2]) - 1), 3)`% 
+  increase in the response per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat4.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat4.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat4.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat4.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat4.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& NB(\lambda_i, \phi)\\
+log(\lambda_i) =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw4b
+#| eval: true
+#| echo: true
+#| cache: false
+dat4b.glmw <- MASS::glm.nb(y ~ scale(x, scale = FALSE), data = dat4)
+dat4b.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glmw_validateMode4a1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat4b.glmw |> performance::check_model()
+dat4b.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel4b1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat4b.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw4b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat4b.glmw |> summary()
+dat4b.glmw |> confint()
+dat4b.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be exp(`r round(coef(dat4b.glmw)[1], 3)`) = 
+  `r round(exp(coef(dat4b.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the expected value of $y$
+  increases by exp(`r round(coef(dat4b.glmw)[2], 3)`) = 
+  `r round(exp(coef(dat4b.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat4b.glmw)[2]) - 1), 3)`% 
+  increase in the response per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat4b.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat4b.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat4b.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat4b.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat4b.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& NB(\lambda_i, \phi)\\
+log(\lambda_i) =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw4c
+#| eval: true
+#| echo: true
+#| cache: false
+dat4c.glmw <- MASS::glm.nb(y ~ scale(x), data = dat4)
+dat4c.glmw
+```
+
+And to explore the diagnostics
+
+##### Performance model checking
+
+```{r}
+#| label: glmw_validateMode4a1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat4c.glmw |> performance::check_model()
+dat4c.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel4b1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat4c.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw4c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat4c.glmw |> summary()
+dat4c.glmw |> confint()
+dat4c.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a log link, in order to return the estimates to
+the scale of the response, we need to backtransform by exponentiation.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (log) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered), $y$ is
+  expected to be exp(`r round(coef(dat4c.glmw)[1], 3)`) = 
+  `r round(exp(coef(dat4c.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the 
+  range of $x$ since standardised), the expected value of $y$
+  increases by exp(`r round(coef(dat4c.glmw)[2], 3)`) =
+  `r round(exp(coef(dat4c.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat4c.glmw)[2]) - 1), 3)`% 
+  increase in the response per one unit change in (standardised) $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat4c.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat4c.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat4c.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat4c.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat4c.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+:::::::
+
+
+### Example  5 (Binary data)
+
+::::::: {.panel-tabset}
+
+#### Raw predictor
+
+::::: {.panel-tabset}
+
+##### Fit model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a
+Bernoulli (Binomial with number of trials = 1) regression model. The
+model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi, 1)\\
+logit(\frac{\pi}{1-\pi}) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw5
+#| eval: true
+#| echo: true
+#| cache: false
+dat5.glmw <- glm(y ~ x, data = dat5, family = binomial(link = "logit"))
+dat5.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glmw_validateMode5a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat5.glmw |> performance::check_model()
+dat5.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel5b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat5.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+```{r}
+#| label: glmw_validateModel5b2
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testDispersion()
+```
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw5a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat5.glmw |> summary()
+dat5.glmw |> confint()
+dat5.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$:
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(coef(dat5.glmw)[1], 3)`) = 
+    `r round(exp(coef(dat5.glmw)[1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(coef(dat5.glmw)[1], 3)`) = 
+    `r round(plogis(coef(dat5.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the odds of $y$
+  increases by exp(`r round(coef(dat5.glmw)[2], 3)`) =  
+  `r round(exp(coef(dat5.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat5.glmw)[2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat5.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat5.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat5.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat5.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat5.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+
+:::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, 1)\\
+log(\frac{\pi_i}{1-\pi_i}) =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw5b
+#| eval: true
+#| echo: true
+#| cache: false
+dat5b.glmw <- glm(y ~ scale(x, scale = FALSE), data = dat5, family = binomial(link = "logit"))
+dat5b.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glmw_validateMode5a1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat5b.glmw |> performance::check_model()
+dat5b.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel5b1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat5b.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw5b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat5b.glmw |> summary()
+dat5b.glmw |> confint()
+dat5b.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered):
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(coef(dat5b.glmw)[1], 3)`) = 
+    `r round(exp(coef(dat5b.glmw)[1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(coef(dat5b.glmw)[1], 3)`) = 
+    `r round(plogis(coef(dat5b.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the odds of $y$
+  increases by exp(`r round(coef(dat5b.glmw)[2], 3)`) = 
+  `r round(exp(coef(dat5b.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat5b.glmw)[2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat5b.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat5b.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat5b.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat5b.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat5b.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, \phi)\\
+log(\frac{\pi_i}{1-\pi}) =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw5c
+#| eval: true
+#| echo: true
+#| cache: false
+dat5c.glmw <- glm(y ~ scale(x), data = dat5, family = binomial(link = "logit"))
+dat5c.glmw
+```
+
+And to explore the diagnostics
+
+##### Performance model checking
+
+```{r}
+#| label: glmw_validateMode5a1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat5c.glmw |> performance::check_model()
+dat5c.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel5b1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat5c.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw5c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat5c.glmw |> summary()
+dat5c.glmw |> confint()
+dat5c.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered):
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(coef(dat5c.glmw)[1], 3)`) = 
+    `r round(exp(coef(dat5c.glmw)[1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(coef(dat5c.glmw)[1], 3)`) = 
+    `r round(plogis(coef(dat5c.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the 
+  range of $x$ since standardised), the odds of $y$
+  increases by exp(`r round(coef(dat5c.glmw)[2], 3)`) = 
+  `r round(exp(coef(dat5c.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat5c.glmw)[2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in (standardised) $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat5c.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat5c.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat5c.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat5c.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat5c.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+:::::::
+
+### Example  6 (Binomial data)
+
+::::::: {.panel-tabset}
+
+#### Raw predictor
+
+::::: {.panel-tabset}
+
+##### Fit model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a Binomial
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi, n)\\
+logit(\frac{\pi}{1-\pi}) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw6
+#| eval: true
+#| echo: true
+#| cache: false
+dat6.glmw <- glm(cbind(count, total - count) ~ x, data = dat6, family = binomial(link = "logit"))
+dat6.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glmw_validateMode6a1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat6.glmw |> performance::check_model()
+dat6.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel6b1
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat6.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+```{r}
+#| label: glmw_validateModel6b2
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat.resid |> testDispersion()
+```
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw6a
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat6.glmw |> summary()
+dat6.glmw |> confint()
+dat6.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$:
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(coef(dat6.glmw)[1], 3)`) = 
+    `r round(exp(coef(dat6.glmw)[1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(coef(dat6.glmw)[1], 3)`) = 
+    `r round(plogis(coef(dat6.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the odds of $y$
+  increases by exp(`r round(coef(dat6.glmw)[2], 3)`) =  
+  `r round(exp(coef(dat6.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat6.glmw)[2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat6.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat6.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat6.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat6.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat6.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, n)\\
+log(\frac{\pi_i}{1-\pi_i}) =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw6b
+#| eval: true
+#| echo: true
+#| cache: false
+dat6b.glmw <- glm(cbind(count, total - count) ~ scale(x, scale = FALSE), data = dat6, family = binomial(link = "logit"))
+dat6b.glmw
+```
+
+And to explore the diagnostics
+
+
+
+##### Performance model checking
+```{r}
+#| label: glmw_validateMode6a1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat6b.glmw |> performance::check_model()
+dat6b.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel6b1b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat6b.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw6b
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat6b.glmw |> summary()
+dat6b.glmw |> confint()
+dat6b.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered):
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(coef(dat6b.glmw)[1], 3)`) = 
+    `r round(exp(coef(dat6b.glmw)[1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(coef(dat6b.glmw)[1], 3)`) = 
+    `r round(plogis(coef(dat6b.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$, the odds of $y$
+  increases by exp(`r round(coef(dat6b.glmw)[2], 3)`) = 
+  `r round(exp(coef(dat6b.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat6b.glmw)[2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat6b.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat6b.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat6b.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat6b.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat6b.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Fit the model
+
+Given that exploratory data analysis suggested that the assumptions
+were not likely to be met for a simple gaussian model and that this
+was subsequently confirmed when we explored the diagnostics resulting
+from the OLS model of these data, we will instead entertain a poisson
+regression model. The model will be of the form:
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, n)\\
+log(\frac{\pi_i}{1-\pi}) =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+
+```{r}
+#| label: glmw6c
+#| eval: true
+#| echo: true
+#| cache: false
+dat6c.glmw <- glm(cbind(count, total - count) ~ scale(x), data = dat6, family = binomial(link = "logit"))
+dat6c.glmw
+```
+
+And to explore the diagnostics
+
+##### Performance model checking
+
+```{r}
+#| label: glmw_validateMode6a1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 10
+#| fig-width: 8
+dat6c.glmw |> performance::check_model()
+dat6c.glmw |> performance::check_outliers()
+```
+
+**Conclusions**:
+
+- these diagnostics are broadly acceptable given the small nature of the
+  data
+
+
+##### DHARMa (simulated) residuals
+
+```{r}
+#| label: glmw_validateModel6b1c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 8
+dat.resid <- dat6c.glmw |> 
+  simulateResiduals(plot = TRUE)
+```
+
+**Conclusions**
+
+- no obvious issues with these diagnostics
+
+##### Summarise model
+
+```{r}
+#| label: summary_glmw6c
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-height: 4
+#| fig-width: 4
+dat6c.glmw |> summary()
+dat6c.glmw |> confint()
+dat6c.glmw |> performance::r2()
+```
+
+:::::::: {.callout-tip}
+
+Since this model used a logit link ($log(\frac{\pi}{1-\pi})$), in
+order to return the estimates to the scale of the response, we can
+either:
+
+- for the y-intercept:
+  - backtransform by exponentiation to odds ratio ($\frac{\pi}{1-\pi}$).
+  - backtransform to probability by exponentiation of the odds ratio
+    ($\pi$).
+- for the slopes:
+  - backtransform by exponentiation to odds ratio.
+
+Importantly, if using confidence intervals for the purpose of
+inference testsing:
+
+- if using estimates on the link (logit) scale, intervals that do not include 0
+  are "significant"
+- if using estimates on the response scale, intervals that do not
+  include 1 are "significant"
+  
+::::::::
+
+**Interpretation**:
+
+- when $x=0$ (e.g. the average $x$ value since centered):
+  - the odds of $y$ being 1 vs 0 is expected to be 
+    exp(`r round(coef(dat6c.glmw)[1], 3)`) = 
+    `r round(exp(coef(dat6c.glmw)[1]), 3)` (the y-intercept).
+  - the probability of $y$ being 1 is expected to be 
+    plogis(`r round(coef(dat6c.glmw)[1], 3)`) = 
+    `r round(plogis(coef(dat6c.glmw)[1]), 3)` (the y-intercept).
+- for every one unit change in $x$ (which represents a span of approximately 34% of the 
+  range of $x$ since standardised), the odds of $y$
+  increases by exp(`r round(coef(dat6c.glmw)[2], 3)`) =
+  `r round(exp(coef(dat6c.glmw)[2]), 3)` (the slope)
+- this is equivalent to a `r round(100 * (exp(coef(dat6c.glmw)[2]) - 1), 3)`% 
+  increase in the odds of the response being 1 per one unit change in (standardised) $x$
+- the slope (on the link scale) could be as low as 
+  `r round(confint(dat6c.glmw)[2,1], 3)` or
+  as high as `r round(confint(dat6c.glmw)[2,2], 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 0, the linear
+  relationship (slope) can be considered significant
+- the slope (on the response scale) could be as low as 
+  `r round(exp(confint(dat6c.glmw)[2,1]), 3)` or
+  as high as `r round(exp(confint(dat6c.glmw)[2,2]), 3)` (95% confidence
+  interval of the slope)
+- as the above interval does not include the value of 1, the linear
+  relationship (slope) can be considered significant
+- we would reject the null hypothesis of no relationship (p-value for
+  slope is less than 0.05)
+- `r round(100*performance::r2(dat6c.glmw)[[1]], 3)`% of the variance in $y$ is
+  explained by its linear relationship with $x$ (R squared value)
+
+:::::
+
+:::::::
+::::

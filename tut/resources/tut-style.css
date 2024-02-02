@@ -320,7 +320,16 @@ pre.sourceCode {
     border-bottom-color: transparent;
     cursor: default;
 }
-
+.nav {
+    display: -webkit-flex;
+    -webkit-flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap-reverse;
+}
 .tab-content {
     border-left: 1px solid #333;
     border-right: 1px solid #333;
