@@ -9620,7 +9620,7 @@ inference testsing:
 :::::
 
 :::::::
-
+ 
 ### Example  6 (Binomial data)
 
 ::::::: {.panel-tabset}

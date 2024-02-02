@@ -10148,5 +10148,4 @@ cd ~/tmp/Repo1
 git log --graph --decorate --oneline --all
 ```
 :::
-
  

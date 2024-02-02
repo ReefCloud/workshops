@@ -231,5 +231,4 @@ scenarios, modern computing now permits more brute force solutions in
 which very large numbers of samples can be drawn from the parameter
 space which in turn can be used to recreate the exact posterior
 probability distribution.
- 
- 
+  

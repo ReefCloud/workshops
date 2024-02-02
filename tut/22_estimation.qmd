@@ -1145,4 +1145,3 @@ the number of groups is low, @Gelman-2006-515 indicates that uniform
 priors have a tendency to result in inflated variance estimates.
 Consequently, half-cauchy priors are generally recommended for
 variances.
-
