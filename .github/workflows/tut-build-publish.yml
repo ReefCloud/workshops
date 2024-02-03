@@ -68,6 +68,7 @@ jobs:
             any::performance
             any::see
             any::cmdstanr
+            any::brms
             
       - name: Install CmdStan
         shell: Rscript {0}
