@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Murray Logan">
-<meta name="dcterms.date" content="2024-02-02">
+<meta name="dcterms.date" content="2024-02-03">
 
 <title>ReefCloud R/Statistics resources - Introduction to R</title>
 <style>
@@ -5487,7 +5487,7 @@ display: none
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 2, 2024</p>
+      <p class="date">February 3, 2024</p>
     </div>
   </div>
   
@@ -5546,7 +5546,7 @@ display: none
 <li>Fedora/CentOS: <code>sudo yum install R</code></li>
 <li>Arch Linux: <code>sudo pacman -S R</code></li>
 </ul></li>
-<li><p>**Verify installation:* Type <code>R</code> in the Terminal window. If the R console opens, the installation was successful.</p></li>
+<li><p><strong>Verify installation:</strong> Type <code>R</code> in the Terminal window. If the R console opens, the installation was successful.</p></li>
 </ul>
 </div>
 </div>
@@ -7687,23 +7687,23 @@ Q10   E2      Q10  full       15.90</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb346"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb346-1"><a href="#cb346-1"></a><span class="fu">rep</span>(<span class="fu">runif</span>(<span class="dv">1</span>), <span class="at">times =</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.3612962 0.3612962 0.3612962 0.3612962 0.3612962</code></pre>
+<pre><code>[1] 0.6640831 0.6640831 0.6640831 0.6640831 0.6640831</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb348"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb348-1"><a href="#cb348-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.2134613050 0.4937713523 0.9852253378 0.0007716785 0.0306679399</code></pre>
+<pre><code>[1] 0.7314823 0.1317378 0.3450903 0.2885417 0.4457711</code></pre>
 </div>
 </div>
 <p>When the function being run within <code>runif()</code> itself produces a vector of length &gt; 1, the <code>runif()</code> function combines each of the vectors together as separate columns in a matrix:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb350"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb350-1"><a href="#cb350-1"></a><span class="fu">replicate</span>(<span class="at">n =</span> <span class="dv">5</span>, <span class="fu">runif</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>           [,1]      [,2]      [,3]       [,4]      [,5]
-[1,] 0.19047182 0.6391435 0.1077643 0.07596554 0.9930762
-[2,] 0.03058013 0.6491529 0.1486044 0.30361071 0.3714658
-[3,] 0.36731209 0.3883098 0.3054818 0.41481860 0.3393144
-[4,] 0.02465518 0.1077754 0.1371063 0.16619946 0.0963895
-[5,] 0.10169368 0.4433841 0.5688905 0.77010950 0.1334271</code></pre>
+<pre><code>           [,1]       [,2]      [,3]      [,4]      [,5]
+[1,] 0.67043123 0.22920166 0.7614933 0.7511596 0.5856582
+[2,] 0.14234919 0.51896529 0.5114990 0.3878538 0.2658900
+[3,] 0.04930677 0.90176683 0.2931994 0.6011541 0.4290893
+[4,] 0.17773893 0.88948324 0.5647839 0.6336076 0.9303940
+[5,] 0.63441399 0.02634125 0.5587115 0.3093995 0.2037684</code></pre>
 </div>
 </div>
 <section id="apply-functions-along-matrix-margins" class="level3" data-number="5.7.1">
@@ -8644,7 +8644,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb404-79"><a href="#cb404-79"></a><span class="ss">  - </span>Fedora/CentOS: <span class="in">`sudo yum install R`</span></span>
 <span id="cb404-80"><a href="#cb404-80"></a><span class="ss">  - </span>Arch Linux: <span class="in">`sudo pacman -S R`</span></span>
 <span id="cb404-81"><a href="#cb404-81"></a></span>
-<span id="cb404-82"><a href="#cb404-82"></a><span class="ss">- </span>**Verify installation:* Type <span class="in">`R`</span> in the Terminal window. If the R</span>
+<span id="cb404-82"><a href="#cb404-82"></a><span class="ss">- </span>**Verify installation:** Type <span class="in">`R`</span> in the Terminal window. If the R</span>
 <span id="cb404-83"><a href="#cb404-83"></a>  console opens, the installation was successful.</span>
 <span id="cb404-84"><a href="#cb404-84"></a></span>
 <span id="cb404-85"><a href="#cb404-85"></a>:::</span>
