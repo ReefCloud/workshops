@@ -79,7 +79,7 @@ below (depending on your operating system).
   - Fedora/CentOS: `sudo yum install R`
   - Arch Linux: `sudo pacman -S R`
 
-- **Verify installation:* Type `R` in the Terminal window. If the R
+- **Verify installation:** Type `R` in the Terminal window. If the R
   console opens, the installation was successful.
 
 :::
