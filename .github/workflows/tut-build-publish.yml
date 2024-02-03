@@ -62,7 +62,18 @@ jobs:
             any::glmmTMB
             any::performance
             any::see
-
+            any::cmdstanr
+            
+      - name: Install CmdStan
+        shell: Rscript {0}
+        run: |
+          cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+          cmdstanr::install_cmdstan()
+          cmdstan <- file.path(Sys.getenv("RUNNER_TEMP"), "cmdstan")
+          file.rename(cmdstanr::cmdstan_path(), cmdstan)
+          lines <- paste0("\nCMDSTAN=", cmdstan, "\n")
+          cat(lines, file = "~/.Renviron", append = TRUE)
+          
       - name: install tinytex
         uses: r-lib/actions/setup-tinytex@v2
       - run: |
