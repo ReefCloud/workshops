@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Murray Logan">
-<meta name="dcterms.date" content="2024-02-02">
+<meta name="dcterms.date" content="2024-02-03">
 
 <title>ReefCloud R/Statistics resources - Code Editors</title>
 <style>
@@ -5245,6 +5245,13 @@ display: none
  <span class="menu-text">Home</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./005_setup.qmd" class="sidebar-item-text sidebar-link"><i class="bi bi-house" role="img">
+</i> 
+ <span class="menu-text">Setup</span></a>
+  </div>
+</li>
         <li class="px-0"><hr class="sidebar-divider hi "></li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
@@ -5397,7 +5404,7 @@ display: none
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">February 2, 2024</p>
+      <p class="date">February 3, 2024</p>
     </div>
   </div>
   
@@ -5480,7 +5487,7 @@ display: none
 <li>If you have not already done so, install R on your Linux distribution using the package manager. For example, on Ubuntu, run:</li>
 </ul></li>
 </ol>
-<div class="cell">
+<div class="cell bash">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">sudo</span> apt-get install r-base</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="2" type="1">
@@ -5547,7 +5554,7 @@ display: none
 <li>Add the following JSON configuration to set the path to your R executable:</li>
 </ul></li>
 </ol>
-<div class="cell">
+<div class="cell bash">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="st">&quot;r.rpath.windows&quot;</span><span class="ex">:</span> <span class="st">&quot;C:</span><span class="dt">\\</span><span class="st">Program Files</span><span class="dt">\\</span><span class="st">R</span><span class="dt">\\</span><span class="st">R-4.x.x</span><span class="dt">\\</span><span class="st">bin</span><span class="dt">\\</span><span class="st">x64</span><span class="dt">\\</span><span class="st">R.exe&quot;</span>,  // Replace with your R path</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol start="3" type="1">
@@ -6425,367 +6432,372 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb14-125"><a href="#cb14-125"></a></span>
 <span id="cb14-128"><a href="#cb14-128"></a><span class="in">```{bash}</span></span>
 <span id="cb14-129"><a href="#cb14-129"></a><span class="co">#| eval: false</span></span>
-<span id="cb14-130"><a href="#cb14-130"></a><span class="fu">sudo</span> apt-get install r-base</span>
-<span id="cb14-131"><a href="#cb14-131"></a><span class="in">```</span></span>
-<span id="cb14-132"><a href="#cb14-132"></a></span>
-<span id="cb14-133"><a href="#cb14-133"></a><span class="ss">2. </span>**Download RStudio:**</span>
-<span id="cb14-134"><a href="#cb14-134"></a><span class="ss">    - </span>Visit the RStudio Download page and choose the appropriate</span>
-<span id="cb14-135"><a href="#cb14-135"></a>      RStudio Desktop version for your Linux distribution.</span>
-<span id="cb14-136"><a href="#cb14-136"></a></span>
-<span id="cb14-137"><a href="#cb14-137"></a><span class="ss">3. </span>**Install RStudio:**</span>
-<span id="cb14-138"><a href="#cb14-138"></a><span class="ss">    - </span>Run the downloaded RStudio package, and follow any additional instructions based on your Linux distribution.</span>
-<span id="cb14-139"><a href="#cb14-139"></a></span>
-<span id="cb14-140"><a href="#cb14-140"></a><span class="ss">4. </span>**Launch RStudio:**</span>
-<span id="cb14-141"><a href="#cb14-141"></a><span class="ss">    - </span>Open a terminal and type rstudio to launch RStudio.</span>
-<span id="cb14-142"><a href="#cb14-142"></a></span>
-<span id="cb14-143"><a href="#cb14-143"></a>::::</span>
+<span id="cb14-130"><a href="#cb14-130"></a><span class="co">#| engine: bash</span></span>
+<span id="cb14-131"><a href="#cb14-131"></a><span class="co">#| classes: bash</span></span>
+<span id="cb14-132"><a href="#cb14-132"></a><span class="fu">sudo</span> apt-get install r-base</span>
+<span id="cb14-133"><a href="#cb14-133"></a><span class="in">```</span></span>
+<span id="cb14-134"><a href="#cb14-134"></a></span>
+<span id="cb14-135"><a href="#cb14-135"></a><span class="ss">2. </span>**Download RStudio:**</span>
+<span id="cb14-136"><a href="#cb14-136"></a><span class="ss">    - </span>Visit the RStudio Download page and choose the appropriate</span>
+<span id="cb14-137"><a href="#cb14-137"></a>      RStudio Desktop version for your Linux distribution.</span>
+<span id="cb14-138"><a href="#cb14-138"></a></span>
+<span id="cb14-139"><a href="#cb14-139"></a><span class="ss">3. </span>**Install RStudio:**</span>
+<span id="cb14-140"><a href="#cb14-140"></a><span class="ss">    - </span>Run the downloaded RStudio package, and follow any additional instructions based on your Linux distribution.</span>
+<span id="cb14-141"><a href="#cb14-141"></a></span>
+<span id="cb14-142"><a href="#cb14-142"></a><span class="ss">4. </span>**Launch RStudio:**</span>
+<span id="cb14-143"><a href="#cb14-143"></a><span class="ss">    - </span>Open a terminal and type rstudio to launch RStudio.</span>
 <span id="cb14-144"><a href="#cb14-144"></a></span>
-<span id="cb14-145"><a href="#cb14-145"></a><span class="fu">### Key Features</span></span>
+<span id="cb14-145"><a href="#cb14-145"></a>::::</span>
 <span id="cb14-146"><a href="#cb14-146"></a></span>
-<span id="cb14-147"><a href="#cb14-147"></a>RStudio offers an integrated scripting and console environment, extensive support for RMarkdown, and streamlined package management capabilities.</span>
+<span id="cb14-147"><a href="#cb14-147"></a><span class="fu">### Key Features</span></span>
 <span id="cb14-148"><a href="#cb14-148"></a></span>
-<span id="cb14-149"><a href="#cb14-149"></a>I strongly encourage you to look over the [RStudio user</span>
-<span id="cb14-150"><a href="#cb14-150"></a>guide](https://docs.posit.co/ide/user/) - particularly the Getting</span>
-<span id="cb14-151"><a href="#cb14-151"></a>Started section.</span>
-<span id="cb14-152"><a href="#cb14-152"></a></span>
-<span id="cb14-153"><a href="#cb14-153"></a></span>
+<span id="cb14-149"><a href="#cb14-149"></a>RStudio offers an integrated scripting and console environment, extensive support for RMarkdown, and streamlined package management capabilities.</span>
+<span id="cb14-150"><a href="#cb14-150"></a></span>
+<span id="cb14-151"><a href="#cb14-151"></a>I strongly encourage you to look over the [RStudio user</span>
+<span id="cb14-152"><a href="#cb14-152"></a>guide](https://docs.posit.co/ide/user/) - particularly the Getting</span>
+<span id="cb14-153"><a href="#cb14-153"></a>Started section.</span>
 <span id="cb14-154"><a href="#cb14-154"></a></span>
-<span id="cb14-155"><a href="#cb14-155"></a><span class="fu">## Visual Studio Code</span></span>
+<span id="cb14-155"><a href="#cb14-155"></a></span>
 <span id="cb14-156"><a href="#cb14-156"></a></span>
-<span id="cb14-157"><a href="#cb14-157"></a><span class="fu">### Overview</span></span>
+<span id="cb14-157"><a href="#cb14-157"></a><span class="fu">## Visual Studio Code</span></span>
 <span id="cb14-158"><a href="#cb14-158"></a></span>
-<span id="cb14-159"><a href="#cb14-159"></a>Visual Studio Code (VSCode) is a versatile and extensible code editor</span>
-<span id="cb14-160"><a href="#cb14-160"></a>known for its speed and efficiency. While not exclusively designed for</span>
-<span id="cb14-161"><a href="#cb14-161"></a>R, it offers excellent support for the language through extensions.</span>
-<span id="cb14-162"><a href="#cb14-162"></a></span>
-<span id="cb14-163"><a href="#cb14-163"></a><span class="fu">### Installation</span></span>
+<span id="cb14-159"><a href="#cb14-159"></a><span class="fu">### Overview</span></span>
+<span id="cb14-160"><a href="#cb14-160"></a></span>
+<span id="cb14-161"><a href="#cb14-161"></a>Visual Studio Code (VSCode) is a versatile and extensible code editor</span>
+<span id="cb14-162"><a href="#cb14-162"></a>known for its speed and efficiency. While not exclusively designed for</span>
+<span id="cb14-163"><a href="#cb14-163"></a>R, it offers excellent support for the language through extensions.</span>
 <span id="cb14-164"><a href="#cb14-164"></a></span>
-<span id="cb14-165"><a href="#cb14-165"></a><span class="ss">1. </span>Download Visual Studio Code:</span>
-<span id="cb14-166"><a href="#cb14-166"></a><span class="ss">    - </span>Visit the Visual Studio Code Download page and choose the</span>
-<span id="cb14-167"><a href="#cb14-167"></a>      version suitable for your operating system (Windows, macOS, or</span>
-<span id="cb14-168"><a href="#cb14-168"></a>      Linux).</span>
-<span id="cb14-169"><a href="#cb14-169"></a><span class="ss">    - </span>Follow the installation instructions for your specific operating</span>
-<span id="cb14-170"><a href="#cb14-170"></a>      system.</span>
-<span id="cb14-171"><a href="#cb14-171"></a></span>
-<span id="cb14-172"><a href="#cb14-172"></a><span class="ss">2. </span>Install Visual Studio Code:</span>
-<span id="cb14-173"><a href="#cb14-173"></a><span class="ss">    - </span>Run the downloaded installer and follow the installation wizard.</span>
-<span id="cb14-174"><a href="#cb14-174"></a><span class="ss">    - </span>Accept the default settings unless you have specific preferences.</span>
-<span id="cb14-175"><a href="#cb14-175"></a></span>
-<span id="cb14-176"><a href="#cb14-176"></a><span class="ss">3. </span>Launch Visual Studio Code:</span>
-<span id="cb14-177"><a href="#cb14-177"></a><span class="ss">    - </span>After installation, launch VSCode from the Start menu or applications folder.</span>
-<span id="cb14-178"><a href="#cb14-178"></a></span>
-<span id="cb14-179"><a href="#cb14-179"></a></span>
-<span id="cb14-180"><a href="#cb14-180"></a><span class="fu">### Setting Up R Support in Visual Studio Code:</span></span>
+<span id="cb14-165"><a href="#cb14-165"></a><span class="fu">### Installation</span></span>
+<span id="cb14-166"><a href="#cb14-166"></a></span>
+<span id="cb14-167"><a href="#cb14-167"></a><span class="ss">1. </span>Download Visual Studio Code:</span>
+<span id="cb14-168"><a href="#cb14-168"></a><span class="ss">    - </span>Visit the Visual Studio Code Download page and choose the</span>
+<span id="cb14-169"><a href="#cb14-169"></a>      version suitable for your operating system (Windows, macOS, or</span>
+<span id="cb14-170"><a href="#cb14-170"></a>      Linux).</span>
+<span id="cb14-171"><a href="#cb14-171"></a><span class="ss">    - </span>Follow the installation instructions for your specific operating</span>
+<span id="cb14-172"><a href="#cb14-172"></a>      system.</span>
+<span id="cb14-173"><a href="#cb14-173"></a></span>
+<span id="cb14-174"><a href="#cb14-174"></a><span class="ss">2. </span>Install Visual Studio Code:</span>
+<span id="cb14-175"><a href="#cb14-175"></a><span class="ss">    - </span>Run the downloaded installer and follow the installation wizard.</span>
+<span id="cb14-176"><a href="#cb14-176"></a><span class="ss">    - </span>Accept the default settings unless you have specific preferences.</span>
+<span id="cb14-177"><a href="#cb14-177"></a></span>
+<span id="cb14-178"><a href="#cb14-178"></a><span class="ss">3. </span>Launch Visual Studio Code:</span>
+<span id="cb14-179"><a href="#cb14-179"></a><span class="ss">    - </span>After installation, launch VSCode from the Start menu or applications folder.</span>
+<span id="cb14-180"><a href="#cb14-180"></a></span>
 <span id="cb14-181"><a href="#cb14-181"></a></span>
-<span id="cb14-182"><a href="#cb14-182"></a><span class="ss">1. </span>Install R Extension:</span>
-<span id="cb14-183"><a href="#cb14-183"></a><span class="ss">    - </span>Open VSCode and go to the Extensions view by clicking on the</span>
-<span id="cb14-184"><a href="#cb14-184"></a>      square icon on the sidebar or using the shortcut Ctrl+Shift+X.</span>
-<span id="cb14-185"><a href="#cb14-185"></a><span class="ss">    - </span>Search for &quot;R&quot; in the Extensions view search box.</span>
-<span id="cb14-186"><a href="#cb14-186"></a><span class="ss">    - </span>Install the &quot;R Language&quot; extension provided by Yuki Ueda.</span>
-<span id="cb14-187"><a href="#cb14-187"></a></span>
-<span id="cb14-188"><a href="#cb14-188"></a><span class="ss">2. </span>Configure R Path (Optional):</span>
-<span id="cb14-189"><a href="#cb14-189"></a><span class="ss">    - </span>Open the VSCode settings by pressing Ctrl+, or navigating to</span>
-<span id="cb14-190"><a href="#cb14-190"></a>      File &gt; Preferences &gt; Settings.</span>
-<span id="cb14-191"><a href="#cb14-191"></a><span class="ss">    - </span>Click on the &quot;Open Settings (JSON)&quot; icon in the upper-right</span>
-<span id="cb14-192"><a href="#cb14-192"></a>      corner of the Settings tab.</span>
-<span id="cb14-193"><a href="#cb14-193"></a><span class="ss">    - </span>Add the following JSON configuration to set the path to your R</span>
-<span id="cb14-194"><a href="#cb14-194"></a>      executable:</span>
-<span id="cb14-195"><a href="#cb14-195"></a></span>
-<span id="cb14-198"><a href="#cb14-198"></a><span class="in">```{bash}</span></span>
-<span id="cb14-199"><a href="#cb14-199"></a><span class="co">#| eval: false</span></span>
-<span id="cb14-200"><a href="#cb14-200"></a><span class="st">&quot;r.rpath.windows&quot;</span><span class="ex">:</span> <span class="st">&quot;C:</span><span class="dt">\\</span><span class="st">Program Files</span><span class="dt">\\</span><span class="st">R</span><span class="dt">\\</span><span class="st">R-4.x.x</span><span class="dt">\\</span><span class="st">bin</span><span class="dt">\\</span><span class="st">x64</span><span class="dt">\\</span><span class="st">R.exe&quot;</span>,  // Replace with your R path</span>
-<span id="cb14-201"><a href="#cb14-201"></a><span class="in">```</span></span>
-<span id="cb14-202"><a href="#cb14-202"></a></span>
-<span id="cb14-203"><a href="#cb14-203"></a><span class="ss">3. </span>Select R Interpreter:</span>
-<span id="cb14-204"><a href="#cb14-204"></a><span class="ss">    - </span>Create or open an R script in VSCode.</span>
-<span id="cb14-205"><a href="#cb14-205"></a><span class="ss">    - </span>Look for the &quot;Select an R interpreter&quot; notification at the</span>
-<span id="cb14-206"><a href="#cb14-206"></a>      bottom-right corner.</span>
-<span id="cb14-207"><a href="#cb14-207"></a><span class="ss">    - </span>Click on &quot;Select R Interpreter&quot; and choose the R version you</span>
-<span id="cb14-208"><a href="#cb14-208"></a>      installed.</span>
-<span id="cb14-209"><a href="#cb14-209"></a></span>
-<span id="cb14-210"><a href="#cb14-210"></a><span class="ss">4. </span>Install Required R Packages:</span>
-<span id="cb14-211"><a href="#cb14-211"></a><span class="ss">    - </span>Open the integrated terminal in VSCode using Ctrl+` .</span>
-<span id="cb14-212"><a href="#cb14-212"></a><span class="ss">    - </span>Install the necessary R packages (e.g., languageserver and</span>
-<span id="cb14-213"><a href="#cb14-213"></a>      formatR) by running the following commands:</span>
-<span id="cb14-214"><a href="#cb14-214"></a></span>
-<span id="cb14-217"><a href="#cb14-217"></a><span class="in">```{r}</span></span>
-<span id="cb14-218"><a href="#cb14-218"></a><span class="co">#| eval: false</span></span>
-<span id="cb14-219"><a href="#cb14-219"></a><span class="fu">install.packages</span>(<span class="st">&quot;languageserver&quot;</span>)</span>
-<span id="cb14-220"><a href="#cb14-220"></a><span class="fu">install.packages</span>(<span class="st">&quot;formatR&quot;</span>)</span>
-<span id="cb14-221"><a href="#cb14-221"></a><span class="in">```</span></span>
-<span id="cb14-222"><a href="#cb14-222"></a></span>
-<span id="cb14-223"><a href="#cb14-223"></a><span class="ss">5. </span>Reload Window:</span>
-<span id="cb14-224"><a href="#cb14-224"></a><span class="ss">    - </span>After configuring R support, it&#39;s recommended to reload the</span>
-<span id="cb14-225"><a href="#cb14-225"></a>      VSCode window to apply the changes.</span>
+<span id="cb14-182"><a href="#cb14-182"></a><span class="fu">### Setting Up R Support in Visual Studio Code:</span></span>
+<span id="cb14-183"><a href="#cb14-183"></a></span>
+<span id="cb14-184"><a href="#cb14-184"></a><span class="ss">1. </span>Install R Extension:</span>
+<span id="cb14-185"><a href="#cb14-185"></a><span class="ss">    - </span>Open VSCode and go to the Extensions view by clicking on the</span>
+<span id="cb14-186"><a href="#cb14-186"></a>      square icon on the sidebar or using the shortcut Ctrl+Shift+X.</span>
+<span id="cb14-187"><a href="#cb14-187"></a><span class="ss">    - </span>Search for &quot;R&quot; in the Extensions view search box.</span>
+<span id="cb14-188"><a href="#cb14-188"></a><span class="ss">    - </span>Install the &quot;R Language&quot; extension provided by Yuki Ueda.</span>
+<span id="cb14-189"><a href="#cb14-189"></a></span>
+<span id="cb14-190"><a href="#cb14-190"></a><span class="ss">2. </span>Configure R Path (Optional):</span>
+<span id="cb14-191"><a href="#cb14-191"></a><span class="ss">    - </span>Open the VSCode settings by pressing Ctrl+, or navigating to</span>
+<span id="cb14-192"><a href="#cb14-192"></a>      File &gt; Preferences &gt; Settings.</span>
+<span id="cb14-193"><a href="#cb14-193"></a><span class="ss">    - </span>Click on the &quot;Open Settings (JSON)&quot; icon in the upper-right</span>
+<span id="cb14-194"><a href="#cb14-194"></a>      corner of the Settings tab.</span>
+<span id="cb14-195"><a href="#cb14-195"></a><span class="ss">    - </span>Add the following JSON configuration to set the path to your R</span>
+<span id="cb14-196"><a href="#cb14-196"></a>      executable:</span>
+<span id="cb14-197"><a href="#cb14-197"></a></span>
+<span id="cb14-200"><a href="#cb14-200"></a><span class="in">```{bash}</span></span>
+<span id="cb14-201"><a href="#cb14-201"></a><span class="co">#| eval: false</span></span>
+<span id="cb14-202"><a href="#cb14-202"></a><span class="co">#| engine: bash</span></span>
+<span id="cb14-203"><a href="#cb14-203"></a><span class="co">#| classes: bash</span></span>
+<span id="cb14-204"><a href="#cb14-204"></a><span class="st">&quot;r.rpath.windows&quot;</span><span class="ex">:</span> <span class="st">&quot;C:</span><span class="dt">\\</span><span class="st">Program Files</span><span class="dt">\\</span><span class="st">R</span><span class="dt">\\</span><span class="st">R-4.x.x</span><span class="dt">\\</span><span class="st">bin</span><span class="dt">\\</span><span class="st">x64</span><span class="dt">\\</span><span class="st">R.exe&quot;</span>,  // Replace with your R path</span>
+<span id="cb14-205"><a href="#cb14-205"></a><span class="in">```</span></span>
+<span id="cb14-206"><a href="#cb14-206"></a></span>
+<span id="cb14-207"><a href="#cb14-207"></a><span class="ss">3. </span>Select R Interpreter:</span>
+<span id="cb14-208"><a href="#cb14-208"></a><span class="ss">    - </span>Create or open an R script in VSCode.</span>
+<span id="cb14-209"><a href="#cb14-209"></a><span class="ss">    - </span>Look for the &quot;Select an R interpreter&quot; notification at the</span>
+<span id="cb14-210"><a href="#cb14-210"></a>      bottom-right corner.</span>
+<span id="cb14-211"><a href="#cb14-211"></a><span class="ss">    - </span>Click on &quot;Select R Interpreter&quot; and choose the R version you</span>
+<span id="cb14-212"><a href="#cb14-212"></a>      installed.</span>
+<span id="cb14-213"><a href="#cb14-213"></a></span>
+<span id="cb14-214"><a href="#cb14-214"></a><span class="ss">4. </span>Install Required R Packages:</span>
+<span id="cb14-215"><a href="#cb14-215"></a><span class="ss">    - </span>Open the integrated terminal in VSCode using Ctrl+` .</span>
+<span id="cb14-216"><a href="#cb14-216"></a><span class="ss">    - </span>Install the necessary R packages (e.g., languageserver and</span>
+<span id="cb14-217"><a href="#cb14-217"></a>      formatR) by running the following commands:</span>
+<span id="cb14-218"><a href="#cb14-218"></a></span>
+<span id="cb14-221"><a href="#cb14-221"></a><span class="in">```{r}</span></span>
+<span id="cb14-222"><a href="#cb14-222"></a><span class="co">#| eval: false</span></span>
+<span id="cb14-223"><a href="#cb14-223"></a><span class="fu">install.packages</span>(<span class="st">&quot;languageserver&quot;</span>)</span>
+<span id="cb14-224"><a href="#cb14-224"></a><span class="fu">install.packages</span>(<span class="st">&quot;formatR&quot;</span>)</span>
+<span id="cb14-225"><a href="#cb14-225"></a><span class="in">```</span></span>
 <span id="cb14-226"><a href="#cb14-226"></a></span>
-<span id="cb14-227"><a href="#cb14-227"></a><span class="ss">6. </span>Verify R Support:</span>
-<span id="cb14-228"><a href="#cb14-228"></a><span class="ss">    - </span>Open R Script:</span>
-<span id="cb14-229"><a href="#cb14-229"></a><span class="ss">      - </span>Create or open an R script (.R file) in VSCode.</span>
-<span id="cb14-230"><a href="#cb14-230"></a><span class="ss">    - </span>Check R Features:</span>
-<span id="cb14-231"><a href="#cb14-231"></a><span class="ss">      - </span>Verify that R features such as syntax highlighting, code</span>
-<span id="cb14-232"><a href="#cb14-232"></a>        completion, and linting are functioning correctly.</span>
-<span id="cb14-233"><a href="#cb14-233"></a><span class="ss">    - </span>Run R Script:</span>
-<span id="cb14-234"><a href="#cb14-234"></a><span class="ss">      - </span>Run parts of your R script or the entire script to ensure that</span>
-<span id="cb14-235"><a href="#cb14-235"></a>        the R interpreter is correctly executing code.</span>
-<span id="cb14-236"><a href="#cb14-236"></a></span>
-<span id="cb14-237"><a href="#cb14-237"></a></span>
-<span id="cb14-238"><a href="#cb14-238"></a><span class="fu">### Key Features</span></span>
-<span id="cb14-239"><a href="#cb14-239"></a></span>
-<span id="cb14-240"><a href="#cb14-240"></a>VSCode is lightweight, supports the R Language Server, and can be</span>
-<span id="cb14-241"><a href="#cb14-241"></a>enhanced with various extensions to meet specific development needs.</span>
-<span id="cb14-242"><a href="#cb14-242"></a></span>
+<span id="cb14-227"><a href="#cb14-227"></a><span class="ss">5. </span>Reload Window:</span>
+<span id="cb14-228"><a href="#cb14-228"></a><span class="ss">    - </span>After configuring R support, it&#39;s recommended to reload the</span>
+<span id="cb14-229"><a href="#cb14-229"></a>      VSCode window to apply the changes.</span>
+<span id="cb14-230"><a href="#cb14-230"></a></span>
+<span id="cb14-231"><a href="#cb14-231"></a><span class="ss">6. </span>Verify R Support:</span>
+<span id="cb14-232"><a href="#cb14-232"></a><span class="ss">    - </span>Open R Script:</span>
+<span id="cb14-233"><a href="#cb14-233"></a><span class="ss">      - </span>Create or open an R script (.R file) in VSCode.</span>
+<span id="cb14-234"><a href="#cb14-234"></a><span class="ss">    - </span>Check R Features:</span>
+<span id="cb14-235"><a href="#cb14-235"></a><span class="ss">      - </span>Verify that R features such as syntax highlighting, code</span>
+<span id="cb14-236"><a href="#cb14-236"></a>        completion, and linting are functioning correctly.</span>
+<span id="cb14-237"><a href="#cb14-237"></a><span class="ss">    - </span>Run R Script:</span>
+<span id="cb14-238"><a href="#cb14-238"></a><span class="ss">      - </span>Run parts of your R script or the entire script to ensure that</span>
+<span id="cb14-239"><a href="#cb14-239"></a>        the R interpreter is correctly executing code.</span>
+<span id="cb14-240"><a href="#cb14-240"></a></span>
+<span id="cb14-241"><a href="#cb14-241"></a></span>
+<span id="cb14-242"><a href="#cb14-242"></a><span class="fu">### Key Features</span></span>
 <span id="cb14-243"><a href="#cb14-243"></a></span>
-<span id="cb14-244"><a href="#cb14-244"></a><span class="fu">## Emacs</span></span>
-<span id="cb14-245"><a href="#cb14-245"></a></span>
-<span id="cb14-246"><a href="#cb14-246"></a><span class="fu">### Overview</span></span>
+<span id="cb14-244"><a href="#cb14-244"></a>VSCode is lightweight, supports the R Language Server, and can be</span>
+<span id="cb14-245"><a href="#cb14-245"></a>enhanced with various extensions to meet specific development needs.</span>
+<span id="cb14-246"><a href="#cb14-246"></a></span>
 <span id="cb14-247"><a href="#cb14-247"></a></span>
-<span id="cb14-248"><a href="#cb14-248"></a>Emacs is a highly customizable and extensible text editor renowned for</span>
-<span id="cb14-249"><a href="#cb14-249"></a>its versatility. It may have a steeper learning curve, but its power</span>
-<span id="cb14-250"><a href="#cb14-250"></a>lies in its ability to adapt to individual preferences.</span>
+<span id="cb14-248"><a href="#cb14-248"></a><span class="fu">## Emacs</span></span>
+<span id="cb14-249"><a href="#cb14-249"></a></span>
+<span id="cb14-250"><a href="#cb14-250"></a><span class="fu">### Overview</span></span>
 <span id="cb14-251"><a href="#cb14-251"></a></span>
-<span id="cb14-252"><a href="#cb14-252"></a><span class="fu">### Installation</span></span>
-<span id="cb14-253"><a href="#cb14-253"></a></span>
-<span id="cb14-254"><a href="#cb14-254"></a><span class="ss">1. </span>Download and Install Emacs:</span>
-<span id="cb14-255"><a href="#cb14-255"></a><span class="ss">    - </span>Visit the <span class="co">[</span><span class="ot">GNU Emacs Download page</span><span class="co">]</span>(</span>
-<span id="cb14-256"><a href="#cb14-256"></a>      https://www.gnu.org/software/emacs/download.htm) and select the</span>
-<span id="cb14-257"><a href="#cb14-257"></a>      appropriate version for your operating system (Windows, macOS,</span>
-<span id="cb14-258"><a href="#cb14-258"></a>      or Linux).</span>
-<span id="cb14-259"><a href="#cb14-259"></a><span class="ss">    - </span>Follow the installation instructions provided on the download</span>
-<span id="cb14-260"><a href="#cb14-260"></a>      page.</span>
-<span id="cb14-261"><a href="#cb14-261"></a></span>
-<span id="cb14-262"><a href="#cb14-262"></a><span class="ss">2. </span>Launch Emacs:</span>
-<span id="cb14-263"><a href="#cb14-263"></a><span class="ss">    - </span>After installation, launch Emacs. On Windows, you can find it in</span>
-<span id="cb14-264"><a href="#cb14-264"></a>      the Start menu. On macOS and Linux, open a terminal and type</span>
-<span id="cb14-265"><a href="#cb14-265"></a>      emacs.</span>
-<span id="cb14-266"><a href="#cb14-266"></a><span class="ss">    - </span>Configuring Emacs for R Support:</span>
-<span id="cb14-267"><a href="#cb14-267"></a></span>
-<span id="cb14-268"><a href="#cb14-268"></a><span class="ss">3. </span>Install ESS (Emacs Speaks Statistics):</span>
-<span id="cb14-269"><a href="#cb14-269"></a><span class="ss">    - </span>ESS is a package for Emacs that provides support for various</span>
-<span id="cb14-270"><a href="#cb14-270"></a>      statistical languages, including R.</span>
-<span id="cb14-271"><a href="#cb14-271"></a><span class="ss">    - </span>Open Emacs and add the following to your Emacs configuration</span>
-<span id="cb14-272"><a href="#cb14-272"></a>      file (usually <span class="in">`~/.emacs`</span> or <span class="in">`~/.emacs.d/init.el`</span>):</span>
-<span id="cb14-273"><a href="#cb14-273"></a></span>
-<span id="cb14-276"><a href="#cb14-276"></a><span class="in">```{elisp}</span></span>
-<span id="cb14-277"><a href="#cb14-277"></a><span class="in">;; Add MELPA repository for package installation</span></span>
-<span id="cb14-278"><a href="#cb14-278"></a><span class="in">(require &#39;package)</span></span>
-<span id="cb14-279"><a href="#cb14-279"></a><span class="in">(add-to-list &#39;package-archives &#39;(&quot;melpa&quot; . &quot;https://melpa.org/packages/&quot;) t)</span></span>
-<span id="cb14-280"><a href="#cb14-280"></a><span class="in">(package-initialize)</span></span>
-<span id="cb14-281"><a href="#cb14-281"></a></span>
-<span id="cb14-282"><a href="#cb14-282"></a><span class="in">;; Install ESS package</span></span>
-<span id="cb14-283"><a href="#cb14-283"></a><span class="in">(unless (package-installed-p &#39;ess)</span></span>
-<span id="cb14-284"><a href="#cb14-284"></a><span class="in">  (package-refresh-contents)</span></span>
-<span id="cb14-285"><a href="#cb14-285"></a><span class="in">  (package-install &#39;ess))</span></span>
-<span id="cb14-286"><a href="#cb14-286"></a><span class="in">```</span></span>
-<span id="cb14-287"><a href="#cb14-287"></a></span>
-<span id="cb14-288"><a href="#cb14-288"></a><span class="ss">4. </span>Configure ESS:</span>
-<span id="cb14-289"><a href="#cb14-289"></a><span class="ss">    - </span>Customize your Emacs configuration to set up ESS for R. Add the</span>
-<span id="cb14-290"><a href="#cb14-290"></a>      following lines to your configuration file:</span>
+<span id="cb14-252"><a href="#cb14-252"></a>Emacs is a highly customizable and extensible text editor renowned for</span>
+<span id="cb14-253"><a href="#cb14-253"></a>its versatility. It may have a steeper learning curve, but its power</span>
+<span id="cb14-254"><a href="#cb14-254"></a>lies in its ability to adapt to individual preferences.</span>
+<span id="cb14-255"><a href="#cb14-255"></a></span>
+<span id="cb14-256"><a href="#cb14-256"></a><span class="fu">### Installation</span></span>
+<span id="cb14-257"><a href="#cb14-257"></a></span>
+<span id="cb14-258"><a href="#cb14-258"></a><span class="ss">1. </span>Download and Install Emacs:</span>
+<span id="cb14-259"><a href="#cb14-259"></a><span class="ss">    - </span>Visit the <span class="co">[</span><span class="ot">GNU Emacs Download page</span><span class="co">]</span>(</span>
+<span id="cb14-260"><a href="#cb14-260"></a>      https://www.gnu.org/software/emacs/download.htm) and select the</span>
+<span id="cb14-261"><a href="#cb14-261"></a>      appropriate version for your operating system (Windows, macOS,</span>
+<span id="cb14-262"><a href="#cb14-262"></a>      or Linux).</span>
+<span id="cb14-263"><a href="#cb14-263"></a><span class="ss">    - </span>Follow the installation instructions provided on the download</span>
+<span id="cb14-264"><a href="#cb14-264"></a>      page.</span>
+<span id="cb14-265"><a href="#cb14-265"></a></span>
+<span id="cb14-266"><a href="#cb14-266"></a><span class="ss">2. </span>Launch Emacs:</span>
+<span id="cb14-267"><a href="#cb14-267"></a><span class="ss">    - </span>After installation, launch Emacs. On Windows, you can find it in</span>
+<span id="cb14-268"><a href="#cb14-268"></a>      the Start menu. On macOS and Linux, open a terminal and type</span>
+<span id="cb14-269"><a href="#cb14-269"></a>      emacs.</span>
+<span id="cb14-270"><a href="#cb14-270"></a><span class="ss">    - </span>Configuring Emacs for R Support:</span>
+<span id="cb14-271"><a href="#cb14-271"></a></span>
+<span id="cb14-272"><a href="#cb14-272"></a><span class="ss">3. </span>Install ESS (Emacs Speaks Statistics):</span>
+<span id="cb14-273"><a href="#cb14-273"></a><span class="ss">    - </span>ESS is a package for Emacs that provides support for various</span>
+<span id="cb14-274"><a href="#cb14-274"></a>      statistical languages, including R.</span>
+<span id="cb14-275"><a href="#cb14-275"></a><span class="ss">    - </span>Open Emacs and add the following to your Emacs configuration</span>
+<span id="cb14-276"><a href="#cb14-276"></a>      file (usually <span class="in">`~/.emacs`</span> or <span class="in">`~/.emacs.d/init.el`</span>):</span>
+<span id="cb14-277"><a href="#cb14-277"></a></span>
+<span id="cb14-280"><a href="#cb14-280"></a><span class="in">```{elisp}</span></span>
+<span id="cb14-281"><a href="#cb14-281"></a><span class="in">;; Add MELPA repository for package installation</span></span>
+<span id="cb14-282"><a href="#cb14-282"></a><span class="in">(require &#39;package)</span></span>
+<span id="cb14-283"><a href="#cb14-283"></a><span class="in">(add-to-list &#39;package-archives &#39;(&quot;melpa&quot; . &quot;https://melpa.org/packages/&quot;) t)</span></span>
+<span id="cb14-284"><a href="#cb14-284"></a><span class="in">(package-initialize)</span></span>
+<span id="cb14-285"><a href="#cb14-285"></a></span>
+<span id="cb14-286"><a href="#cb14-286"></a><span class="in">;; Install ESS package</span></span>
+<span id="cb14-287"><a href="#cb14-287"></a><span class="in">(unless (package-installed-p &#39;ess)</span></span>
+<span id="cb14-288"><a href="#cb14-288"></a><span class="in">  (package-refresh-contents)</span></span>
+<span id="cb14-289"><a href="#cb14-289"></a><span class="in">  (package-install &#39;ess))</span></span>
+<span id="cb14-290"><a href="#cb14-290"></a><span class="in">```</span></span>
 <span id="cb14-291"><a href="#cb14-291"></a></span>
-<span id="cb14-294"><a href="#cb14-294"></a><span class="in">```{elisp}</span></span>
-<span id="cb14-295"><a href="#cb14-295"></a><span class="in">;; Configure ESS for R</span></span>
-<span id="cb14-296"><a href="#cb14-296"></a><span class="in">(require &#39;ess-site)</span></span>
-<span id="cb14-297"><a href="#cb14-297"></a><span class="in">```</span></span>
-<span id="cb14-298"><a href="#cb14-298"></a></span>
-<span id="cb14-299"><a href="#cb14-299"></a><span class="ss">5. </span>Select R Interpreter:</span>
-<span id="cb14-300"><a href="#cb14-300"></a><span class="ss">    - </span>Open an R script in Emacs. ESS should automatically detect your R installation.</span>
-<span id="cb14-301"><a href="#cb14-301"></a><span class="ss">    - </span>If needed, customize the R interpreter by adding the following line to your configuration file:</span>
+<span id="cb14-292"><a href="#cb14-292"></a><span class="ss">4. </span>Configure ESS:</span>
+<span id="cb14-293"><a href="#cb14-293"></a><span class="ss">    - </span>Customize your Emacs configuration to set up ESS for R. Add the</span>
+<span id="cb14-294"><a href="#cb14-294"></a>      following lines to your configuration file:</span>
+<span id="cb14-295"><a href="#cb14-295"></a></span>
+<span id="cb14-298"><a href="#cb14-298"></a><span class="in">```{elisp}</span></span>
+<span id="cb14-299"><a href="#cb14-299"></a><span class="in">;; Configure ESS for R</span></span>
+<span id="cb14-300"><a href="#cb14-300"></a><span class="in">(require &#39;ess-site)</span></span>
+<span id="cb14-301"><a href="#cb14-301"></a><span class="in">```</span></span>
 <span id="cb14-302"><a href="#cb14-302"></a></span>
-<span id="cb14-305"><a href="#cb14-305"></a><span class="in">```{elisp}</span></span>
-<span id="cb14-306"><a href="#cb14-306"></a><span class="in">(setq inferior-R-program-name &quot;/path/to/R&quot;)</span></span>
-<span id="cb14-307"><a href="#cb14-307"></a><span class="in">```</span></span>
-<span id="cb14-308"><a href="#cb14-308"></a></span>
-<span id="cb14-309"><a href="#cb14-309"></a><span class="ss">6. </span>Useful Keybindings (Optional):</span>
-<span id="cb14-310"><a href="#cb14-310"></a><span class="ss">    - </span>Add keybindings for common ESS commands. For example:</span>
-<span id="cb14-311"><a href="#cb14-311"></a></span>
-<span id="cb14-314"><a href="#cb14-314"></a><span class="in">```{elisp}</span></span>
-<span id="cb14-315"><a href="#cb14-315"></a><span class="in">(global-set-key (kbd &quot;C-c C-k&quot;) &#39;ess-eval-buffer)</span></span>
-<span id="cb14-316"><a href="#cb14-316"></a><span class="in">(global-set-key (kbd &quot;C-c C-r&quot;) &#39;ess-eval-region)</span></span>
-<span id="cb14-317"><a href="#cb14-317"></a><span class="in">```</span></span>
-<span id="cb14-318"><a href="#cb14-318"></a></span>
-<span id="cb14-319"><a href="#cb14-319"></a><span class="ss">7. </span>ESS Documentation (Optional):</span>
-<span id="cb14-320"><a href="#cb14-320"></a><span class="ss">    - </span>Access ESS documentation by typing C-h i to open the Info</span>
-<span id="cb14-321"><a href="#cb14-321"></a>      viewer, then select &quot;ESS&quot; from the menu.</span>
+<span id="cb14-303"><a href="#cb14-303"></a><span class="ss">5. </span>Select R Interpreter:</span>
+<span id="cb14-304"><a href="#cb14-304"></a><span class="ss">    - </span>Open an R script in Emacs. ESS should automatically detect your R installation.</span>
+<span id="cb14-305"><a href="#cb14-305"></a><span class="ss">    - </span>If needed, customize the R interpreter by adding the following line to your configuration file:</span>
+<span id="cb14-306"><a href="#cb14-306"></a></span>
+<span id="cb14-309"><a href="#cb14-309"></a><span class="in">```{elisp}</span></span>
+<span id="cb14-310"><a href="#cb14-310"></a><span class="in">(setq inferior-R-program-name &quot;/path/to/R&quot;)</span></span>
+<span id="cb14-311"><a href="#cb14-311"></a><span class="in">```</span></span>
+<span id="cb14-312"><a href="#cb14-312"></a></span>
+<span id="cb14-313"><a href="#cb14-313"></a><span class="ss">6. </span>Useful Keybindings (Optional):</span>
+<span id="cb14-314"><a href="#cb14-314"></a><span class="ss">    - </span>Add keybindings for common ESS commands. For example:</span>
+<span id="cb14-315"><a href="#cb14-315"></a></span>
+<span id="cb14-318"><a href="#cb14-318"></a><span class="in">```{elisp}</span></span>
+<span id="cb14-319"><a href="#cb14-319"></a><span class="in">(global-set-key (kbd &quot;C-c C-k&quot;) &#39;ess-eval-buffer)</span></span>
+<span id="cb14-320"><a href="#cb14-320"></a><span class="in">(global-set-key (kbd &quot;C-c C-r&quot;) &#39;ess-eval-region)</span></span>
+<span id="cb14-321"><a href="#cb14-321"></a><span class="in">```</span></span>
 <span id="cb14-322"><a href="#cb14-322"></a></span>
-<span id="cb14-323"><a href="#cb14-323"></a><span class="ss">8. </span>Reload Configuration:</span>
-<span id="cb14-324"><a href="#cb14-324"></a><span class="ss">    - </span>After making changes to your Emacs configuration, restart Emacs</span>
-<span id="cb14-325"><a href="#cb14-325"></a>      or use M-x load-file to reload the configuration.</span>
+<span id="cb14-323"><a href="#cb14-323"></a><span class="ss">7. </span>ESS Documentation (Optional):</span>
+<span id="cb14-324"><a href="#cb14-324"></a><span class="ss">    - </span>Access ESS documentation by typing C-h i to open the Info</span>
+<span id="cb14-325"><a href="#cb14-325"></a>      viewer, then select &quot;ESS&quot; from the menu.</span>
 <span id="cb14-326"><a href="#cb14-326"></a></span>
-<span id="cb14-327"><a href="#cb14-327"></a><span class="ss">9. </span>Verify R Support:</span>
-<span id="cb14-328"><a href="#cb14-328"></a><span class="ss">    - </span>Open R Script:</span>
-<span id="cb14-329"><a href="#cb14-329"></a><span class="ss">      - </span>Create or open an R script (.R file) in Emacs.</span>
-<span id="cb14-330"><a href="#cb14-330"></a><span class="ss">    - </span>Check ESS Features:</span>
-<span id="cb14-331"><a href="#cb14-331"></a><span class="ss">      - </span>Verify that ESS features such as syntax highlighting, code</span>
-<span id="cb14-332"><a href="#cb14-332"></a>        evaluation, and interaction with R are functioning correctly.</span>
-<span id="cb14-333"><a href="#cb14-333"></a><span class="ss">    - </span>Run R Script:</span>
-<span id="cb14-334"><a href="#cb14-334"></a><span class="ss">      - </span>Evaluate parts of your R script or the entire script to ensure</span>
-<span id="cb14-335"><a href="#cb14-335"></a>        that the R interpreter is correctly executing code.</span>
-<span id="cb14-336"><a href="#cb14-336"></a></span>
-<span id="cb14-337"><a href="#cb14-337"></a></span>
-<span id="cb14-338"><a href="#cb14-338"></a><span class="fu">### Key Features</span></span>
-<span id="cb14-339"><a href="#cb14-339"></a></span>
-<span id="cb14-340"><a href="#cb14-340"></a>Emacs supports extensive extensibility through packages, boasts ESS</span>
-<span id="cb14-341"><a href="#cb14-341"></a>(Emacs Speaks Statistics) for R integration, and offers Org Mode for</span>
-<span id="cb14-342"><a href="#cb14-342"></a>literate programming.</span>
+<span id="cb14-327"><a href="#cb14-327"></a><span class="ss">8. </span>Reload Configuration:</span>
+<span id="cb14-328"><a href="#cb14-328"></a><span class="ss">    - </span>After making changes to your Emacs configuration, restart Emacs</span>
+<span id="cb14-329"><a href="#cb14-329"></a>      or use M-x load-file to reload the configuration.</span>
+<span id="cb14-330"><a href="#cb14-330"></a></span>
+<span id="cb14-331"><a href="#cb14-331"></a><span class="ss">9. </span>Verify R Support:</span>
+<span id="cb14-332"><a href="#cb14-332"></a><span class="ss">    - </span>Open R Script:</span>
+<span id="cb14-333"><a href="#cb14-333"></a><span class="ss">      - </span>Create or open an R script (.R file) in Emacs.</span>
+<span id="cb14-334"><a href="#cb14-334"></a><span class="ss">    - </span>Check ESS Features:</span>
+<span id="cb14-335"><a href="#cb14-335"></a><span class="ss">      - </span>Verify that ESS features such as syntax highlighting, code</span>
+<span id="cb14-336"><a href="#cb14-336"></a>        evaluation, and interaction with R are functioning correctly.</span>
+<span id="cb14-337"><a href="#cb14-337"></a><span class="ss">    - </span>Run R Script:</span>
+<span id="cb14-338"><a href="#cb14-338"></a><span class="ss">      - </span>Evaluate parts of your R script or the entire script to ensure</span>
+<span id="cb14-339"><a href="#cb14-339"></a>        that the R interpreter is correctly executing code.</span>
+<span id="cb14-340"><a href="#cb14-340"></a></span>
+<span id="cb14-341"><a href="#cb14-341"></a></span>
+<span id="cb14-342"><a href="#cb14-342"></a><span class="fu">### Key Features</span></span>
 <span id="cb14-343"><a href="#cb14-343"></a></span>
-<span id="cb14-344"><a href="#cb14-344"></a></span>
-<span id="cb14-345"><a href="#cb14-345"></a><span class="fu">## NeoVim</span></span>
-<span id="cb14-346"><a href="#cb14-346"></a></span>
-<span id="cb14-347"><a href="#cb14-347"></a><span class="fu">### Overview</span></span>
+<span id="cb14-344"><a href="#cb14-344"></a>Emacs supports extensive extensibility through packages, boasts ESS</span>
+<span id="cb14-345"><a href="#cb14-345"></a>(Emacs Speaks Statistics) for R integration, and offers Org Mode for</span>
+<span id="cb14-346"><a href="#cb14-346"></a>literate programming.</span>
+<span id="cb14-347"><a href="#cb14-347"></a></span>
 <span id="cb14-348"><a href="#cb14-348"></a></span>
-<span id="cb14-349"><a href="#cb14-349"></a>Neovim is a modern and extensible text editor that builds on the</span>
-<span id="cb14-350"><a href="#cb14-350"></a>foundation of Vim. It combines the efficiency of Vim with additional</span>
-<span id="cb14-351"><a href="#cb14-351"></a>features for a more contemporary editing experience.</span>
+<span id="cb14-349"><a href="#cb14-349"></a><span class="fu">## NeoVim</span></span>
+<span id="cb14-350"><a href="#cb14-350"></a></span>
+<span id="cb14-351"><a href="#cb14-351"></a><span class="fu">### Overview</span></span>
 <span id="cb14-352"><a href="#cb14-352"></a></span>
-<span id="cb14-353"><a href="#cb14-353"></a></span>
-<span id="cb14-354"><a href="#cb14-354"></a><span class="fu">### Installation</span></span>
-<span id="cb14-355"><a href="#cb14-355"></a></span>
-<span id="cb14-356"><a href="#cb14-356"></a><span class="ss">1. </span>Download and Install Neovim:</span>
-<span id="cb14-357"><a href="#cb14-357"></a><span class="ss">    - </span>Visit the [Neovim GitHub Releases</span>
-<span id="cb14-358"><a href="#cb14-358"></a>      page](https://github.com/neovim/neovim/releases) and download</span>
-<span id="cb14-359"><a href="#cb14-359"></a>      the installer appropriate for your operating system (Windows,</span>
-<span id="cb14-360"><a href="#cb14-360"></a>      macOS, or Linux).</span>
-<span id="cb14-361"><a href="#cb14-361"></a><span class="ss">    - </span>Follow the installation instructions provided on the GitHub</span>
-<span id="cb14-362"><a href="#cb14-362"></a>      page.</span>
-<span id="cb14-363"><a href="#cb14-363"></a></span>
-<span id="cb14-364"><a href="#cb14-364"></a><span class="ss">2. </span>Launch Neovim:</span>
-<span id="cb14-365"><a href="#cb14-365"></a><span class="ss">    - </span>After installation, launch Neovim. On Windows, you can find it</span>
-<span id="cb14-366"><a href="#cb14-366"></a>      in the Start menu or use the executable. On macOS and Linux,</span>
-<span id="cb14-367"><a href="#cb14-367"></a>      open a terminal and type nvim.</span>
-<span id="cb14-368"><a href="#cb14-368"></a></span>
-<span id="cb14-369"><a href="#cb14-369"></a><span class="ss">3. </span>Configuring Neovim for R Support:</span>
-<span id="cb14-370"><a href="#cb14-370"></a><span class="ss">    - </span>Install a Plugin Manager (Optional):</span>
-<span id="cb14-371"><a href="#cb14-371"></a><span class="ss">      - </span>While optional, using a plugin manager makes it easier to</span>
-<span id="cb14-372"><a href="#cb14-372"></a>        manage Neovim plugins. Popular choices include vim-plug and</span>
-<span id="cb14-373"><a href="#cb14-373"></a>        dein.vim.</span>
-<span id="cb14-374"><a href="#cb14-374"></a><span class="ss">      - </span>Follow the installation instructions provided by the chosen</span>
-<span id="cb14-375"><a href="#cb14-375"></a>        plugin manager.</span>
-<span id="cb14-376"><a href="#cb14-376"></a></span>
-<span id="cb14-377"><a href="#cb14-377"></a><span class="ss">4. </span>Install Nvim-R Plugin:</span>
-<span id="cb14-378"><a href="#cb14-378"></a><span class="ss">    - </span>Nvim-R is a plugin that enhances Neovim for R development.</span>
-<span id="cb14-379"><a href="#cb14-379"></a><span class="ss">    - </span>Add the following lines to your Neovim configuration file</span>
-<span id="cb14-380"><a href="#cb14-380"></a>      (usually <span class="in">`~/.config/nvim/init.vim`</span> or <span class="in">`~/.vimrc`</span>):</span>
-<span id="cb14-381"><a href="#cb14-381"></a></span>
-<span id="cb14-384"><a href="#cb14-384"></a><span class="in">```{lua}</span></span>
-<span id="cb14-385"><a href="#cb14-385"></a><span class="in">&quot; For vim-plug</span></span>
-<span id="cb14-386"><a href="#cb14-386"></a><span class="in">Plug &#39;jalvesaq/Nvim-R&#39;</span></span>
-<span id="cb14-387"><a href="#cb14-387"></a></span>
-<span id="cb14-388"><a href="#cb14-388"></a><span class="in">&quot; For dein.vim</span></span>
-<span id="cb14-389"><a href="#cb14-389"></a><span class="in">call dein#add(&#39;jalvesaq/Nvim-R&#39;)</span></span>
-<span id="cb14-390"><a href="#cb14-390"></a><span class="in">```</span></span>
+<span id="cb14-353"><a href="#cb14-353"></a>Neovim is a modern and extensible text editor that builds on the</span>
+<span id="cb14-354"><a href="#cb14-354"></a>foundation of Vim. It combines the efficiency of Vim with additional</span>
+<span id="cb14-355"><a href="#cb14-355"></a>features for a more contemporary editing experience.</span>
+<span id="cb14-356"><a href="#cb14-356"></a></span>
+<span id="cb14-357"><a href="#cb14-357"></a></span>
+<span id="cb14-358"><a href="#cb14-358"></a><span class="fu">### Installation</span></span>
+<span id="cb14-359"><a href="#cb14-359"></a></span>
+<span id="cb14-360"><a href="#cb14-360"></a><span class="ss">1. </span>Download and Install Neovim:</span>
+<span id="cb14-361"><a href="#cb14-361"></a><span class="ss">    - </span>Visit the [Neovim GitHub Releases</span>
+<span id="cb14-362"><a href="#cb14-362"></a>      page](https://github.com/neovim/neovim/releases) and download</span>
+<span id="cb14-363"><a href="#cb14-363"></a>      the installer appropriate for your operating system (Windows,</span>
+<span id="cb14-364"><a href="#cb14-364"></a>      macOS, or Linux).</span>
+<span id="cb14-365"><a href="#cb14-365"></a><span class="ss">    - </span>Follow the installation instructions provided on the GitHub</span>
+<span id="cb14-366"><a href="#cb14-366"></a>      page.</span>
+<span id="cb14-367"><a href="#cb14-367"></a></span>
+<span id="cb14-368"><a href="#cb14-368"></a><span class="ss">2. </span>Launch Neovim:</span>
+<span id="cb14-369"><a href="#cb14-369"></a><span class="ss">    - </span>After installation, launch Neovim. On Windows, you can find it</span>
+<span id="cb14-370"><a href="#cb14-370"></a>      in the Start menu or use the executable. On macOS and Linux,</span>
+<span id="cb14-371"><a href="#cb14-371"></a>      open a terminal and type nvim.</span>
+<span id="cb14-372"><a href="#cb14-372"></a></span>
+<span id="cb14-373"><a href="#cb14-373"></a><span class="ss">3. </span>Configuring Neovim for R Support:</span>
+<span id="cb14-374"><a href="#cb14-374"></a><span class="ss">    - </span>Install a Plugin Manager (Optional):</span>
+<span id="cb14-375"><a href="#cb14-375"></a><span class="ss">      - </span>While optional, using a plugin manager makes it easier to</span>
+<span id="cb14-376"><a href="#cb14-376"></a>        manage Neovim plugins. Popular choices include vim-plug and</span>
+<span id="cb14-377"><a href="#cb14-377"></a>        dein.vim.</span>
+<span id="cb14-378"><a href="#cb14-378"></a><span class="ss">      - </span>Follow the installation instructions provided by the chosen</span>
+<span id="cb14-379"><a href="#cb14-379"></a>        plugin manager.</span>
+<span id="cb14-380"><a href="#cb14-380"></a></span>
+<span id="cb14-381"><a href="#cb14-381"></a><span class="ss">4. </span>Install Nvim-R Plugin:</span>
+<span id="cb14-382"><a href="#cb14-382"></a><span class="ss">    - </span>Nvim-R is a plugin that enhances Neovim for R development.</span>
+<span id="cb14-383"><a href="#cb14-383"></a><span class="ss">    - </span>Add the following lines to your Neovim configuration file</span>
+<span id="cb14-384"><a href="#cb14-384"></a>      (usually <span class="in">`~/.config/nvim/init.vim`</span> or <span class="in">`~/.vimrc`</span>):</span>
+<span id="cb14-385"><a href="#cb14-385"></a></span>
+<span id="cb14-388"><a href="#cb14-388"></a><span class="in">```{lua}</span></span>
+<span id="cb14-389"><a href="#cb14-389"></a><span class="in">&quot; For vim-plug</span></span>
+<span id="cb14-390"><a href="#cb14-390"></a><span class="in">Plug &#39;jalvesaq/Nvim-R&#39;</span></span>
 <span id="cb14-391"><a href="#cb14-391"></a></span>
-<span id="cb14-392"><a href="#cb14-392"></a><span class="ss">5. </span>Configure Nvim-R:</span>
-<span id="cb14-393"><a href="#cb14-393"></a><span class="ss">    - </span>Customize your Neovim configuration to set up Nvim-R for R. Add</span>
-<span id="cb14-394"><a href="#cb14-394"></a>      the following lines to your configuration file:</span>
+<span id="cb14-392"><a href="#cb14-392"></a><span class="in">&quot; For dein.vim</span></span>
+<span id="cb14-393"><a href="#cb14-393"></a><span class="in">call dein#add(&#39;jalvesaq/Nvim-R&#39;)</span></span>
+<span id="cb14-394"><a href="#cb14-394"></a><span class="in">```</span></span>
 <span id="cb14-395"><a href="#cb14-395"></a></span>
-<span id="cb14-398"><a href="#cb14-398"></a><span class="in">```{lua}</span></span>
-<span id="cb14-399"><a href="#cb14-399"></a><span class="in">&quot; Set the path to your R executable (replace with your actual path)</span></span>
-<span id="cb14-400"><a href="#cb14-400"></a><span class="in">let g:vimrplugin_Rexecutable = &#39;/path/to/R&#39;</span></span>
-<span id="cb14-401"><a href="#cb14-401"></a></span>
-<span id="cb14-402"><a href="#cb14-402"></a><span class="in">&quot; Enable filetype plugin and indentation</span></span>
-<span id="cb14-403"><a href="#cb14-403"></a><span class="in">filetype plugin indent on</span></span>
-<span id="cb14-404"><a href="#cb14-404"></a></span>
-<span id="cb14-405"><a href="#cb14-405"></a><span class="in">&quot; Set R as the default file type for .R files</span></span>
-<span id="cb14-406"><a href="#cb14-406"></a><span class="in">au BufNewFile,BufRead *.R set filetype=r</span></span>
-<span id="cb14-407"><a href="#cb14-407"></a><span class="in">````</span></span>
+<span id="cb14-396"><a href="#cb14-396"></a><span class="ss">5. </span>Configure Nvim-R:</span>
+<span id="cb14-397"><a href="#cb14-397"></a><span class="ss">    - </span>Customize your Neovim configuration to set up Nvim-R for R. Add</span>
+<span id="cb14-398"><a href="#cb14-398"></a>      the following lines to your configuration file:</span>
+<span id="cb14-399"><a href="#cb14-399"></a></span>
+<span id="cb14-402"><a href="#cb14-402"></a><span class="in">```{lua}</span></span>
+<span id="cb14-403"><a href="#cb14-403"></a><span class="in">&quot; Set the path to your R executable (replace with your actual path)</span></span>
+<span id="cb14-404"><a href="#cb14-404"></a><span class="in">let g:vimrplugin_Rexecutable = &#39;/path/to/R&#39;</span></span>
+<span id="cb14-405"><a href="#cb14-405"></a></span>
+<span id="cb14-406"><a href="#cb14-406"></a><span class="in">&quot; Enable filetype plugin and indentation</span></span>
+<span id="cb14-407"><a href="#cb14-407"></a><span class="in">filetype plugin indent on</span></span>
 <span id="cb14-408"><a href="#cb14-408"></a></span>
-<span id="cb14-409"><a href="#cb14-409"></a><span class="ss">6. </span>Install Plugins:</span>
-<span id="cb14-410"><a href="#cb14-410"></a><span class="ss">    - </span>Open Neovim and run the command to install the configured</span>
-<span id="cb14-411"><a href="#cb14-411"></a>      plugins:</span>
-<span id="cb14-412"><a href="#cb14-412"></a><span class="ss">      - </span>For vim-plug: :PlugInstall</span>
-<span id="cb14-413"><a href="#cb14-413"></a><span class="ss">      - </span>For dein.vim: :call dein#install()</span>
-<span id="cb14-414"><a href="#cb14-414"></a></span>
-<span id="cb14-415"><a href="#cb14-415"></a><span class="ss">7. </span>Reload Configuration:</span>
-<span id="cb14-416"><a href="#cb14-416"></a><span class="ss">     - </span>After adding the configuration, restart Neovim or use :source %</span>
-<span id="cb14-417"><a href="#cb14-417"></a>       to reload the configuration.</span>
+<span id="cb14-409"><a href="#cb14-409"></a><span class="in">&quot; Set R as the default file type for .R files</span></span>
+<span id="cb14-410"><a href="#cb14-410"></a><span class="in">au BufNewFile,BufRead *.R set filetype=r</span></span>
+<span id="cb14-411"><a href="#cb14-411"></a><span class="in">````</span></span>
+<span id="cb14-412"><a href="#cb14-412"></a></span>
+<span id="cb14-413"><a href="#cb14-413"></a><span class="ss">6. </span>Install Plugins:</span>
+<span id="cb14-414"><a href="#cb14-414"></a><span class="ss">    - </span>Open Neovim and run the command to install the configured</span>
+<span id="cb14-415"><a href="#cb14-415"></a>      plugins:</span>
+<span id="cb14-416"><a href="#cb14-416"></a><span class="ss">      - </span>For vim-plug: :PlugInstall</span>
+<span id="cb14-417"><a href="#cb14-417"></a><span class="ss">      - </span>For dein.vim: :call dein#install()</span>
 <span id="cb14-418"><a href="#cb14-418"></a></span>
-<span id="cb14-419"><a href="#cb14-419"></a><span class="ss">8. </span>Verify R Support:</span>
-<span id="cb14-420"><a href="#cb14-420"></a><span class="ss">    - </span>Open R Script:</span>
-<span id="cb14-421"><a href="#cb14-421"></a><span class="ss">      - </span>Create or open an R script (.R file) in Neovim.</span>
-<span id="cb14-422"><a href="#cb14-422"></a><span class="ss">    - </span>Check Nvim-R Features:</span>
-<span id="cb14-423"><a href="#cb14-423"></a><span class="ss">      - </span>Verify that Nvim-R features, such as syntax highlighting, code</span>
-<span id="cb14-424"><a href="#cb14-424"></a>        evaluation, and interaction with R, are functioning correctly.</span>
-<span id="cb14-425"><a href="#cb14-425"></a><span class="ss">    - </span>Run R Script:</span>
-<span id="cb14-426"><a href="#cb14-426"></a><span class="ss">      - </span>Evaluate parts of your R script or the entire script to ensure</span>
-<span id="cb14-427"><a href="#cb14-427"></a>        that the R interpreter is correctly executing code.</span>
-<span id="cb14-428"><a href="#cb14-428"></a>      </span>
-<span id="cb14-429"><a href="#cb14-429"></a><span class="fu">### Key Features</span></span>
-<span id="cb14-430"><a href="#cb14-430"></a></span>
-<span id="cb14-431"><a href="#cb14-431"></a>Neovim maintains Vim compatibility, supports plugins for extended</span>
-<span id="cb14-432"><a href="#cb14-432"></a>functionality, and emphasizes efficient text editing.</span>
-<span id="cb14-433"><a href="#cb14-433"></a></span>
+<span id="cb14-419"><a href="#cb14-419"></a><span class="ss">7. </span>Reload Configuration:</span>
+<span id="cb14-420"><a href="#cb14-420"></a><span class="ss">     - </span>After adding the configuration, restart Neovim or use :source %</span>
+<span id="cb14-421"><a href="#cb14-421"></a>       to reload the configuration.</span>
+<span id="cb14-422"><a href="#cb14-422"></a></span>
+<span id="cb14-423"><a href="#cb14-423"></a><span class="ss">8. </span>Verify R Support:</span>
+<span id="cb14-424"><a href="#cb14-424"></a><span class="ss">    - </span>Open R Script:</span>
+<span id="cb14-425"><a href="#cb14-425"></a><span class="ss">      - </span>Create or open an R script (.R file) in Neovim.</span>
+<span id="cb14-426"><a href="#cb14-426"></a><span class="ss">    - </span>Check Nvim-R Features:</span>
+<span id="cb14-427"><a href="#cb14-427"></a><span class="ss">      - </span>Verify that Nvim-R features, such as syntax highlighting, code</span>
+<span id="cb14-428"><a href="#cb14-428"></a>        evaluation, and interaction with R, are functioning correctly.</span>
+<span id="cb14-429"><a href="#cb14-429"></a><span class="ss">    - </span>Run R Script:</span>
+<span id="cb14-430"><a href="#cb14-430"></a><span class="ss">      - </span>Evaluate parts of your R script or the entire script to ensure</span>
+<span id="cb14-431"><a href="#cb14-431"></a>        that the R interpreter is correctly executing code.</span>
+<span id="cb14-432"><a href="#cb14-432"></a>      </span>
+<span id="cb14-433"><a href="#cb14-433"></a><span class="fu">### Key Features</span></span>
 <span id="cb14-434"><a href="#cb14-434"></a></span>
-<span id="cb14-435"><a href="#cb14-435"></a><span class="fu">## Sublime Text</span></span>
-<span id="cb14-436"><a href="#cb14-436"></a></span>
-<span id="cb14-437"><a href="#cb14-437"></a><span class="fu">### Overview</span></span>
+<span id="cb14-435"><a href="#cb14-435"></a>Neovim maintains Vim compatibility, supports plugins for extended</span>
+<span id="cb14-436"><a href="#cb14-436"></a>functionality, and emphasizes efficient text editing.</span>
+<span id="cb14-437"><a href="#cb14-437"></a></span>
 <span id="cb14-438"><a href="#cb14-438"></a></span>
-<span id="cb14-439"><a href="#cb14-439"></a>Sublime Text is a lightweight yet feature-rich text editor appreciated</span>
-<span id="cb14-440"><a href="#cb14-440"></a>for its speed and simplicity. While not R-specific, it offers a</span>
-<span id="cb14-441"><a href="#cb14-441"></a>customizable environment suitable for various programming languages.</span>
+<span id="cb14-439"><a href="#cb14-439"></a><span class="fu">## Sublime Text</span></span>
+<span id="cb14-440"><a href="#cb14-440"></a></span>
+<span id="cb14-441"><a href="#cb14-441"></a><span class="fu">### Overview</span></span>
 <span id="cb14-442"><a href="#cb14-442"></a></span>
-<span id="cb14-443"><a href="#cb14-443"></a><span class="fu">### Installation</span></span>
-<span id="cb14-444"><a href="#cb14-444"></a></span>
-<span id="cb14-445"><a href="#cb14-445"></a><span class="ss">1. </span>Download and Install Sublime Text:</span>
-<span id="cb14-446"><a href="#cb14-446"></a><span class="ss">    - </span>Visit the [Sublime Text Download</span>
-<span id="cb14-447"><a href="#cb14-447"></a>      page](https://www.sublimetext.com/download) and download the</span>
-<span id="cb14-448"><a href="#cb14-448"></a>      installer for your operating system (Windows, macOS, or Linux).</span>
-<span id="cb14-449"><a href="#cb14-449"></a><span class="ss">    - </span>Follow the installation instructions provided on the website.</span>
-<span id="cb14-450"><a href="#cb14-450"></a>    </span>
-<span id="cb14-451"><a href="#cb14-451"></a><span class="ss">2. </span>Launch Sublime Text:</span>
-<span id="cb14-452"><a href="#cb14-452"></a><span class="ss">    - </span>After installation, launch Sublime Text. You can find it in the Start menu on Windows, in the Applications folder on macOS, or by using the terminal on Linux.</span>
-<span id="cb14-453"><a href="#cb14-453"></a></span>
-<span id="cb14-454"><a href="#cb14-454"></a><span class="ss">3. </span>Configuring Sublime Text for R Support:</span>
-<span id="cb14-455"><a href="#cb14-455"></a><span class="ss">    - </span>Install Package Control:</span>
-<span id="cb14-456"><a href="#cb14-456"></a><span class="ss">      - </span>Package Control is a package manager for Sublime Text. Follow</span>
-<span id="cb14-457"><a href="#cb14-457"></a>        the installation instructions on the [Package Control</span>
-<span id="cb14-458"><a href="#cb14-458"></a>        website](https://packagecontrol.io/installation).</span>
-<span id="cb14-459"><a href="#cb14-459"></a></span>
-<span id="cb14-460"><a href="#cb14-460"></a><span class="ss">    - </span>Install Terminus Package:</span>
-<span id="cb14-461"><a href="#cb14-461"></a><span class="ss">      - </span>Open Sublime Text and press Ctrl+Shift+P (Windows/Linux) or Cmd+Shift+P (macOS) to open the command palette.</span>
-<span id="cb14-462"><a href="#cb14-462"></a><span class="ss">      - </span>Type &quot;Install Package&quot; and select &quot;Package Control: Install Package.&quot;</span>
-<span id="cb14-463"><a href="#cb14-463"></a><span class="ss">      - </span>Search for &quot;Terminus&quot; and install the package.</span>
-<span id="cb14-464"><a href="#cb14-464"></a></span>
-<span id="cb14-465"><a href="#cb14-465"></a><span class="ss">    - </span>Install R:</span>
-<span id="cb14-466"><a href="#cb14-466"></a><span class="ss">      - </span>Make sure you have R installed on your system. You can download it from the official R website.</span>
-<span id="cb14-467"><a href="#cb14-467"></a><span class="ss">    - </span>Configure Terminus for R:</span>
-<span id="cb14-468"><a href="#cb14-468"></a><span class="ss">      - </span>Open Sublime Text and create or open an R script (.R file).</span>
-<span id="cb14-469"><a href="#cb14-469"></a><span class="ss">      - </span>Press Ctrl+ (Windows/Linux) or Cmd+ (macOS) to open the Terminus console.</span>
-<span id="cb14-470"><a href="#cb14-470"></a><span class="ss">      - </span>In the Terminus console, type the following command to start an R session:</span>
-<span id="cb14-471"><a href="#cb14-471"></a></span>
-<span id="cb14-472"><a href="#cb14-472"></a><span class="in">```{bash, eval = FALSE}</span></span>
-<span id="cb14-473"><a href="#cb14-473"></a><span class="in">R</span></span>
-<span id="cb14-474"><a href="#cb14-474"></a><span class="in">```</span></span>
-<span id="cb14-475"><a href="#cb14-475"></a><span class="ss">    - </span>Terminus will open a new terminal at the bottom of Sublime Text,</span>
-<span id="cb14-476"><a href="#cb14-476"></a>      providing an interactive R session.</span>
-<span id="cb14-477"><a href="#cb14-477"></a><span class="ss">    - </span>Create Build System (Optional):</span>
-<span id="cb14-478"><a href="#cb14-478"></a><span class="ss">      - </span>You can create a custom build system for R scripts to simplify</span>
-<span id="cb14-479"><a href="#cb14-479"></a>        execution.</span>
-<span id="cb14-480"><a href="#cb14-480"></a><span class="ss">        - </span>Open a new file in Sublime Text and paste the following JSON</span>
-<span id="cb14-481"><a href="#cb14-481"></a>          configuration:</span>
-<span id="cb14-482"><a href="#cb14-482"></a></span>
-<span id="cb14-483"><a href="#cb14-483"></a><span class="in">```{json, eval = FALSE}</span></span>
-<span id="cb14-484"><a href="#cb14-484"></a><span class="in">{</span></span>
-<span id="cb14-485"><a href="#cb14-485"></a><span class="in">    &quot;cmd&quot;: [&quot;R&quot;, &quot;--slave&quot;, &quot;--vanilla&quot;, &quot;-f&quot;, &quot;$file&quot;],</span></span>
-<span id="cb14-486"><a href="#cb14-486"></a><span class="in">    &quot;file_regex&quot;: &quot;^(?:(...*?):([0-9]+):([0-9]+)|(...*?))$&quot;,</span></span>
-<span id="cb14-487"><a href="#cb14-487"></a><span class="in">    &quot;selector&quot;: &quot;source.R&quot;</span></span>
-<span id="cb14-488"><a href="#cb14-488"></a><span class="in">}</span></span>
-<span id="cb14-489"><a href="#cb14-489"></a><span class="in">```</span></span>
-<span id="cb14-490"><a href="#cb14-490"></a><span class="ss">        - </span>Save the file with the extension .sublime-build in the</span>
-<span id="cb14-491"><a href="#cb14-491"></a>          &quot;User&quot; directory of your Sublime Text &quot;Packages&quot; folder. You</span>
-<span id="cb14-492"><a href="#cb14-492"></a>          can find this folder by selecting &quot;Preferences&quot; &gt; &quot;Browse</span>
-<span id="cb14-493"><a href="#cb14-493"></a>          Packages...&quot; in Sublime Text.</span>
-<span id="cb14-494"><a href="#cb14-494"></a><span class="ss">      - </span>Run R Script:</span>
-<span id="cb14-495"><a href="#cb14-495"></a><span class="ss">        - </span>Open an R script in Sublime Text.</span>
-<span id="cb14-496"><a href="#cb14-496"></a><span class="ss">        - </span>Use the Terminus console to interact with the R session and</span>
-<span id="cb14-497"><a href="#cb14-497"></a>          execute commands.</span>
-<span id="cb14-498"><a href="#cb14-498"></a></span>
-<span id="cb14-499"><a href="#cb14-499"></a><span class="fu">### Key Features</span></span>
-<span id="cb14-500"><a href="#cb14-500"></a></span>
-<span id="cb14-501"><a href="#cb14-501"></a>Sublime Text boasts multiple cursors, supports extensions through</span>
-<span id="cb14-502"><a href="#cb14-502"></a>Package Control, and provides ample customization options.</span>
-<span id="cb14-503"><a href="#cb14-503"></a></span>
+<span id="cb14-443"><a href="#cb14-443"></a>Sublime Text is a lightweight yet feature-rich text editor appreciated</span>
+<span id="cb14-444"><a href="#cb14-444"></a>for its speed and simplicity. While not R-specific, it offers a</span>
+<span id="cb14-445"><a href="#cb14-445"></a>customizable environment suitable for various programming languages.</span>
+<span id="cb14-446"><a href="#cb14-446"></a></span>
+<span id="cb14-447"><a href="#cb14-447"></a><span class="fu">### Installation</span></span>
+<span id="cb14-448"><a href="#cb14-448"></a></span>
+<span id="cb14-449"><a href="#cb14-449"></a><span class="ss">1. </span>Download and Install Sublime Text:</span>
+<span id="cb14-450"><a href="#cb14-450"></a><span class="ss">    - </span>Visit the [Sublime Text Download</span>
+<span id="cb14-451"><a href="#cb14-451"></a>      page](https://www.sublimetext.com/download) and download the</span>
+<span id="cb14-452"><a href="#cb14-452"></a>      installer for your operating system (Windows, macOS, or Linux).</span>
+<span id="cb14-453"><a href="#cb14-453"></a><span class="ss">    - </span>Follow the installation instructions provided on the website.</span>
+<span id="cb14-454"><a href="#cb14-454"></a>    </span>
+<span id="cb14-455"><a href="#cb14-455"></a><span class="ss">2. </span>Launch Sublime Text:</span>
+<span id="cb14-456"><a href="#cb14-456"></a><span class="ss">    - </span>After installation, launch Sublime Text. You can find it in the Start menu on Windows, in the Applications folder on macOS, or by using the terminal on Linux.</span>
+<span id="cb14-457"><a href="#cb14-457"></a></span>
+<span id="cb14-458"><a href="#cb14-458"></a><span class="ss">3. </span>Configuring Sublime Text for R Support:</span>
+<span id="cb14-459"><a href="#cb14-459"></a><span class="ss">    - </span>Install Package Control:</span>
+<span id="cb14-460"><a href="#cb14-460"></a><span class="ss">      - </span>Package Control is a package manager for Sublime Text. Follow</span>
+<span id="cb14-461"><a href="#cb14-461"></a>        the installation instructions on the [Package Control</span>
+<span id="cb14-462"><a href="#cb14-462"></a>        website](https://packagecontrol.io/installation).</span>
+<span id="cb14-463"><a href="#cb14-463"></a></span>
+<span id="cb14-464"><a href="#cb14-464"></a><span class="ss">    - </span>Install Terminus Package:</span>
+<span id="cb14-465"><a href="#cb14-465"></a><span class="ss">      - </span>Open Sublime Text and press Ctrl+Shift+P (Windows/Linux) or Cmd+Shift+P (macOS) to open the command palette.</span>
+<span id="cb14-466"><a href="#cb14-466"></a><span class="ss">      - </span>Type &quot;Install Package&quot; and select &quot;Package Control: Install Package.&quot;</span>
+<span id="cb14-467"><a href="#cb14-467"></a><span class="ss">      - </span>Search for &quot;Terminus&quot; and install the package.</span>
+<span id="cb14-468"><a href="#cb14-468"></a></span>
+<span id="cb14-469"><a href="#cb14-469"></a><span class="ss">    - </span>Install R:</span>
+<span id="cb14-470"><a href="#cb14-470"></a><span class="ss">      - </span>Make sure you have R installed on your system. You can download it from the official R website.</span>
+<span id="cb14-471"><a href="#cb14-471"></a><span class="ss">    - </span>Configure Terminus for R:</span>
+<span id="cb14-472"><a href="#cb14-472"></a><span class="ss">      - </span>Open Sublime Text and create or open an R script (.R file).</span>
+<span id="cb14-473"><a href="#cb14-473"></a><span class="ss">      - </span>Press Ctrl+ (Windows/Linux) or Cmd+ (macOS) to open the Terminus console.</span>
+<span id="cb14-474"><a href="#cb14-474"></a><span class="ss">      - </span>In the Terminus console, type the following command to start an R session:</span>
+<span id="cb14-475"><a href="#cb14-475"></a></span>
+<span id="cb14-476"><a href="#cb14-476"></a><span class="in">```{bash, eval = FALSE}</span></span>
+<span id="cb14-477"><a href="#cb14-477"></a><span class="in">R</span></span>
+<span id="cb14-478"><a href="#cb14-478"></a><span class="in">```</span></span>
+<span id="cb14-479"><a href="#cb14-479"></a><span class="ss">    - </span>Terminus will open a new terminal at the bottom of Sublime Text,</span>
+<span id="cb14-480"><a href="#cb14-480"></a>      providing an interactive R session.</span>
+<span id="cb14-481"><a href="#cb14-481"></a><span class="ss">    - </span>Create Build System (Optional):</span>
+<span id="cb14-482"><a href="#cb14-482"></a><span class="ss">      - </span>You can create a custom build system for R scripts to simplify</span>
+<span id="cb14-483"><a href="#cb14-483"></a>        execution.</span>
+<span id="cb14-484"><a href="#cb14-484"></a><span class="ss">        - </span>Open a new file in Sublime Text and paste the following JSON</span>
+<span id="cb14-485"><a href="#cb14-485"></a>          configuration:</span>
+<span id="cb14-486"><a href="#cb14-486"></a></span>
+<span id="cb14-487"><a href="#cb14-487"></a><span class="in">```{json, eval = FALSE}</span></span>
+<span id="cb14-488"><a href="#cb14-488"></a><span class="in">{</span></span>
+<span id="cb14-489"><a href="#cb14-489"></a><span class="in">    &quot;cmd&quot;: [&quot;R&quot;, &quot;--slave&quot;, &quot;--vanilla&quot;, &quot;-f&quot;, &quot;$file&quot;],</span></span>
+<span id="cb14-490"><a href="#cb14-490"></a><span class="in">    &quot;file_regex&quot;: &quot;^(?:(...*?):([0-9]+):([0-9]+)|(...*?))$&quot;,</span></span>
+<span id="cb14-491"><a href="#cb14-491"></a><span class="in">    &quot;selector&quot;: &quot;source.R&quot;</span></span>
+<span id="cb14-492"><a href="#cb14-492"></a><span class="in">}</span></span>
+<span id="cb14-493"><a href="#cb14-493"></a><span class="in">```</span></span>
+<span id="cb14-494"><a href="#cb14-494"></a><span class="ss">        - </span>Save the file with the extension .sublime-build in the</span>
+<span id="cb14-495"><a href="#cb14-495"></a>          &quot;User&quot; directory of your Sublime Text &quot;Packages&quot; folder. You</span>
+<span id="cb14-496"><a href="#cb14-496"></a>          can find this folder by selecting &quot;Preferences&quot; &gt; &quot;Browse</span>
+<span id="cb14-497"><a href="#cb14-497"></a>          Packages...&quot; in Sublime Text.</span>
+<span id="cb14-498"><a href="#cb14-498"></a><span class="ss">      - </span>Run R Script:</span>
+<span id="cb14-499"><a href="#cb14-499"></a><span class="ss">        - </span>Open an R script in Sublime Text.</span>
+<span id="cb14-500"><a href="#cb14-500"></a><span class="ss">        - </span>Use the Terminus console to interact with the R session and</span>
+<span id="cb14-501"><a href="#cb14-501"></a>          execute commands.</span>
+<span id="cb14-502"><a href="#cb14-502"></a></span>
+<span id="cb14-503"><a href="#cb14-503"></a><span class="fu">### Key Features</span></span>
 <span id="cb14-504"><a href="#cb14-504"></a></span>
-<span id="cb14-505"><a href="#cb14-505"></a>:::</span>
-<span id="cb14-506"><a href="#cb14-506"></a></span>
+<span id="cb14-505"><a href="#cb14-505"></a>Sublime Text boasts multiple cursors, supports extensions through</span>
+<span id="cb14-506"><a href="#cb14-506"></a>Package Control, and provides ample customization options.</span>
+<span id="cb14-507"><a href="#cb14-507"></a></span>
+<span id="cb14-508"><a href="#cb14-508"></a></span>
+<span id="cb14-509"><a href="#cb14-509"></a>:::</span>
+<span id="cb14-510"><a href="#cb14-510"></a></span>
+<span id="cb14-511"><a href="#cb14-511"></a></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
