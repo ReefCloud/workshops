@@ -1146,3 +1146,4 @@ priors have a tendency to result in inflated variance estimates.
 Consequently, half-cauchy priors are generally recommended for
 variances.
 
+

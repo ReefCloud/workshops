@@ -125,6 +125,8 @@ choice among R users.
 
 ```{bash}
 #| eval: false
+#| engine: bash
+#| classes: bash
 sudo apt-get install r-base
 ```
 
@@ -193,6 +195,8 @@ R, it offers excellent support for the language through extensions.
 
 ```{bash}
 #| eval: false
+#| engine: bash
+#| classes: bash
 "r.rpath.windows": "C:\\Program Files\\R\\R-4.x.x\\bin\\x64\\R.exe",  // Replace with your R path
 ```
 
@@ -485,5 +489,6 @@ Package Control, and provides ample customization options.
 
 
 :::
+
 
 

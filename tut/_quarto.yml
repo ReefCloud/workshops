@@ -3,6 +3,7 @@ project:
   output-dir: ../docs
   render:
     - index.qmd
+    - 005_setup.qmd
     - 01_introduction_to_r.qmd
     - 02_editors.qmd
     - 03_data_frames.qmd
@@ -26,6 +27,9 @@ website:
     contents:
       - href: index.qmd
         text: Home
+        icon: house
+      - href: 005_setup.qmd
+        text: Setup
         icon: house
       - text: "---"
       - section: R basics
