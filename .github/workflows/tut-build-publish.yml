@@ -36,6 +36,11 @@ jobs:
         with:
           r-version: ${{ matrix.config.R }}
 
+      - name: Repos
+        run: |
+          cat("\noptions(repos=c(stan='https://mc-stan.org/r-packages/',CRAN ='https://cloud.r-project.org'))\n", file = "~/.Rprofile", append = TRUE)
+        shell: Rscript {0}
+        
       ## Install R packages
       - name: install R packages
         uses: r-lib/actions/setup-r-dependencies@v2
