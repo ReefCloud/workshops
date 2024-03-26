@@ -14,6 +14,8 @@ project:
     - 21_statistical_philosophies.qmd
     - 22_estimation.qmd
     - 30_glm.qmd
+    - 35_bayesian_linear_models.qmd
+    - 40_synthetic_world.qmd
 
 website:
   title: ReefCloud R/Statistics resources
@@ -65,10 +67,18 @@ website:
         - href: 22_estimation.qmd
           text: Estimation and inference
           icon: house
-      - section: Linear modelling
+      - section: Introduction to linear modelling
         contents:
         - href: 30_glm.qmd
           text: Generalised linear models
+          icon: house
+        - href: 35_bayesian_linear_models.qmd
+          text: Bayesian linear models
+          icon: house
+      - section: Analyses
+        contents:
+        - href: 40_synthetic_world.qmd
+          text: Synthetic world and data
           icon: house
 
 format:

@@ -1,34 +1,59 @@
 digraph structs {
   node [shape=record,fontsize=11,fontname="arial"];
   rankdir="TB";
-  _07a94 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|07a94}|100644\ blob\ 50fcd\	file1\l}"]  _07a94 -> _50fcd
-  _143a8 [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|143a8}|\*\ Notes\l\-\-\-\l}"]  _1944f [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|1944f}|\*\.tmp\l}"]  _28ed2 [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|28ed2}|File\ 1\l\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\l}"]  _2b61e [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|2b61e}|040000\ tree\ f2fa5\	dir1\l100644\ blob\ 28ed2\	file1\l}"]  _2b61e -> _f2fa5
-  _2b61e -> _28ed2
+  _4d77b [fillcolor="gold", style="filled,rounded", label="{{obj:commit|4d77b}|tree\ c0af8\lparent\ 9e74e\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019551\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019551\ \+1000\l\lFeature\ complete\l}"]  _4d77b -> _c0af8
+  _4d77b -> _9e74e
+  _d7891 [fillcolor="gold", style="filled,rounded", label="{{obj:commit|d7891}|tree\ 91d70\lparent\ b55f2\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019550\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019550\ \+1000\l\lBug\ fix\ in\ file1\l}"]  _d7891 -> _91d70
+  _d7891 -> _b55f2
   _3c7af [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|3c7af}|100644\ blob\ 1944f\	\.gitignore\l040000\ tree\ c426a\	dir1\l100644\ blob\ 28ed2\	file1\l}"]  _3c7af -> _1944f
   _3c7af -> _c426a
   _3c7af -> _28ed2
-  _4fcc8 [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|4fcc8}|\*\ Notes\l}"]  _50fcd [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|50fcd}|File\ 1\l}"]  _bfe17 [fillcolor="gold", style="filled,rounded", label="{{obj:commit|bfe17}|tree\ 2b61e\lparent\ ee164\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1705468173\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1705468173\ \+1000\l\lModified\ file1\ and\ added\ file2\ \(in\ dir1\)\l}"]  _bfe17 -> _2b61e
-  _bfe17 -> _ee164
-  _c426a [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|c426a}|100644\ blob\ 143a8\	file2\l}"]  _c426a -> _143a8
-  _dfa27 [fillcolor="gold", style="filled,rounded", label="{{obj:commit|dfa27}|tree\ 3c7af\lparent\ bfe17\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1705468175\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1705468175\ \+1000\l\lModified\ file2\,\ added\ \.gitignore\l}"]  _dfa27 -> _3c7af
-  _dfa27 -> _bfe17
-  _ee164 [fillcolor="gold", style="filled,rounded", label="{{obj:commit|ee164}|tree\ 07a94\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1705468170\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1705468170\ \+1000\l\lInitial\ repo\ and\ added\ file1\l}"]  _ee164 -> _07a94
+  _c0af8 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|c0af8}|100644\ blob\ 1944f\	\.gitignore\l040000\ tree\ 6a7e6\	dir1\l100644\ blob\ 87df5\	file1\l}"]  _c0af8 -> _1944f
+  _c0af8 -> _6a7e6
+  _c0af8 -> _87df5
+  _dc477 [fillcolor="gold", style="filled,rounded", label="{{obj:commit|dc477}|tree\ 2b61e\lparent\ adefa\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019542\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019542\ \+1000\l\lModified\ file1\ and\ added\ file2\ \(in\ dir1\)\l}"]  _dc477 -> _2b61e
+  _dc477 -> _adefa
+  _91d70 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|91d70}|100644\ blob\ 1944f\	\.gitignore\l040000\ tree\ 174b4\	dir1\l100644\ blob\ 28ed2\	file1\l}"]  _91d70 -> _1944f
+  _91d70 -> _174b4
+  _91d70 -> _28ed2
   _f2fa5 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|f2fa5}|100644\ blob\ 4fcc8\	file2\l}"]  _f2fa5 -> _4fcc8
-  _refs___heads___main [style=filled, fillcolor=slateblue3, fontcolor = white,  label="{{ref:local branch|refs\/heads\/main}|dfa27\l}"]
-  _refs___heads___main -> _dfa27
-  _refs___tags___V___1 [style=filled, fillcolor=lightyellow, fontcolor = black,  label="{{ref:tag|refs\/tags\/V\.1}|dfa27\l}"]
-  _refs___tags___V___1 -> _dfa27
-  _HEAD [style=filled, fillcolor=cornflowerblue, fontcolor=black,  label="{{ref|HEAD}|refs\/heads\/main\l}"]
-  _HEAD -> _refs___heads___main
+  _9e74e [fillcolor="gold", style="filled,rounded", label="{{obj:commit|9e74e}|tree\ ae0a8\lparent\ b55f2\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019546\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019546\ \+1000\l\lNew\ feature\l}"]  _9e74e -> _ae0a8
+  _9e74e -> _b55f2
+  _b55f2 [fillcolor="gold", style="filled,rounded", label="{{obj:commit|b55f2}|tree\ 3c7af\lparent\ dc477\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019542\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019542\ \+1000\l\lModified\ file2\,\ added\ \.gitignore\l}"]  _b55f2 -> _3c7af
+  _b55f2 -> _dc477
+  _174b4 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|174b4}|100644\ blob\ 9a83f\	file2\l}"]  _174b4 -> _9a83f
+  _07a94 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|07a94}|100644\ blob\ 50fcd\	file1\l}"]  _07a94 -> _50fcd
+  _50fcd [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|50fcd}|File\ 1\l}"]  _8cf9e [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|8cf9e}|File\ 3\l}"]  _143a8 [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|143a8}|\*\ Notes\l\-\-\-\l}"]  _28ed2 [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|28ed2}|File\ 1\l\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\l}"]  _2b61e [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|2b61e}|040000\ tree\ f2fa5\	dir1\l100644\ blob\ 28ed2\	file1\l}"]  _2b61e -> _f2fa5
+  _2b61e -> _28ed2
+  _4fcc8 [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|4fcc8}|\*\ Notes\l}"]  _adefa [fillcolor="gold", style="filled,rounded", label="{{obj:commit|adefa}|tree\ 07a94\lauthor\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019542\ \+1000\lcommitter\ Murray\ Logan\ \<i\.obesulus\@gmail\.com\>\ 1707019542\ \+1000\l\lInitial\ repo\ and\ added\ file1\l}"]  _adefa -> _07a94
+  _ae0a8 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|ae0a8}|100644\ blob\ 1944f\	\.gitignore\l040000\ tree\ 362b7\	dir1\l100644\ blob\ 87df5\	file1\l}"]  _ae0a8 -> _1944f
+  _ae0a8 -> _362b7
+  _ae0a8 -> _87df5
+  _9a83f [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|9a83f}|\*\ Notes\l\-\-\-\l\ another\ bug\ fix\l}"]  _6a7e6 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|6a7e6}|100644\ blob\ 143a8\	file2\l100644\ blob\ decc8\	file3\l}"]  _6a7e6 -> _143a8
+  _6a7e6 -> _decc8
+  _c426a [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|c426a}|100644\ blob\ 143a8\	file2\l}"]  _c426a -> _143a8
+  _1944f [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|1944f}|\*\.tmp\l}"]  _362b7 [fillcolor="yellowgreen", style="filled,rounded", label="{{obj:tree|362b7}|100644\ blob\ 143a8\	file2\l100644\ blob\ 8cf9e\	file3\l}"]  _362b7 -> _143a8
+  _362b7 -> _8cf9e
+  _decc8 [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|decc8}|File\ 3\l\ a\ modification\l}"]  _87df5 [fillcolor="forestgreen", style="filled,rounded", label="{{obj:blob|87df5}|File\ 1\l\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\lb\l}"]  _refs___heads___Feature [style=filled, fillcolor=slateblue3, fontcolor = white,  label="{{ref:local branch|refs\/heads\/Feature}|4d77b\l}"]
+  _refs___heads___Feature -> _4d77b
+  _refs___heads___main [style=filled, fillcolor=slateblue3, fontcolor = white,  label="{{ref:local branch|refs\/heads\/main}|d7891\l}"]
+  _refs___heads___main -> _d7891
+  _refs___tags___V___1 [style=filled, fillcolor=lightyellow, fontcolor = black,  label="{{ref:tag|refs\/tags\/V\.1}|b55f2\l}"]
+  _refs___tags___V___1 -> _b55f2
+  _HEAD [style=filled, fillcolor=cornflowerblue, fontcolor=black,  label="{{ref|HEAD}|refs\/heads\/Feature\l}"]
+  _HEAD -> _refs___heads___Feature
   index -> _1944f
   index -> _143a8
-  index -> _28ed2
-  index [style=filled, fillcolor=lightcyan, label="{{index}|100644\ 1944f\ 0\	\.gitignore\l100644\ 143a8\ 0\	dir1\/file2\l100644\ 28ed2\ 0\	file1\l}"]
+  index -> _decc8
+  index -> _87df5
+  index [style=filled, fillcolor=lightcyan, label="{{index}|100644\ 1944f\ 0\	\.gitignore\l100644\ 143a8\ 0\	dir1\/file2\l100644\ decc8\ 0\	dir1\/file3\l100644\ 87df5\ 0\	file1\l}"]
 subgraph cluster_1 {rank=sink  _gitignore [fillcolor="white", label="{{.gitignore}|*.tmp\l\l}"] 
   _file2 [fillcolor="white", label="{{file2}|* Notes\l---\l\l}"] 
-  _file1 [fillcolor="white", label="{{file1}|File 1\l---------------\l\l}"] 
+  _file3 [fillcolor="white", label="{{file3}|File 3\l a modification\l\l}"] 
+  _file1 [fillcolor="white", label="{{file1}|File 1\l---------------\lb\l\l}"] 
 }
  _1944f -> _gitignore
  _143a8 -> _file2
- _28ed2 -> _file1
+ _decc8 -> _file3
+ _87df5 -> _file1
 }

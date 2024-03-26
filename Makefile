@@ -17,8 +17,8 @@ tut:
 	$(MAKE) -f tut/Makefile
 
 docs:
-	@echo "Transfer to docs/Makefile"
-	$(MAKE) -f docs/Makefile
+	@echo "Transfer to pres/Makefile"
+	$(MAKE) -f pres/Makefile
 
 clean:
 	rm -f *.log *.aux *.md *.out texput.log

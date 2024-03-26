@@ -12,3 +12,4 @@ tut/resources/Fig*
 *.aux
 tut/_freeze
 tut/site_libs
+*.md
