@@ -69,6 +69,13 @@ jobs:
             any::see
             any::cmdstanr
             any::brms
+            any::knitr
+            any::simstudy
+            any::sf
+            any::stars
+            any::gstat
+            any::RandomFields
+            any::patchwork
             
       - name: Install CmdStan
         shell: Rscript {0}
