@@ -1,0 +1,1323 @@
+---
+title: Synthetic world and data
+author: "Murray Logan"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format: 
+  html:
+    toc: true
+    toc-float: true
+    number-sections: true
+    number-depth: 3
+    embed-resources: true
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+    html-math-method: katex
+execute:
+  keep-md: true
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+bibliography: resources/references.bib
+output_dir: "docs"
+---
+
+```{r setup, include=FALSE,warning=FALSE, message=FALSE}
+options(tinytex.engine = "xelatex")
+knitr::read_chunk("../R/40_synthetic_world.R")
+```
+
+# Synopsis
+
+This document illustrates the generation of synthetic data that can be
+used to test the processing and modelling routines used in the
+ReefCloud statistical modelling components. Specifically, it will
+illustrate the generation of a full spatio-temporal grid for hard
+coral (HC), soft coral (SC) and macroalgae (MA) within a fabricated
+area by establishing a baseline for each in space and then perturbing
+them over time by overlaying synthetic disturbances (degree heating
+weeks, cyclones and other disturbances) as well as between disturbance
+growth (recovery).
+
+The established full spatio-temporal grid for each of HC, SC and MA
+can thereafter be considered the "true" synthetic world from which a
+range of sampling designs and analyses can be explored.
+
+# Preparations
+
+We will start by loading the required r packages.
+
+```{r}
+#| label: packages
+#| warning: false
+#| message: false
+```
+
+The generated data are synthetic. As such they are the result of a
+combination of deterministic (based on precise repeatable rules and
+equations) and stochastic (based on random variability) processes. To
+ensure repeatability (in the presence of the stochasticity), we will
+set a random seed value that we can utilise any time we are enacting a
+stochastic (random) element.
+
+```{r}
+#| label: set_seed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+# Define the spatial and temporal domains
+
+The spatial and temporal domains will be used to represent our
+synthetic (fabricated) "world". Before we can project any spatial and
+temporal patterns in benthic cover, we first need to define the bounds
+of this world. Thereafter, cover will broadly be generated as the
+baseline cover (cover at time 0) plus the spatial patterns over time
+plus random noise.
+
+$$
+cover \sim{} baseline + spatial\times temporal + noise
+$$
+
+::: {.panel-tabset}
+
+## Temporal
+
+We will simulate 12 annual sampling events. Although these will be
+assumed to be evenly spaced in time (descrete times), it is
+acknowledged that this is typically not now sampling programs collect
+data.
+
+```{r}
+#| label: temporal_domain
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+## Spatial
+
+Lets define the spatial domain.
+
+:::: {.columns}
+::: {.column .left width='50%'}
+
+```{r}
+#| label: spatial_domain
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+:::
+
+::: {.column width='50%'}
+
+```{r}
+#| label: spatial_domain
+#| results: markup
+#| eval: true
+#| echo: false
+#| cache: false
+#| out-width: 100%
+```
+
+:::
+::::
+
+Now we will generate a grid of 10,000 points within the spatial domain.
+This will essentially represent the full continuous spatial surface.
+
+:::: {.columns}
+::: {.column .left width='50%'}
+
+```{r}
+#| label: spatial_grid
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+:::
+
+::: {.column width='50%'}
+```{r}
+#| label: spatial_grid
+#| results: markup
+#| eval: true
+#| echo: false
+#| cache: false
+#| out-width: 100%
+```
+:::
+::::
+
+
+## Generate reefs
+
+Although the above represents the broad spatial domain, the entire
+domain will not be saturated with coral reef. Indeed only a small
+fraction of the full domain will contain coral reef. Furthermore, the
+coral reef will not be distributed uniformly throughout the domain.
+
+To simulate this, we will create a collection of discrete reefs that
+vary in size and shape and be sprinkled throughout the spatial domain.
+This can be acheived by creating a gaussian markov random field to
+defines a noisy variable in space. If we think of the noisy variable
+as being a third dimension (such as height), then this field is like a
+very rough topography. "Reefs" can be created by only keeping the
+parts of the topography that are higher than a specific value (picture
+viewing the hilly landscape from a plane as a large, flat cloud slowly
+decends towards the ground gradually revealing a set of seperate
+peaks).
+
+Coral reefs tend to consist of a shallow, sand-filled lagoon
+surrounded by a sloping escarpment of hard substrate. The coral of a
+coral reef is typically restricted to the escarpment and thus only the
+5-20 meter perimeter of a reef. Hence, to further the realism of the
+simulated reefs, we will further modify the "reefs" so that they are a
+series of irregular frames.
+
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: reefs_rf
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: reefs_rf
+#| results: markup
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 5
+#| fig-height: 5
+#| out-width: 100%
+```
+
+:::
+::::
+
+We can then filter the field to exclude Y values that are less than
+1.75, convert the data into a simple features points object, generate
+square buffers around each point, convert the points into polygons and
+then combine overlapping and connected polygons into single polygons,
+
+The result will be a set of irregular and randomly postioned polygons
+that can represent coral reefs.
+
+:::: {.columns} 
+::: {.column .left width='60%'} 
+
+```{r}
+#| label: reefs_rf_polygons
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+::: 
+
+::: {.column .left width='40%'} 
+
+```{r}
+#| label: reefs_rf_polygons
+#| results: markup
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 5
+#| fig-height: 5
+#| out-width: 100%
+```
+
+::: 
+::::
+
+Finally, we generate the difference between an enlarged and shrunk
+versions of each reef so as to yield polygons that resembled frames.
+To illustrate, the figure is zoomed in on a small collection of reefs.
+
+:::: {.columns} 
+::: {.column .left width='60%'} 
+
+```{r}
+#| label: reefs_rf_polygons_hollow
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+::: 
+
+::: {.column .left width='40%'} 
+
+```{r}
+#| label: reefs_rf_polygons_hollow
+#| results: markup
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 5
+#| fig-height: 5
+#| out-width: 100%
+```
+
+::: 
+::::
+
+:::
+
+# Synthetic broad scale patterns
+
+In this section, we will use a range of statistical routines to
+project spatial and temporal patterns (as well as noise) onto the
+entire spatio-temporal domain ignoring the fact that the reefs only
+occur in the limited bordered shaped defined in the previous section.
+We will this later point in the next section.
+
+The response data (hard coral, soft coral and macroalgae cover) will be
+effected by the following:
+
+ - base coral cover - the global average coral cover (pooled over
+   space and time)
+ - spatial pattern in this base cover which reflects the spatial
+   pattern at T0
+ - annual growth (e.g. 5-10% annual increase)
+ - influence of covariates (spatio-temporal effects)
+ - random noise
+
+::: {.panel-tabset}
+
+## Define the SPDE
+
+- Create the SPDE mesh
+
+  :::: {.columns}
+  ::: {.column .left width='60%'}
+
+  ```{r}
+  #| label: spatial_mesh
+  #| results: markup
+  #| eval: false
+  #| echo: true
+  #| cache: false
+  ```
+  :::
+
+  ::: {.column .left width='40%'}
+
+  ```{r}
+  #| label: spatial_mesh
+  #| results: markup
+  #| eval: true
+  #| echo: false
+  #| cache: false
+  #| message: false
+  #| warning: false
+  #| fig-width: 5
+  #| fig-height: 5
+  #| out-width: 100%
+  ```
+  :::
+  ::::
+
+- Create a SPDE for a Matern model. If you want to apply PC priors,
+  use inla.spde2.pcmatern instead. Matern SPDE model with spatial
+  scale paramter kappa(u) and variance rescaling. parameter tau(u).
+  Alpha is the Fractional operator order where $nu = \alpha-d/2$.
+
+  ```{r}
+  #| label: spatial_spde2
+  #| results: markup
+  #| eval: true
+  #| echo: true
+  #| cache: false
+ ```
+- calculate the precision matrix from the parameter values (theta)
+
+  ```{r}
+  #| label: spatial_precision_matrix
+  #| results: markup
+  #| eval: true
+  #| echo: true
+  #| cache: false
+  ```
+
+- calculate a lattice projection to and from the mesh
+  ```{r}
+  #| label: spatial_A
+  #| results: markup
+  #| eval: true
+  #| echo: true
+  #| cache: false
+  ```
+
+## Baseline hard coral cover
+
+The baseline represents the spatial pattern of hard coral cover the
+year prior to sampling. This spatial pattern is defined as a simple
+sine wave (applied to the centered latitudes) and rotated slightly and
+projected onto the SPDE grid.
+
+$$
+cover_i = longitude_i + sin(latitude_i) + 1.5\times (longitude_i + latitude_i)
+$$
+
+**Note, these values are on the expected link scale (logit)**. The
+second (bottom) figure displays the baseline on the response (percent
+cover) scale.
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: baseline_spatial_HC
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: baseline_spatial_HC
+#| results: markup
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 3
+#| fig-height: 3
+#| out-width: 100%
+```
+:::
+::::
+
+
+## Baseline soft coral cover
+
+The baseline represents the spatial pattern of soft coral cover the
+year prior to sampling. Similar to hard coral cover, this spatial
+pattern is defined as a simple sine wave (applied to the centered
+latitudes), yet it is rotated slightly more before being projected
+onto the SPDE grid.
+
+$$
+cover_i = longitude_i + sin(latitude_i) + 1.5\times longitude_i - 1.5\times latitude_i
+$$
+
+**Note again, these values are on the expected link scale (logit)**.
+The second (bottom) figure displays the baseline on the response
+(percent cover) scale.
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: baseline_spatial_SC
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: baseline_spatial_SC
+#| results: markup
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 3
+#| fig-height: 3
+#| out-width: 100%
+```
+:::
+::::
+
+## Baseline macroalgae cover
+
+In this simulated world, macroalgae simply fills the space not
+occupied by hard and soft coral. Consequently, we will not generate an
+initial baseline for this. Rather, we will calculate it from the hard
+and soft coral spatio-temporal projections later.
+
+## Degree heating weeks	
+
+The degree heating weeks effects represent relative spatio-temporal
+patterns. We start by establishing an overall temporal trend in degree
+heating weeks defined as:
+
+$$
+\begin{align}
+cyear &= year - 1\\
+dhw_i &\sim{} Beta(\alpha_i, 1)\\
+log\left(\frac{\alpha_i}{1-\alpha_i}\right) &= 0.2 + cyear_i + sin(cyear_i)\\
+dhw_i &= 5 * (dhw_i - min(dhw)) / range(dhw)
+\end{align}
+$$
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: covariate_DHW_temporal_trend
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: covariate_DHW_temporal_trend
+#| results: markup
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 3
+#| fig-height: 3
+#| out-width: 100%
+```
+:::
+::::
+
+Now we propagate this temporal trend across a random field with a time
+varying autocorrelation coefficient drawn from beta distribution with
+shape parameters of 0.2 and 1.
+
+```{r}
+#| label: covariate_DHW_effect
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+
+## Cyclones
+
+For each year, we calculate the probability that a cyclone has
+occurred somewhere in the spatial domain, the cyclone intensity and a
+sine wave path for the cyclone to follow through the spatial domain.
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: covariate_CYC_temporal_trend
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: covariate_CYC_temporal_trend
+#| results: hide
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 3
+#| fig-height: 3
+#| out-width: 100%
+```
+:::
+::::
+
+```{r}
+#| label: covariate_CYC_effect
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+## Other disturbances
+
+Similar to degree heating weeks, other disturbances are generated by
+defining local effects that are autocorrelated. This is a catchall for
+all other disturbances including crown of thorns, disease etc.
+
+```{r}
+#| label: covariate_other_effect
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+## All effects
+
+We can now compile all the effects (disturbances as well as growth)
+together. If we work on the **link scale**, we can simply calculate a
+cumulative sum of effects per pixel.
+
+We will define the relative influence (annual decline weighting) of
+each of the disturbances as:
+
+- Degree heating weeks (0.5)
+- Cyclones (0.5)
+- All others (0.2)
+
+In addition, we will indicate growth (annual increase) of:
+
+- Hard coral (0.3)
+- Soft coral (0.3)
+
+Macrolgae will respond differently. Rather than respond directly,
+macroalgae will take up the remaining available space (e.g $MA =
+Total~available~space - HCC - SC$).
+
+```{r}
+#| label: compile_effects
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+The marginalized temporal effects are approximately:
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: compile_effects_temporal
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: compile_effects_temporal
+#| results: hide
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 3
+#| fig-height: 3
+#| out-width: 100%
+```
+
+:::
+::::
+
+And the spatio-temporal effects are:
+
+```{r}
+#| label: compile_effects_spatiotemporal
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+## Synthetic hard coral cover data
+
+```{r}
+#| label: compile_synthetic_data_HCC
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: compile_synthetic_data_HCC_temporal
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: compile_synthetic_data_HCC_temporal 
+#| results: hide
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 3
+#| fig-height: 3
+#| out-width: 100%
+```
+
+:::
+::::
+
+```{r}
+#| label: compile_synthetic_data_HCC_spatiotemporal 
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+## Synthetic soft coral cover data
+
+```{r}
+#| label: compile_synthetic_data_SC
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: compile_synthetic_data_SC_temporal
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: compile_synthetic_data_SC_temporal 
+#| results: hide
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 3
+#| fig-height: 3
+#| out-width: 100%
+```
+
+:::
+::::
+
+```{r}
+#| label: compile_synthetic_data_SC_spatiotemporal 
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+## Synthetic macroalgae cover data
+
+```{r}
+#| label: compile_synthetic_data_MA
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+:::: {.columns}
+::: {.column .left width='60%'}
+
+```{r}
+#| label: compile_synthetic_data_MA_temporal
+#| results: markup
+#| eval: false
+#| echo: true
+#| cache: false
+```
+
+:::
+::: {.column .left width='40%'}
+
+```{r}
+#| label: compile_synthetic_data_MA_temporal 
+#| results: hide
+#| eval: true
+#| echo: false
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 3
+#| fig-height: 3
+#| out-width: 100%
+```
+
+:::
+::::
+
+```{r}
+#| label: compile_synthetic_data_MA_spatiotemporal 
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+:::
+
+# Broad scale reef patterns
+
+As indicated previously, the entire spatial domain is not covered with
+coral reef. Rather coral reefs are usually sprinkled throughout the
+spatial domain. Therefore, to represent reality more closely, we
+should restict the broad spatial patterns to just the reefs (which are
+themselves the set of frames we created earlier).
+
+Note, as the 'reefs' (frames) take up relatively little space within
+the full spatial domain, the figures in this section will be zoomed in
+on a specific section of the spatial domain (so as to highlight the
+reef fraction of the space).
+
+
+- rasterize the reefs frame
+- convert to points (centroids of raster cells)
+- filter to the values of 1
+- extract coordinates
+- convert to data frame
+  
+```{r}
+#| label: points_in_reefs
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+::: {.panel-tabset}
+
+## Hard coral cover
+ 
+```{r}
+#| label: project_onto_reefs_HCC
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: true
+#| message: false
+#| warning: false
+```
+
+Given that the entire spatial domain is very large and thus it would
+be very difficult to discern any within individual reef variations
+from a plot of the entire spatial domain, we will zoom in on a small
+region for the purposes of illustrating the result of projecting onto
+the reefs frames.
+
+```{r}
+#| label: reefs_plot_HCC
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+## Soft coral cover
+ 
+```{r}
+#| label: project_onto_reefs_SC
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: true
+#| message: false
+#| warning: false
+```
+
+Given that the entire spatial domain is very large and thus it would
+be very difficult to discern any within individual reef variations
+from a plot of the entire spatial domain, we will zoom in on a small
+region for the purposes of illustrating the result of projecting onto
+the reefs frames.
+
+```{r}
+#| label: reefs_plot_SC
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+## Macroalgae cover
+ 
+```{r}
+#| label: project_onto_reefs_MA
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: true
+#| message: false
+#| warning: false
+```
+
+Given that the entire spatial domain is very large and thus it would
+be very difficult to discern any within individual reef variations
+from a plot of the entire spatial domain, we will zoom in on a small
+region for the purposes of illustrating the result of projecting onto
+the reefs frames.
+
+```{r}
+#| label: reefs_plot_MA
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 14
+#| fig-height: 6
+#| out-width: 100%
+```
+
+:::
+
+
+# Sampling designs (large scale components) 
+
+Before going any further, we will combine the HCC, SC and MA data
+together. Since each of these are projected onto the same grid, we can
+simply bind the columns together.
+
+```{r}
+#| label: project_onto_reefs
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+Rarely (if ever) can we actually saturate a spatial (and temporal)
+domain with sampling locations. More typically, monitoring sampling
+designs comprise either:
+
+- a limited number of **fixed location** that are repeatidly visited
+  annually (or perhaps biennially). Such a design is thought to
+  provide more power for exploring the temporal trends, yet the
+  absolute values in the trend are biased towards the actual sampling
+  locations.
+  
+- an approximately set number of **random locations** are visited
+  annually (or perhaps biennially). Such a design is throught to
+  provide more accurace (less biased and thus more representative)
+  estimates of the absolute value of the response (or at least not
+  have a consistent bias), albeit with (potentially) less power for
+  exploring temporal trends.
+
+On top of this, as already described above, the full spatial domain
+does not consist only of reef. Indeed, much of the spatial domain is
+open water. Hence, sampling locations must be selected from within the
+reef areas.
+
+So far we have created a large number of standard features objects and
+data frames. Going forward, we only need a single one:
+`data_reefs_points_sf`. This is a standard features object containing
+the Latitude and Longitude of the pool of potential sampling locations
+along with the underlying hard coral, softcoral and macroalgae cover
+associated with each year (for each location).
+
+Lets start by assuming that we want to sample from two sites within
+each of 25 locations (reefs) annually.
+
+```{r}
+#| label: number_of_locs
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+In selecting our annual sampling locations, we don't want to have
+multiple locations from the one reef (we will define subsample 'sites'
+within Reefs later). Instead, we want to select 25 Reefs.
+
+::: {.panel-tabset}
+
+## Fixed locations
+
+```{r}
+#| label: fixed_locs
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: fixed_locs_bubble
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 13
+#| fig-height: 15
+#| out-width: 100%
+```
+
+```{r}
+#| label: fixed_locs_means
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 13
+#| fig-height: 15
+#| out-width: 100%
+```
+
+## Random locations
+
+```{r}
+#| label: random_locs
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: random_locs_bubble
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 13
+#| fig-height: 15
+#| out-width: 100%
+```
+
+```{r}
+#| label: random_locs_means
+#| results: hide
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+#| fig-width: 13
+#| fig-height: 15
+#| out-width: 100%
+```
+
+:::
+
+**Conclusions:**
+
+- the fixed design yields trends in site means that are more
+  consistent with the trends in the "true" reef level means
+- the accuracy of the fixed design remains relatively constant each
+  year
+- bootstrap confidence intervals calculated from the fixed site level
+  data typically contain the "true" mean values of the reef level
+  cover
+- the random design yields estimates of cover that vary in their
+  accuracy each year
+- indeed, the estimates of cover from the random design were rarely
+  more accurate than those of the fixed design
+- the estimates from site level data in this section were all based on
+  simple means and bootstrap intervals. It is expected that if the
+  estimates were generated from more sophisticed statistical models,
+  the uncertainty around the fixed design estimates would be narrower
+  than those around the random design estimates.
+- hence arguably the fixed design is more suitable for depicting the
+  temporal trends
+
+# Finer sampling design components 
+
+Now that we have the location (e.g Reef) cover estimates for each of
+hard coral, soft coral and macroalgae, we need to spread this out over
+the fine scale sampling design (e.g sites, transects, photos etc).
+That is, we want the structure of the data to resemble the structure
+of real collected within the reefCloud platform.
+
+For each of the fixed and random reef/site location designs, we will
+define a hierarchical structure in which there are a set number (5) of
+fixed transects within each site, there are a set number photos (100)
+within each transect and a set number of points (5) within each photo.
+
+The hierarchical structures will be illustrated via a diagram at the
+top of the respective sections (tabs).
+
+In order to decompose a Reef mean into (for example) two Sites, for
+each Site, I will draw two random numbers from a Gaussian distribution
+with mean of 0 and variance equal to a set parameter (which differs
+between HCC, SC and MA). These numbers will be added to the Reef value
+so as to yield to new values (one for each Site). Similarly, to
+decompose these Site values into Transects values, random numbers will
+be drawn from a zero mean Gaussian. These calculation are performed on
+the logit scale before the values are transformed onto a 0-100
+(percentage) scale.
+
+To decompose into multiple depths, random numbers will be again drawn
+from a zero-centered Gaussian. These random draws will themselves be
+normalized and ordered (such that there is a relationship between
+depth and cover) and added to the 0-100 scaled values.
+
+Finally, cover values will be converted into total integer counts per
+transect before being partitioned into Frames (photos) and Points.
+
+```{r}
+#| label: locs_obs_parameters
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+::: {.panel-tabset}
+
+## Fixed locations
+
+<!-- note, the figure is created in a chunk at the end of this subsection -->
+
+![](../tut/40_synthetic_world_files/figure-html/hierarchical_schematic_fixed-1.png){width="100%"}
+
+The design comprises of:
+
+- a single region (~synthetic~)
+- 25 Reefs (of which ~Reef118~ is the first)
+- 2 Sites (~S1~ and ~S2) within each Reef
+- 5 Transects (~T1~ -- ~T5~) within each Site
+- each Transect is sampled annually for 12 Years (~2010~ -- ~2021~).
+  Colours indicate different years,
+- in each Year, 100 photos are collected along each Transect. Although
+  photos represent a spatial scale under Transect, unlike Transect
+  (which is anchored at a fixed location that can be visited annually),
+  it is not possible to guarantee that Photo 1 is in exactly the same
+  location each year - hence Photos are treated as random within the
+  transects.
+- 5 Points per Photo (not depicted in diagram).
+
+```{r}
+#| label: fixed_locs_obs
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: fixed_locs_obs_depths
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: fixed_locs_obs_fortify_data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: hierarchical_schematic_fixed
+#| results: hide
+#| output: hide
+#| eval: true
+#| echo: false
+#| cache: true
+#| message: false
+#| warning: false
+#| fig-width: 15
+#| fig-height: 10
+#| out-width: 100%
+```
+
+## Random locations
+
+![](../tut/40_synthetic_world_files/figure-html/hierarchical_schematic_random-1.png){width="100%"}
+
+The design comprises of:
+
+- a single region (~synthetic~)
+- 25 Reefs (of which ~Reef118~ is the first) in each of 12 Years (~2010~ -- ~2021~).
+  Colours indicate different years. **Note the selection of Reefs differs each Year**.
+- 2 Sites (~S1~ and ~S2) within each Reef
+- 5 Transects (~T1~ -- ~T5~) within each Site
+- 100 photos are collected along each Transect. Although photos
+  represent a spatial scale under Transect, it is not possible to
+  gaurantee that Photo 1 is in exactly the same location each year -
+  hence Photos are treated as random within the transects.
+- 5 Points per Photo (not depicted in diagram).
+
+```{r}
+#| label: random_locs_obs
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: random_locs_obs_depths
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: random_locs_obs_fortify_data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: random_download_data_btn1
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+```{r}
+#| label: hierarchical_schematic_random
+#| results: hide
+#| output: hide
+#| eval: true
+#| echo: false
+#| cache: true
+#| message: false
+#| warning: false
+#| fig-width: 15
+#| fig-height: 10
+#| out-width: 100%
+```
+
+:::
+
+
+ 
