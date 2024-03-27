@@ -1017,7 +1017,7 @@ g$G |>
 data_reefs_sum <- data_reefs_pts_sf |>
   st_drop_geometry() |>
   group_by(Year) |>
-  summarize(across(c(HCC, SC, MA), mean)) |>
+  dplyr::summarize(across(c(HCC, SC, MA), mean)) |>
   pivot_longer(
     cols = c(HCC, SC, MA),
     names_to = "Group",
@@ -1031,7 +1031,7 @@ data_fixed_locs_sum <- data_fixed_locs_sf |>
     values_to = "Value"
   ) |>
   group_by(Year, Group) |>
-  summarize(mean_cl_boot(Value))
+  dplyr::summarize(mean_cl_boot(Value))
 
 g <-
   data_reefs_sum |>
