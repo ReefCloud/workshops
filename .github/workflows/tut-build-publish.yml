@@ -75,7 +75,12 @@ jobs:
             any::stars
             any::gstat
             any::patchwork
-            
+            any::remotes
+
+      - name: Install other R packages
+        run: |
+          Rscript -e "remotes::install_github('cran/RandomFields')"
+
       - name: Install CmdStan
         shell: Rscript {0}
         run: |
