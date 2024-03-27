@@ -14,7 +14,7 @@ library(patchwork)
 library(Hmisc)
 #library(downloadthis)
 ## ----end
-
+ 
 ## ---- set_seed
 seed <- 123
 ## ----end
