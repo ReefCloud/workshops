@@ -76,6 +76,7 @@ jobs:
             any::gstat
             any::patchwork
             any::remotes
+            any::inlabru
 
       - name: Install other R packages
         run: |
