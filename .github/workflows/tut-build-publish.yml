@@ -77,6 +77,7 @@ jobs:
             any::patchwork
             any::remotes
             any::inlabru
+            any::Hmisc
             any::igraph
             any::ggraph
 
