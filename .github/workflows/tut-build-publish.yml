@@ -74,7 +74,6 @@ jobs:
             any::sf
             any::stars
             any::gstat
-            any::RandomFields
             any::patchwork
             
       - name: Install CmdStan
