@@ -11,7 +11,7 @@ library(inlabru)
 library(mgcv)
 library(stars)
 library(patchwork)
-library(downloadthis)
+#library(downloadthis)
 ## ----end
 
 ## ---- set_seed
