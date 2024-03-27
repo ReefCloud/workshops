@@ -80,6 +80,7 @@ jobs:
 
       - name: Install other R packages
         run: |
+          Rscript -e "remotes::install_url('https://cran.r-project.org/src/contrib/Archive/RandomFieldsUtils/RandomFieldsUtils_1.2.3.tar.gz')"
           Rscript -e "remotes::install_url('https://cran.r-project.org/src/contrib/Archive/RandomFields/RandomFields_3.3.14.tar.gz')"
 
       - name: Install CmdStan
