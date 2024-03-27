@@ -11,6 +11,7 @@ library(inlabru)
 library(mgcv)
 library(stars)
 library(patchwork)
+library(Hmisc)
 #library(downloadthis)
 ## ----end
 
