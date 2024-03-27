@@ -80,8 +80,9 @@ jobs:
       - name: Install other R packages
         run: |
           #Rscript -e "remotes::install_url('https://cran.r-project.org/src/contrib/Archive/RandomFieldsUtils/RandomFieldsUtils_1.2.3.tar.gz')"
-          Rscript -e "remotes::install_url('https://cran.r-project.org/src/contrib/Archive/RandomFields/RandomFields_3.3.14.tar.gz', dependencies = FALSE)"
-          Rscript -e "remotes::install_url('https://inla.r-inla-download.org/R/stable/src/contrib/INLA_24.02.09.tar.gz')"
+          #Rscript -e "remotes::install_url('https://cran.r-project.org/src/contrib/Archive/RandomFields/RandomFields_3.3.14.tar.gz', dependencies = FALSE)"
+          Rscript -e "install.packages("INLA",repos=c(getOption("repos"),INLA="https://inla.r-inla-download.org/R/stable"), dep=TRUE)"
+
 
       - name: Install CmdStan
         shell: Rscript {0}
