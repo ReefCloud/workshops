@@ -1258,10 +1258,14 @@ data_fixed_locs_obs <-
                                     scale(rnorm(Depths))))) |>
   ungroup()
 data_fixed_locs_obs |> head()
+save(data_fixed_locs_obs, file = "../data/data_fixed_locs_obs.RData")
 ## ----end
+
+## Convert the data into reefCloud format
 
 ## ---- fixed_locs_obs_fortify_data
 ## Need to split the percentage cover into point and frames
+load(file = "../data/data_fixed_locs_obs.RData")
 data_fixed_locs_obs <- data_fixed_locs_obs |>
   group_by(Reef,Site,Transect,Year,Depth,Date) |>
   mutate(Points = round(Number_of_frames_per_transect *
@@ -1281,35 +1285,89 @@ data_fixed_locs_obs <- data_fixed_locs_obs |>
 ##     mutate(Total=sum(Count),
 ##            Cover = Count/Total)
 
-reef_data_synthetic_fixed <- 
-  data_fixed_locs_obs |> 
-  mutate(PCODE = "SYNTHETIC-fixed",
-    ID = 1:n(),
-    CRUISE_CODE = paste0("SYNTHETIC",Year),
-    REEF_NAME = Reef,
-    AIMS_REEF_NAME = Reef,
-    SECTOR = "synthetic",
-    LATITUDE = Latitude,
-    LONGITUDE = Longitude,
-    SITE_NO = Site,
-    TRANSECT_NO = Transect,
-    SITE_DEPTH = Depth,
-    REEF_ZONE = "-",
-    REPORT_YEAR = Year,
-    SURVEY_DATE = Date,
-    FRAME = paste0(PCODE, "/", REEF_NAME, "/",
-      REEF_ZONE, "/", SITE_NO, "/", SITE_DEPTH,
-      "/", TRANSECT_NO, "/", REPORT_YEAR, "/", FRAME),
-    POINT_NO = POINT_NO,
-    FAMILY = NA,
-    GROUP_DESC = Group,
-    REEFPAGE_CATEGORY = paste0(Group,"_alt")
+reef_data_synthetic_fixed <-
+  data_fixed_locs_obs |>
+  mutate(
+    project_id = 1,
+    project_name = "synthetic_fixed",
+    SITE_NO = str_replace(Site, "^S", "Site "),
+    TRANSECT_NO = str_replace(Transect, "^T", "Transect "),
+    site_name = factor(paste(Reef, SITE_NO)),
+    site_id = as.numeric(site_name),
+    site_latitude = Latitude,
+    site_longitude = Longitude,
+    site_depth = Depth,
+    site_country = "synthetic Country",
+    site_reef_name = factor(Reef),
+    site_reef_type = NA,
+    site_reef_zone = NA,
+    site_code = NA,
+    site_management = NA,
+    survey_title = factor(paste(Reef, SITE_NO, TRANSECT_NO, format(Date, "%Y-%m-%d"))),
+    survey_id = as.numeric(survey_title),
+    survey_start_date = Date,
+    survey_depth = Depth,
+    survey_transect_number = as.numeric(str_replace(TRANSECT_NO, "Transect ", "")),
+    image_name = factor(paste(survey_title, FRAME)),
+    image_id = as.numeric(image_name),
+    image_quality = 100,
+    point_no = POINT_NO,
+    point_id = as.numeric(factor(paste(image_name, POINT_NO))),
+    point_machine_classification = Group
   ) |>
-  dplyr::select(PCODE, ID, CRUISE_CODE, REEF_NAME,
-    AIMS_REEF_NAME, SECTOR,
-    LATITUDE, LONGITUDE, SITE_NO, TRANSECT_NO, SITE_DEPTH,
-    REEF_ZONE, REPORT_YEAR, SURVEY_DATE, FRAME, POINT_NO,
-    FAMILY, GROUP_DESC, REEFPAGE_CATEGORY)
+  dplyr::select(
+    project_id,
+    project_name,
+    site_id,
+    site_name,
+    site_latitude,
+    site_longitude,
+    site_depth,
+    site_country,
+    site_reef_name,
+    site_reef_type,
+    site_reef_zone,
+    site_code,
+    site_management,
+    survey_id,
+    survey_title,
+    survey_start_date,
+    survey_depth,
+    survey_transect_number,
+    image_id,
+    image_name,
+    image_quality,
+    point_id,
+    point_no,
+    point_machine_classification
+  )
+  ##   PCODE = "SYNTHETIC-fixed",
+  ##   ID = 1:n(),
+  ##   CRUISE_CODE = paste0("SYNTHETIC",Year),
+  ##   REEF_NAME = Reef,
+  ##   AIMS_REEF_NAME = Reef,
+  ##   SECTOR = "synthetic",
+  ##   LATITUDE = Latitude,
+  ##   LONGITUDE = Longitude,
+  ##   SITE_NO = Site,
+  ##   TRANSECT_NO = Transect,
+  ##   SITE_DEPTH = Depth,
+  ##   REEF_ZONE = "-",
+  ##   REPORT_YEAR = Year,
+  ##   SURVEY_DATE = Date,
+  ##   FRAME = paste0(PCODE, "/", REEF_NAME, "/",
+  ##     REEF_ZONE, "/", SITE_NO, "/", SITE_DEPTH,
+  ##     "/", TRANSECT_NO, "/", REPORT_YEAR, "/", FRAME),
+  ##   POINT_NO = POINT_NO,
+  ##   FAMILY = NA,
+  ##   GROUP_DESC = Group,
+  ##   REEFPAGE_CATEGORY = paste0(Group,"_alt")
+  ## ) |>
+  ## dplyr::select(PCODE, ID, CRUISE_CODE, REEF_NAME,
+  ##   AIMS_REEF_NAME, SECTOR,
+  ##   LATITUDE, LONGITUDE, SITE_NO, TRANSECT_NO, SITE_DEPTH,
+  ##   REEF_ZONE, REPORT_YEAR, SURVEY_DATE, FRAME, POINT_NO,
+  ##   FAMILY, GROUP_DESC, REEFPAGE_CATEGORY)
 
 write_csv(reef_data_synthetic_fixed,
   file = "../data/reef_data_synthetic_fixed.csv"
@@ -1320,26 +1378,33 @@ rmarkdown::paged_table(reef_data_synthetic_fixed |> head())
 
 
 ## ---- hierarchical_schematic_fixed
-#require(igraph)
-#require(ggraph)
-data <- reef_data_synthetic_fixed
+# require(igraph)
+# require(ggraph)
+data <- reef_data_synthetic_fixed |>
+  mutate(
+    Site = site_name,
+    Transect = paste(site_name, "Transect", survey_transect_number),
+    REPORT_YEAR = factor(year(survey_start_date)),
+    Year = str_replace(survey_title, "(.*[0-9]{4}).*", "\\1"),
+    Photo = image_name
+  )
  
 edges <- data |>
-  mutate(Origin = 'Root', Height = 6, Name = SECTOR, Level = 'Region',
+  mutate(Origin = 'Root', Height = 6, Name = site_country, Level = 'Region',
     forground_colour = NA, background_colour = "white", point_size = "point_1") |>
-  select(from = Origin, to = SECTOR, Height, Name, Level,
+  select(from = Origin, to = site_country, Height, Name, Level,
     forground_colour, background_colour, point_size) |>
   distinct() |>
   rbind(
     data |>
       mutate(Height = 5,
-        Name = REEF_NAME,
+        Name = site_reef_name,
         Level = 'Reef',
         forground_colour = NA,
         background_colour = "white",
         point_size = 'point_1') |>
-      select(from = SECTOR,
-        to = REEF_NAME,
+      select(from = site_country,
+        to = site_reef_name,
         Height,
         Name,
         Level,
@@ -1351,13 +1416,11 @@ edges <- data |>
   rbind(
     data |>
       mutate(Height = 3,
-        Name = SITE_NO,
         Level = 'Site',
-        Site = paste(REEF_NAME, SITE_NO),
         forground_colour = NA,
         background_colour = "white",
         point_size = 'point_1') |>
-      select(from = REEF_NAME,
+      select(from = site_reef_name,
         to = Site,
         Height,
         Name =  Site,
@@ -1371,10 +1434,7 @@ edges <- data |>
     data |>
       mutate(
         Height = 2,
-        Name = TRANSECT_NO,
         Level = "Transect",
-        Site = paste(REEF_NAME, SITE_NO),
-        Transect = paste(REEF_NAME, SITE_NO, TRANSECT_NO),
         forground_colour = NA,
         background_colour = "white",
         point_size = 'point_1') |> 
@@ -1391,12 +1451,8 @@ edges <- data |>
   rbind(
     data |>
       mutate(Height = 1,
-        REPORT_YEAR = factor(REPORT_YEAR),
         Name = REPORT_YEAR,
         Level = 'Year',
-        Site = paste(REEF_NAME, SITE_NO),
-        Transect = paste(REEF_NAME, SITE_NO, TRANSECT_NO),
-        Year = paste(REEF_NAME, SITE_NO, TRANSECT_NO, REPORT_YEAR),
         forground_colour = REPORT_YEAR,
         background_colour = "white",
         point_size = "point_0") |>
@@ -1413,13 +1469,7 @@ edges <- data |>
   rbind(
     data |>
       mutate(Height = 0,
-        REPORT_YEAR = factor(REPORT_YEAR),
-        ## Name = PHOTO,
         Level = 'Photo',
-        Site = paste(REEF_NAME, SITE_NO),
-        Transect = paste(REEF_NAME, SITE_NO, TRANSECT_NO),
-        Year = paste(REEF_NAME, SITE_NO, TRANSECT_NO, REPORT_YEAR),
-        Photo = paste(Year, str_extract(FRAME, "\\d+$")), 
         ## forground_colour = REPORT_YEAR,
         forground_colour = REPORT_YEAR,
         background_colour = NA,
@@ -1436,11 +1486,11 @@ edges <- data |>
   )  
 
 reef_names <- data |>
-  pull(REEF_NAME) |>
+  pull(site_reef_name) |>
   unique()
 
 edges <- edges |>
-  filter(!(Level == "Photo" & !str_detect(from, paste(reef_names[1], "S1"))))
+  filter(!(Level == "Photo" & !str_detect(from, paste(reef_names[1], "Site 1"))))
 
 vertices <- edges |>
   select(Name, Height, Level, forground_colour, background_colour, point_size) |>
@@ -1451,9 +1501,13 @@ vertices <- edges |>
     Name2 = case_when(
       Level == 'Photo' ~ str_replace_all(Name, '.*',''),
       Level == 'Reef' ~ ifelse(Name == reef_names[1], Name, ""), #str_replace_all(Name, '.*',''),
-      Level == 'Site' ~ ifelse(str_detect(Name, reef_names[1]), str_replace(Name, ".*(S.*)", "\\1"), ""),
-      Level == 'Transect' ~ ifelse(str_detect(Name, paste(reef_names[1], "S1")), str_replace(Name, ".*(T.*)", "\\1"), ""),
-      Level == 'Year' ~ ifelse(str_detect(Name, paste(reef_names[1], "S1")), str_replace(Name, ".*T.(.*)", "\\1"), ""),
+      Level == 'Site' ~ ifelse(str_detect(Name, as.character(reef_names[1])),
+        str_replace(Name, ".*Site (.*)", "S\\1"), ""),
+      Level == 'Transect' ~ ifelse(str_detect(Name,
+        paste(as.character(reef_names[1]), "Site 1")),
+        str_replace(Name, ".*Transect (.*)", "T\\1"), ""),
+      Level == 'Year' ~ ifelse(str_detect(Name, paste(as.character(reef_names[1]), "Site 1")),
+        str_replace(Name, ".*Transect . (.*)", "\\1"), ""),
       Level == 'Zone' ~ str_replace(Name, '[^_]*_[^_]*_', ''),
       !Level %in% c('Site') ~ str_replace(Name, "(.*)", "\\1")),
     size = Height
@@ -1470,13 +1524,14 @@ levels <- edges |> dplyr::select(Level, Height) |> distinct()
 graph <- igraph::graph_from_data_frame(edges, vertices = vertices)
 
 ggraph::ggraph(graph, layout = "dendrogram", circular = TRUE, height = size, repel = TRUE, ratio = 0.001) +
-  ggraph::geom_edge_diagonal(aes(colour = edges$forground_colour), show.legend = FALSE) +
+  ggraph::geom_edge_diagonal(aes(colour = forground_colour), show.legend = FALSE) +
   ggraph::geom_node_point(aes(size = factor(point_size)), show.legend = FALSE) +
   ggraph::geom_node_label(aes(label = Name2, size = Level, 
     fill = background_colour),
     label.size = NA, repel = FALSE, show.legend = FALSE) +
   theme_void() +
   ## scale_y_continuous('', breaks = levels$Height, labels = levels$Level) +
+  ggraph::scale_edge_colour_discrete() +
   scale_size_manual(breaks = c("point_0", "point_1",'Photo','Reef', 'Region', 'Root', 'Site', 'Transect', 'Year', "A"),
     values = c(0, 1, 3,5,4,4,4,3,3, 0)) +
   scale_fill_manual(values = c("white"), na.value = "#00000000") 
@@ -1551,10 +1606,12 @@ data_random_locs_obs <-
     rev(sort(Depth_effect_multiplier *
       scale(rnorm(Depths))))) |>
   ungroup()
+save(data_random_locs_obs, file = "../data/data_random_locs_obs.RData")
 ## ----end
 
 ## ---- random_locs_obs_fortify_data
 ## Need to split the percentage cover into point and frames
+load(file = "../data/data_random_locs_obs.RData")
 data_random_locs_obs <- data_random_locs_obs |>
   group_by(Reef, Site, Transect, Year, Depth, Date) |>
   mutate(
@@ -1576,36 +1633,91 @@ data_random_locs_obs <- data_random_locs_obs |>
 reef_data_synthetic_random <-
   data_random_locs_obs |>
   mutate(
-    PCODE = "SYNTHETIC-random",
-    ID = 1:n(),
-    CRUISE_CODE = paste0("SYNTHETIC", Year),
-    REEF_NAME = Reef,
-    AIMS_REEF_NAME = Reef,
-    SECTOR = "synthetic",
-    LATITUDE = Latitude,
-    LONGITUDE = Longitude,
-    SITE_NO = Site,
-    TRANSECT_NO = Transect,
-    SITE_DEPTH = Depth,
-    REEF_ZONE = "-",
-    REPORT_YEAR = Year,
-    SURVEY_DATE = Date,
-    FRAME = paste0(PCODE, "/", REEF_NAME, "/", REEF_ZONE,
-      "/", SITE_NO, "/", SITE_DEPTH, "/", TRANSECT_NO,
-      "/", REPORT_YEAR, "/", FRAME),
-    POINT_NO = POINT_NO,
-    FAMILY = NA,
-    GROUP_DESC = Group,
-    REEFPAGE_CATEGORY = paste0(Group, "_alt")
+    project_id = 1,
+    project_name = "synthetic_fixed",
+    SITE_NO = str_replace(Site, "^S", "Site "),
+    TRANSECT_NO = str_replace(Transect, "^T", "Transect "),
+    site_name = factor(paste(Reef, SITE_NO)),
+    site_id = as.numeric(site_name),
+    site_latitude = Latitude,
+    site_longitude = Longitude,
+    site_depth = Depth,
+    site_country = "synthetic Country",
+    site_reef_name = factor(Reef),
+    site_reef_type = NA,
+    site_reef_zone = NA,
+    site_code = NA,
+    site_management = NA,
+    survey_title = factor(paste(Reef, SITE_NO, TRANSECT_NO, format(Date, "%Y-%m-%d"))),
+    survey_id = as.numeric(survey_title),
+    survey_start_date = Date,
+    survey_depth = Depth,
+    survey_transect_number = as.numeric(str_replace(TRANSECT_NO, "Transect ", "")),
+    image_name = factor(paste(survey_title, FRAME)),
+    image_id = as.numeric(image_name),
+    image_quality = 100,
+    point_no = POINT_NO,
+    point_id = as.numeric(factor(paste(image_name, POINT_NO))),
+    point_machine_classification = Group
   ) |>
   dplyr::select(
-    PCODE, ID, CRUISE_CODE, REEF_NAME, AIMS_REEF_NAME, SECTOR,
-    LATITUDE, LONGITUDE, SITE_NO, TRANSECT_NO, SITE_DEPTH,
-    REEF_ZONE, REPORT_YEAR, SURVEY_DATE, FRAME, POINT_NO,
-    FAMILY, GROUP_DESC, REEFPAGE_CATEGORY
+    project_id,
+    project_name,
+    site_id,
+    site_name,
+    site_latitude,
+    site_longitude,
+    site_depth,
+    site_country,
+    site_reef_name,
+    site_reef_type,
+    site_reef_zone,
+    site_code,
+    site_management,
+    survey_id,
+    survey_title,
+    survey_start_date,
+    survey_depth,
+    survey_transect_number,
+    image_id,
+    image_name,
+    image_quality,
+    point_id,
+    point_no,
+    point_machine_classification
   )
+  ##   PCODE = "SYNTHETIC-random",
+  ##   ID = 1:n(),
+  ##   CRUISE_CODE = paste0("SYNTHETIC", Year),
+  ##   REEF_NAME = Reef,
+  ##   AIMS_REEF_NAME = Reef,
+  ##   SECTOR = "synthetic",
+  ##   LATITUDE = Latitude,
+  ##   LONGITUDE = Longitude,
+  ##   SITE_NO = Site,
+  ##   TRANSECT_NO = Transect,
+  ##   SITE_DEPTH = Depth,
+  ##   REEF_ZONE = "-",
+  ##   REPORT_YEAR = Year,
+  ##   SURVEY_DATE = Date,
+  ##   FRAME = paste0(PCODE, "/", REEF_NAME, "/", REEF_ZONE,
+  ##     "/", SITE_NO, "/", SITE_DEPTH, "/", TRANSECT_NO,
+  ##     "/", REPORT_YEAR, "/", FRAME),
+  ##   POINT_NO = POINT_NO,
+  ##   FAMILY = NA,
+  ##   GROUP_DESC = Group,
+  ##   REEFPAGE_CATEGORY = paste0(Group, "_alt")
+  ## ) |>
+  ## dplyr::select(
+  ##   PCODE, ID, CRUISE_CODE, REEF_NAME, AIMS_REEF_NAME, SECTOR,
+  ##   LATITUDE, LONGITUDE, SITE_NO, TRANSECT_NO, SITE_DEPTH,
+  ##   REEF_ZONE, REPORT_YEAR, SURVEY_DATE, FRAME, POINT_NO,
+  ##   FAMILY, GROUP_DESC, REEFPAGE_CATEGORY
+  ## )
 
-write_csv(reef_data_synthetic_random, file = "../data/reef_data_synthetic_random.csv")
+write_csv(reef_data_synthetic_random,
+  file = "../data/reef_data_synthetic_random.csv"
+  )
 rmarkdown::paged_table(reef_data_synthetic_random |> head())
 ## ----end
 
@@ -1626,55 +1738,67 @@ reef_data_synthetic_random |>
 ## ---- hierarchical_schematic_random
 #require(igraph)
 #require(ggraph)
-data <- reef_data_synthetic_random
+data <- reef_data_synthetic_random |> 
+  mutate(
+    Year = year(survey_start_date), #str_replace(survey_title, "(.*[0-9]{4}).*", "\\1"),
+    Site = paste(Year, site_name),
+    Transect = paste(Site, "Transect", survey_transect_number),
+    REPORT_YEAR = factor(year(survey_start_date)),
+    Photo = image_name,
+    Reef = paste(Year, site_reef_name)
+  )
 
 first_reef <- data |>
-  arrange(REPORT_YEAR, REEF_NAME) |> 
+  arrange(REPORT_YEAR, site_reef_name) |>
   dplyr::filter(REPORT_YEAR == first(REPORT_YEAR)) |>
   droplevels() |>
-  dplyr::filter(REEF_NAME == REEF_NAME[1]) |>
-  pull(REEF_NAME) |>
-  unique()
+  dplyr::filter(site_reef_name == site_reef_name[1]) |>
+  pull(site_reef_name) |>
+  unique() |>
+  as.character()
+
 data <- data |>
-  nest_by(REPORT_YEAR, REEF_NAME, .keep = TRUE) |>
+  nest_by(REPORT_YEAR, site_reef_name, .keep = TRUE) |>
   mutate(data = list({
     data |>
-      filter(!(REPORT_YEAR != 2010 & SITE_NO == last(SITE_NO))) |>
-      mutate(SITE_NO = ifelse(REPORT_YEAR != 2010, NA, SITE_NO)) |>
-      mutate(Site = paste(REEF_NAME, SITE_NO)) |> 
-      mutate(TRANSECT_NO = ifelse(REPORT_YEAR == 2010 &
-        REEF_NAME == first_reef,
-        #Site == first(Site),
-        TRANSECT_NO, NA
+      filter(!(REPORT_YEAR != 2010 & Site == last(Site))) |>
+      mutate(Site = ifelse(REPORT_YEAR != 2010,
+        NA,
+        as.character(Site)
       )) |> 
-      mutate(FRAME = ifelse(REPORT_YEAR == 2010 &
-                              REEF_NAME == first_reef &
-       SITE_NO == "S1",# & TRANSECT_NO == "T1",
+      ## mutate(Site = paste(site_reef_name, Site)) |> 
+      mutate(Transect = ifelse(REPORT_YEAR == 2010 &
+        site_reef_name == first_reef,
         #Site == first(Site),
-        FRAME, NA
+        Transect, NA
+      )) |> 
+      mutate(Photo = ifelse(REPORT_YEAR == 2010 &
+                              site_reef_name == first_reef &
+       str_detect(Site, "Site 1"),# & TRANSECT_NO == "T1",
+        #Site == first(Site),
+        Photo, NA
       ))
   })) |>
     ungroup() |> 
-  dplyr::select(-REPORT_YEAR, -REEF_NAME) |> 
+  dplyr::select(-REPORT_YEAR, -site_reef_name) |> 
   unnest(data) 
 
 edges <- data |>
-  mutate(Origin = 'Root', Height = 6, Name = SECTOR, Level = 'Region',
+  mutate(Origin = 'Root', Height = 6, Name = site_country, Level = 'Region',
     forground_colour = NA, background_colour = "white", point_size = "point_1") |>
-  select(from = Origin, to = SECTOR, Height, Name, Level,
+  select(from = Origin, to = site_country, Height, Name, Level,
     forground_colour, background_colour, point_size) |>
   distinct() |>
   rbind(
     data |>
       mutate(Height = 5,
-        REPORT_YEAR = factor(REPORT_YEAR),
         Name = REPORT_YEAR,
         Level = 'Year',
         Year = paste(REPORT_YEAR),
         forground_colour = REPORT_YEAR,
         background_colour = "white",
         point_size = "point_0") |>
-      select(from = SECTOR,
+      select(from = site_country,
         to = Year,
         Height,
         Name = Year,
@@ -1687,10 +1811,9 @@ edges <- data |>
   rbind(
     data |>
       mutate(Height = 4,
-        Name = REEF_NAME,
         Level = 'Reef',
-        Year = paste(REPORT_YEAR),
-        Reef = paste(Year, REEF_NAME),
+        ## Year = paste(REPORT_YEAR),
+        ## Reef = paste(Year, REEF_NAME),
         forground_colour = REPORT_YEAR,
         background_colour = "white",
         point_size = 'point_1') |>
@@ -1707,11 +1830,10 @@ edges <- data |>
   rbind(
     data |>
       mutate(Height = 3,
-        Name = SITE_NO,
         Level = 'Site',
-        Year = paste(REPORT_YEAR),
-        Reef = paste(Year, REEF_NAME),
-        Site = ifelse(is.na(SITE_NO), NA, paste(Reef, SITE_NO)),
+        ## Year = paste(REPORT_YEAR),
+        ## Reef = paste(Year, REEF_NAME),
+        ## Site = ifelse(is.na(SITE_NO), NA, paste(Reef, SITE_NO)),
         forground_colour = REPORT_YEAR,
         background_colour = "white",
         point_size = 'point_1') |>
@@ -1729,12 +1851,12 @@ edges <- data |>
     data |>
       mutate(
         Height = 2,
-        Name = TRANSECT_NO,
+        Name = survey_transect_number,
         Level = "Transect",
-        Year = paste(REPORT_YEAR),
-        Reef = paste(Year, REEF_NAME),
-        Site = ifelse(is.na(SITE_NO), NA, paste(Reef, SITE_NO)),
-        Transect = ifelse(is.na(TRANSECT_NO), NA, paste(Site, TRANSECT_NO)),
+        ## Year = paste(REPORT_YEAR),
+        ## Reef = paste(Year, REEF_NAME),
+        ## Site = ifelse(is.na(SITE_NO), NA, paste(Reef, SITE_NO)),
+        ## Transect = ifelse(is.na(TRANSECT_NO), NA, paste(Site, TRANSECT_NO)),
         forground_colour = REPORT_YEAR,
         background_colour = "white",
         point_size = 'point_1') |> 
@@ -1754,11 +1876,11 @@ edges <- data |>
         REPORT_YEAR = factor(REPORT_YEAR),
         ## Name = PHOTO,
         Level = 'Photo',
-        Year = paste(REPORT_YEAR),
-        Reef = paste(Year, REEF_NAME),
-        Site = ifelse(is.na(SITE_NO), NA, paste(Reef, SITE_NO)),
-        Transect = ifelse(is.na(TRANSECT_NO), NA, paste(Site, TRANSECT_NO)),
-        Photo = paste(Transect, str_extract(FRAME, "\\d+$")), 
+        ## Year = paste(REPORT_YEAR),
+        ## Reef = paste(Year, REEF_NAME),
+        ## Site = ifelse(is.na(SITE_NO), NA, paste(Reef, SITE_NO)),
+        ## Transect = ifelse(is.na(TRANSECT_NO), NA, paste(Site, TRANSECT_NO)),
+        ## Photo = paste(Transect, str_extract(FRAME, "\\d+$")), 
         ## forground_colour = REPORT_YEAR,
         forground_colour = REPORT_YEAR,
         background_colour = "white",
@@ -1775,8 +1897,9 @@ edges <- data |>
   )  
 
 reef_names <- data |>
-  pull(REEF_NAME) |>
-  unique()
+  pull(site_reef_name) |>
+  unique() |>
+  as.character()
 
 edges <- edges |>
   filter(!is.na(to)) |>
@@ -1803,11 +1926,11 @@ vertices <- edges |>
       ),
       Level == "Site" ~ ifelse(str_detect(Name, paste("2010")) &
         str_detect(Name, first_reef),
-      str_replace(Name, ".*(S.*)", "\\1"), ""
+      str_replace(Name, ".*Site (.*)", "S\\1"), ""
       ),
       Level == "Transect" ~ ifelse(str_detect(Name, paste("2010")) &
-        str_detect(Name, "S1"),
-      str_replace(Name, ".*(T.*)", "\\1"), ""
+        str_detect(Name, "Site 1"),
+      str_replace(Name, ".*Transect (.*)", "T\\1"), ""
       ),
       ## Level == "Photo" ~ ifelse(str_detect(Name, paste("2010")) &
       ##                             str_detect(Name, "S1") &
