@@ -1537,7 +1537,7 @@ ggraph::ggraph(graph, layout = "dendrogram", circular = TRUE, height = size, rep
   scale_fill_manual(values = c("white"), na.value = "#00000000") 
 
 if ("package:igraph" %in% search()) detach("package:igraph", unload = TRUE)
-if ("package:ggraph" %in% search()) detach("package:ggraph", unload = TRUE)
+if ("package:ggraph" %in% search()) detach("package:ggraph", unload = TRUE) 
 ## ----end
 
 
@@ -1968,5 +1968,5 @@ ggraph::ggraph(graph, layout = "dendrogram", circular = TRUE, height = size, rep
   scale_fill_manual(values = c("white"), na.value = "#00000000") 
 
 if ("package:igraph" %in% search()) detach("package:igraph", unload = TRUE)
-if ("package:ggraph" %in% search()) detach("package:ggraph", unload = TRUE)
+if ("package:ggraph" %in% search()) detach("package:ggraph", unload = TRUE) 
 ## ----end
