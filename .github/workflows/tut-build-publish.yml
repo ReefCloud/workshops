@@ -169,7 +169,7 @@ jobs:
         uses: actions/download-artifact@v4
         with: 
           name: artifact
-          path: data
+          path: data/reef_data_synthetic_*.csv
       
       # render tutorials
       - name: Make tutorials
