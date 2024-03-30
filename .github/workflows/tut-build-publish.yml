@@ -80,6 +80,7 @@ jobs:
             any::Hmisc
             any::igraph
             any::ggraph
+            any::easystats
 
       - name: Install other R packages
         run: |
