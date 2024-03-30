@@ -173,6 +173,15 @@ jobs:
         #  echo "library(quarto); quarto_render(\"tut/index.qmd\")" | R --no-save --no-restore;
         #  echo "library(quarto); quarto_render(\"tut/10_git.qmd\")" | R --no-save --no-restore;
 
+      # upload artifacts  
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with: 
+          name: artifact
+          path: data/reef_data_synthetic_.*.csv
+          if-no-files-found: ignore
+          overwrite: true
+        
       # Deploy site to gh-pages branch
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.4
