@@ -163,7 +163,14 @@ jobs:
           git config --global user.name "pcinereus"
           git config --global user.email "i.obesulus@gmail.com"
           git config --global init.defaultBranch main
-          
+
+      # Download artifacts
+      - name: download artifacts
+        uses: actions/download-artifact@v4
+        with: 
+          name: artifact
+          path: data
+      
       # render tutorials
       - name: Make tutorials
         run: |
