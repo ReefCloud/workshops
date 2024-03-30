@@ -178,7 +178,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with: 
           name: artifact
-          path: data/reef_data_synthetic_.*.csv
+          path: data/reef_data_synthetic_*.csv
           if-no-files-found: ignore
           overwrite: true
         
