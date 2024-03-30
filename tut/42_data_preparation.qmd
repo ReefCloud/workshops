@@ -1,0 +1,542 @@
+---
+title: Preparation of reefCloud data
+author: "Murray Logan"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format: 
+  html:
+    toc: true
+    toc-float: true
+    number-sections: true
+    number-depth: 3
+    embed-resources: true
+    code-fold: false
+    code-tools: true
+    code-summary: "Show the code"
+    html-math-method: katex
+execute:
+  keep-md: true
+crossref:
+  fig-title: '**Figure**'
+  fig-labels: arabic
+  tbl-title: '**Table**'
+  tbl-labels: arabic
+engine: knitr
+bibliography: resources/references.bib
+output_dir: "docs"
+---
+
+```{r setup, include=FALSE,warning=FALSE, message=FALSE}
+options(tinytex.engine = "xelatex")
+knitr::read_chunk("../R/42_data_preparation.R")
+```
+
+# Synopsis
+
+In the previous tutorial, we created synthetic reefCloud data. In the
+current tutorial, we will prepare these data for statistical analyses.
+Recall that we created two data sets, one representing a fixed
+sampling design, the other representing a random sampling design. We
+will prepare both of these data sets.
+
+Necessary wrangling (preparation) steps:
+
+1. exclude extraneous (unneeded) fields
+2. exclude poor images
+2. lengthen the data with respect to classification type
+3. join to a labelset lookup
+4. tally up the points per date/image/GROUP/type
+5. recode transect id
+6. fill in the gaps and add the zeros
+7. sum to transect level
+8. generate a Year field from the sample date
+
+
+
+# Preparations
+
+We will start by loading the required r packages.
+
+```{r}
+#| label: packages
+#| warning: false
+#| message: false
+```
+ 
+# Read in the data
+
+Lets start by reading in the data sets (which were exported as csv
+files). There are many functions in R that can read in a CSV file. We
+will use a the `read_csv()` function as it is part of the tidyverse
+ecosystem.
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: read_data_fixed
+#| cache: true
+```
+
+After reading in a dataset, it is always a good idea to quickly
+explore a few summaries in order to ascertain whether the imported
+data are correctly transcribed. In particular, we should pay attention
+to whether there are any unexpected missing values and ensure that
+each variable (column) has the expected class (e.g. that variables we
+expected to be considered numbers are indeed listed as either <dbl> or
+<int> and not <char>).
+
+::: {.panel-tabset}
+
+## glimpse
+
+```{r}
+#| label: glimpse_data_fixed
+```
+
+## head
+```{r}
+#| label: head_data_fixed
+```
+
+## str
+```{r}
+#| label: str_data_fixed
+```
+
+## Easystats (datawizard)
+```{r}
+#| label: codebook_data_fixed
+#| cache: true
+```
+
+:::
+
+## Random design
+
+```{r}
+#| label: read_data_random
+#| cache: true
+```
+
+After reading in a dataset, it is always a good idea to quickly
+explore a few summaries in order to ascertain whether the imported
+data are correctly transcribed. In particular, we should pay attention
+to whether there are any unexpected missing values and ensure that
+each variable (column) has the expected class (e.g. that variables we
+expected to be considered numbers are indeed listed as either <dbl> or
+<int> and not <char>).
+
+::: {.panel-tabset}
+
+## glimpse
+
+```{r}
+#| label: glimpse_data_random
+```
+
+## head
+```{r}
+#| label: head_data_random
+```
+
+## str
+```{r}
+#| label: str_data_random
+```
+
+## Easystats (datawizard)
+```{r}
+#| label: codebook_data_random
+#| cache: true
+```
+:::
+
+:::
+
+# Excluding extraneous fields
+
+As these are synthetic data, not all the typical reefCloud fields are
+present. Nevertheless, there are still a large number of fields
+(columns) in this dataset, many of which we are going to ignore for
+this exercise. The important fields are:
+
+- `site_id` - a unique identifier of the site
+- `site_name` - a unique name of the site
+- `site latitude` - latitude of the site
+- `site_longitude` - longitude of the site
+- `survey_start_date` - date (and time) of survey
+- `survey_depth` - depth at which the survey took place
+- `survey_transect_number` - unique identifier of the transect
+- `image_id` - unique identifier of the image
+- `image_quality` - indication of the quality of the image
+- `point_id` - unique identifier of the point
+- `point_num` - the number of the point within the image
+- `point_machine_classification` - classification determined by AI
+
+Although it is often harmless enough to retain the other fields, it
+does make reviewing the data more combersum, so at an early stage
+within this exercise, we will probably restrict the data to just the
+above fields.
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: focus_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+## Random design
+
+```{r}
+#| label: focus_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+:::
+
+# Excluding poor images
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: poor_images_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+## Random design
+
+```{r}
+#| label: poor_images_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+:::
+
+# Lengthen the data
+
+To facilitate most graphical and statistical modelling routines, data
+must be structured such that each row represents an individual record
+and that the variables are in columns.
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: lengthen_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+## Random design
+
+```{r}
+#| label: lengthen_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+:::
+
+# Joining to the code group lookup data
+
+Within reefCloud, the taxonomic resolution of point classification
+depends on the granularity of training label sets. For many analyses
+(such as spatio-temporal modelling of hard coral cover), this is
+overly granular. In order to group the taxonomic levels up to the
+larger groups (such as hard coral, soft coral and macroalgae), it is
+necessary to join the data to a lookup table representing the
+labelsets. However, the current synthetic data were only constructed
+to the broad categories (hard coral, soft coral and macroalgae) in the
+first place. 
+
+Although the current data are already recorded in the desired
+taxonomic resolution, for code completeness, we will still join in the
+labelset data (which we will first generate here).
+
+```{r}
+#| label: make_labelset
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+```{r}
+#| label: read_data_labelset
+#| cache: true
+```
+
+::: {.panel-tabset}
+
+## glimpse
+
+```{r}
+#| label: glimpse_data_labelset
+```
+
+## head
+```{r}
+#| label: head_data_labelset
+```
+
+## str
+```{r}
+#| label: str_data_labelset
+```
+
+## Easystats (datawizard)
+```{r}
+#| label: codebook_data_labelset
+#| cache: true
+```
+
+:::
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: join_labelset_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+## Random design
+
+```{r}
+#| label: join_labelset_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+:::
+
+# Tally up points
+
+Count the number of points of each type as well as sum up the total
+number of points per image.
+
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: tally_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+## Random design
+
+```{r}
+#| label: tally_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+:::
+
+# Recode transects
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: recode_transects_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+## Random design
+
+```{r}
+#| label: recode_transects_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+```
+
+:::
+
+
+# Fill in any gaps
+
+Since the data represent the classification of points in images, they
+only include what was present, not what was also absent. For example,
+if all five points are Algae, then this also means that all other
+functional groups are absent - yet this information is lacking in the
+data. For modelling purposes it is vital that we fill in all the zero
+values.
+
+To do so, we must create a data set that contains every GROUP in every
+IMAGE.
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: fill_gaps_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+## Random design
+
+```{r}
+#| label: fill_gaps_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+:::
+
+# Sum to transect level
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: sum_transect_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+## Random design
+
+```{r}
+#| label: sum_transect_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+:::
+
+# Generate a year field
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: generate_year_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+## Random design
+
+```{r}
+#| label: generate_year_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+:::
+
+
+# Generate a reef id
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: generate_reef_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+## Random design
+
+```{r}
+#| label: generate_reef_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+```
+
+:::
+
+# Visualisations
+
+::: {.panel-tabset}
+
+## Fixed design
+
+```{r}
+#| label: visualisation_data_fixed
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 10
+#| fig-height: 10
+```
+
+## Random design
+
+```{r}
+#| label: visualisation_data_random
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 10
+#| fig-height: 10
+```
+
+:::
+  

@@ -16,6 +16,7 @@ project:
     - 30_glm.qmd
     - 35_bayesian_linear_models.qmd
     - 40_synthetic_world.qmd
+    - 42_data_preparation.qmd
 
 website:
   title: ReefCloud R/Statistics resources
@@ -79,6 +80,9 @@ website:
         contents:
         - href: 40_synthetic_world.qmd
           text: Synthetic world and data
+          icon: house
+        - href: 42_data_preparation.qmd
+          text: Data preparation
           icon: house
 
 format:

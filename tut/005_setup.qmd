@@ -469,6 +469,7 @@ and confirm that it indicates that there is a hidden password.
    ```{r}
    #| label: install_cmdstan5
    #| eval: true
+   #| cache: true
    file <- file.path(cmdstan_path(), "examples", "bernoulli", "bernoulli.stan")
    mod <- cmdstan_model(file)
    data_list <- list(N = 10, y = c(0,1,0,0,0,0,0,0,0,1))
@@ -494,6 +495,7 @@ and confirm that it indicates that there is a hidden password.
      ```{r}
      #| label: install_cmdstan7
      #| eval: true
+     #| cache: true
      library(cmdstanr)
      library(brms)
      dat <- data.frame(y = rnorm(10), x = rnorm(10))
@@ -522,11 +524,13 @@ and confirm that it indicates that there is a hidden password.
        ```{r}
        #| label: install_cmdstan1
        #| eval: false
+       #| cache: true
        ```
      - make sure the package loads
        ```{r}
        #| label: install_cmdstan2
        #| eval: true
+       #| cache: true
        ```
      - ensure that the c++ toolchain (from Rtools) is correctly
        installed and configured
@@ -543,6 +547,7 @@ and confirm that it indicates that there is a hidden password.
    ```{r}
    #| label: install_cmdstan5
    #| eval: true
+   #| cache: true
    ```
    If you get output resembling the above, then cmdstan is setup correctly.
 4. Install the **brms** - an R package that provides a more familiar R
@@ -556,6 +561,7 @@ and confirm that it indicates that there is a hidden password.
      ```{r}
      #| label: install_cmdstan7
      #| eval: true
+     #| cache: true
      ```
 
      Again, if you get output similar to that above, then the complete
@@ -582,6 +588,7 @@ and confirm that it indicates that there is a hidden password.
        ```{r}
        #| label: install_cmdstan2
        #| eval: true
+       #| cache: true
        ```
      - ensure that the c++ toolchain (from Rtools) is correctly
        installed and configured
@@ -598,6 +605,7 @@ and confirm that it indicates that there is a hidden password.
    ```{r}
    #| label: install_cmdstan5
    #| eval: true
+   #| cache: true
    ```
    If you get output resembling the above, then cmdstan is setup correctly.
 4. Install the **brms** - an R package that provides a more familiar R
@@ -611,6 +619,7 @@ and confirm that it indicates that there is a hidden password.
      ```{r}
      #| label: install_cmdstan7
      #| eval: true
+     #| cache: true
      ```
 
      Again, if you get output similar to that above, then the complete
