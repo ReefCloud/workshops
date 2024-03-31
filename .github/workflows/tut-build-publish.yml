@@ -169,8 +169,11 @@ jobs:
         uses: actions/download-artifact@v4
         with: 
           name: artifact
+          github-token: ${{ secrets.GH_PAT }} # token with actions:read permissions on target repo
           path: data
-      
+      - name: Display structure of downloaded files
+        run: ls -R data
+  
       # render tutorials
       - name: Make tutorials
         run: |
