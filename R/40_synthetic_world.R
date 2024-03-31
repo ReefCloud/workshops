@@ -1376,6 +1376,9 @@ rmarkdown::paged_table(reef_data_synthetic_fixed |> head())
 
 ## ----end
 
+## ---- save_data_fixed
+saveRDS(reef_data_synthetic_fixed, file = "../data/reef_data_synthetic_fixed.RData")
+## ----
 
 ## ---- hierarchical_schematic_fixed
 # require(igraph)

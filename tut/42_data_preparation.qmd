@@ -27,6 +27,7 @@ output_dir: "docs"
 
 ```{r setup, include=FALSE,warning=FALSE, message=FALSE}
 options(tinytex.engine = "xelatex")
+knitr::read_chunk("../R/40_synthetic_world.R")
 knitr::read_chunk("../R/42_data_preparation.R")
 ```
 
@@ -57,11 +58,65 @@ Necessary wrangling (preparation) steps:
 We will start by loading the required r packages.
 
 ```{r}
-#| label: packages
+#| label: load_packages
 #| warning: false
 #| message: false
 ```
- 
+
+This tutorial will prepare the data sets generated at the end of the
+previous tutorials. These datasets (`reef_data_synthetic_fixed.csv`
+and `reef_data_synthetic_random.csv`) are reasonably large (take up
+substantial disk space on a repository). In order to keep the
+repository containing these tutorials to a manageable size, rather
+than track the final, large data sets, I have instead versioned the
+much smaller penultimate data sets (`data_fixed_locs_obs.RData` and
+`data_random_locs_obs.RData`). Hence, before starting this tutorial,
+we will first read in these penultimate data sets and repeat the final
+preparation and writing steps of the last tutorial. If you are working
+through these tutorials in sequential order and already have created
+the final data sets, there is no need to repeat this step.
+
+::: {.callout-note collapse="true"}
+## View code
+
+```{r}
+#| label: locs_obs_parameters
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+load(file = "../data/data_fixed_locs_obs.RData")
+data_fixed_locs_obs |> head()
+```
+
+**Fixed design**
+
+```{r}
+#| label: fixed_locs_obs_fortify_data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+
+**Random design**
+
+```{r}
+#| label: random_locs_obs_fortify_data
+#| results: markup
+#| eval: true
+#| echo: true
+#| cache: false
+#| message: false
+#| warning: false
+```
+:::
+
+
 # Read in the data
 
 Lets start by reading in the data sets (which were exported as csv

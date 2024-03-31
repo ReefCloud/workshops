@@ -1,4 +1,4 @@
-## ---- packages
+## ---- load_packages
 library(knitr)
 library(tidyverse)
 library(easystats)
