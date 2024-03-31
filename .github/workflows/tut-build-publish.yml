@@ -165,15 +165,15 @@ jobs:
           git config --global init.defaultBranch main
 
       # Download artifacts
-      - name: download artifacts
-        uses: actions/download-artifact@v4
-        with: 
-          name: artifact
-          github-token: ${{ secrets.GH_PAT }} # token with actions:read permissions on target repo
-          path: data
-          run-id: 8493870822
-      - name: Display structure of downloaded files
-        run: ls -R data
+      #- name: download artifacts
+      #  uses: actions/download-artifact@v4
+      #  with: 
+      #    name: artifact
+      #    github-token: ${{ secrets.GH_PAT }} # token with actions:read permissions on target repo
+      #    path: data
+      #    run-id: 8493870822
+      #- name: Display structure of downloaded files
+      #  run: ls -R data
   
       # render tutorials
       - name: Make tutorials
@@ -185,13 +185,13 @@ jobs:
         #  echo "library(quarto); quarto_render(\"tut/10_git.qmd\")" | R --no-save --no-restore;
 
       # upload artifacts  
-      - name: upload artifacts
-        uses: actions/upload-artifact@v4
-        with: 
-          name: artifact
-          path: data/reef_data_synthetic_*.csv
-          if-no-files-found: ignore
-          overwrite: true
+      #- name: upload artifacts
+      #  uses: actions/upload-artifact@v4
+      #  with: 
+      #    name: artifact
+      #    path: data/reef_data_synthetic_*.csv
+      #    if-no-files-found: ignore
+      #    overwrite: true
         
       # Deploy site to gh-pages branch
       - name: Deploy
