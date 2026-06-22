@@ -1130,6 +1130,51 @@ discussion.
 Simple (gaussian) linear models (represented below) make the following
 assumptions:
 
+::: {.columns}
+
+:::: {.column width="65%"}
+
+```{tikz}
+%| label: model1
+%| eval: true
+%| echo: false
+%| cache: false
+%| fig-width: 6
+\usetikzlibrary{shapes,arrows,shadows,positioning,mindmap,backgrounds,decorations, calc,fit, decorations.pathreplacing,decorations.pathmorphing, shadings,shapes.geometric,patterns} 
+
+\newcommand{\tikzmark}[1]{\tikz[baseline, remember picture] \coordinate (#1) {};}
+
+\begin{tikzpicture}[remember picture]
+\node (model) {$y_i=\underbrace{\beta_0 + \beta_1\times x_i}_\text{Linearity} + \varepsilon_i $};
+\node [anchor = west, right = 2cm of model.east] (dist) {$\varepsilon_i\sim \underbrace{\mathcal{N}(0, \tikzmark{sigma}\sigma^2)}_\text{Normality}$};
+\node [anchor = west, below = 1.25cm of model.east] (covnode) {$
+\tikzmark{cov}\mathbf{V}=cov = \begin{pmatrix}
+\tikzmark{covsigma}\sigma^2&0~&\cdots&\tikzmark{otherzero}0\\
+0&\sigma^2&\cdots&\vdots\\
+\vdots&\cdots&\sigma^2&\vdots\\
+\tikzmark{zero}0&\cdots&\cdots&\tikzmark{othercovsigma}\sigma^2\\
+\end{pmatrix} $};
+
+\coordinate (sigmamark) at ($(othercovsigma.north) + (covnode.west|-covnode)$);
+\path (sigmamark) +(1,0em) node[anchor = west](c) {Homogeneity of variance};
+\draw[->] (sigmamark)++(.9em,0ex) to [bend right] (c.west) ;
+
+\coordinate (zeromark) at ($(otherzero.north) + (covnode.west|-covnode)$);
+\path (zeromark) +(1,-1em) node[anchor = west](Z) {\parbox{3cm}{Zero covariance\\ (=independence)}};
+\draw[->] (zeromark)++(.9em,0ex) to [bend left] ($(Z.north west) + (0, -0.5em)$) ;
+ 
+\coordinate (sigma2mark) at ($(sigma.north) + (dist.west|-dist)$);
+\coordinate (covmark) at ($(cov.north) + (covnode.west|-covnode)$);
+
+\draw[->,thick, black!50!white!50] ($(sigma2mark.east) +(1em, 0.5em)$) 
+    .. controls ++(1cm,0.2cm) and ++(1.7cm,0.8em) .. ++(1cm,-1cm) 
+    .. controls ++(-2cm,-0.1cm) and ++(4cm,-.0cm) ..  ++(-6cm,0cm)
+    .. controls ++(-0.8cm, 0cm) and ++ (0.2cm, 1.3cm) .. ($(covmark.north) +(0.7em, 0.7em)$);
+\end{tikzpicture}
+```
+ 
+
+::::
 
 
 # References
