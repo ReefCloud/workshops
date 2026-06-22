@@ -258,6 +258,82 @@ there is a 'significant' relationship in Population A and C
 C were both generated from the same random distribution, it is just
 that Population C has a substantially higher number of observations.
 
+The above illustrates a couple of things
+
+- statistical significance does not necessarily translate into
+  biological importance. The percentage of decline for Population A is
+  `r p1 <- predict(popA.lm, data.frame( x=c(1,10)));
+  round(100*(p1[1]-p1[2])/p1[1],2)` where as the percentage of decline
+  for Population B is `r p1 <- predict(popB.lm, data.frame(x=c(1,10)));
+  round(100*(p1[1]-p1[2])/p1[1],2)`. That is Population B is declining
+  at nearly 10 times the rate of Population A. That sounds rather
+  important, yet on the basis of the hypothesis test, we would dismiss
+  the decline in Population B.
+
+- that a _p_-value is just the probability of detecting an effect or
+  relationship - what is the probability that the sample size is large
+  enough to pick up a difference.
+
+Let us now look at it from a Bayesian perspective. I will just provide
+the posterior distributions (densities scaled to 0-1 so that they can
+be plotted together) for the slope for each population.
+
+```{r}
+#| label: Pop_densities
+#| eval: true
+#| echo: false
+#| fig-width: 9
+#| fig-height: 4
+#| warning: false
+#| message: false
+#| results: hide
+#| cache: true
+## PopA
+popA.brm <- brm(y ~ x, data = popA)
+slopeA <- popA.brm |>
+    as_draws_df() |>
+    pull("b_x")
+## PopB
+popB.brm <- brm(y ~ x, data = popB)
+slopeB <- popB.brm |>
+    as_draws_df() |>
+    pull("b_x")
+## PopC
+popC.brm <- brm(y ~ x, data = popC)
+slopeC <- popC.brm |>
+    as_draws_df() |>
+    pull("b_x")
+
+ggplot() +
+    geom_density(data = NULL, aes(x = slopeA, y = ..scaled..)) +
+    geom_density(data = NULL, aes(x = slopeB, y = ..scaled..)) +
+    geom_density(data = NULL, aes(x = slopeC, y = ..scaled..)) +
+    scale_y_continuous("Relative probability", limits = c(0, 1), expand = c(0, 0)) +
+    scale_x_continuous("Regression slope") +
+  theme_classic() +
+  theme(
+      axis.text.y = element_blank(),
+      axis.ticks.y = element_blank()
+    )
+```
+
+Focusing on Populations A and B, we would conclude:
+
+- the mean (plus or minus CI) slopes for Population A and B are 
+  `r round(mean(slopeA),2)` (`r paste(round(quantile(slopeA,
+  p=c(0.025,0.975)),2),collapse=",")`) and `r round(mean(slopeB),2)`
+  (`r paste(round(quantile(slopeB,
+  p=c(0.025,0.975)),2),collapse=",")`) respectively.
+
+- the Bayesian approach allows us to query the posterior distribution
+  is many other ways in order to ask sensible biological questions.
+  For example, we might consider that a rate of change of 5% or
+  greater represents an important biological impact. For Population A
+  and B, the probability that the rate is 5% or greater is 
+  `r round(mean(slopeA< -5),2)` and `r round(mean(slopeB < -5),2)`
+  respectively.
+
+
 
 
 
