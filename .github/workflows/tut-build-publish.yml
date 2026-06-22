@@ -151,6 +151,7 @@ jobs:
             any::bayesplot
             any::bayestestR
             any::rstan
+            any::HDInterval
             
       # Checkout the gh-pages branch into the docs folder    
       - name: Retrieve previous compiled pages
