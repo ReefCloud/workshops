@@ -2344,6 +2344,2262 @@ dat6 |>
 
 :::
 
+# Fitting models
+
+
+:::: {.panel-tabset}
+
+
+### Example 1 (Gaussian data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Define priors
+
+One way to assess the priors is to have the MCMC sampler sample purely
+from the prior predictive distribution without conditioning on the
+observed data. Doing so provides a glimpse at the range of predictions
+possible under the priors. On the one hand, wide ranging predictions
+would ensure that the priors are unlikely to influence the actual
+predictions once they are conditioned on the data. On the other hand,
+if they are too wide, the sampler is being permitted to traverse into
+regions of parameter space that are not logically possible in the
+context of the actual underlying ecological context. Not only could
+this mean that illogical parameter estimates are possible, when the
+sampler is traversing regions of parameter space that are not
+supported by the actual data, the sampler can become unstable and have
+difficulty.
+
+In `brms`, we can inform the sampler to draw from the prior predictive
+distribution instead of conditioning on the response, by running the
+model with the `sample_prior = 'only'` argument. Unfortunately, this
+cannot be applied when there are flat priors (since the posteriors
+will necessarily extend to negative and positive infinity). Therefore,
+in order to use this useful routine, we need to make sure that we have
+defined a proper prior for all parameters.
+
+Earlier we suggested the following priors might be useful:
+
+- $\beta_0$: Normal prior centred at `r round(median(dat$y),2)` with a
+  variance of `r round(mad(dat$y),2)`
+  - mean: 
+    ```{r}
+    #| prior_y_mean_1a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    ```
+  - variance: 
+    ```{r}
+    #| prior_y_var_1a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    ```
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centred at
+  0 with a variance of `r round(mad(dat$y)/mad(dat$x),2)`
+  - mean: since effects are differences and we may not want to
+    pre-determine the direction (polarity) of any trends, it is
+    typical to define effects priors with means of 0
+  - variance: 
+    ```{r}
+    #| prior_y_var1_1a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    ```
+ 
+- $\sigma$: (half) _t_ distribution (3 degrees of freedom) centred at
+  0 with a variance of `r round(mad(dat$y),2)`
+  - variance: 
+    ```{r}
+    #| prior_y_var_1a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    ```
+
+It might be use usefull to understand what some of these distributions
+look like. For example, we have used both a normal (Gaussian)
+distribution and a flatter _t_ distribution for y-intercept and slope
+respectively. This was a somewhat arbitrary choice. We could easily
+have gone with either normal or _t_ distributions for all of the above
+parameters. To visualise prior distributions for the slope based on
+both normal and _t_ distributions:
+
+```{r} 
+#| label: normal_prior
+#| eval: true
+#| echo: true
+#| fig-width: 4
+#| fig-height: 3
+standist::visualize("normal(0, 4.09)", "student_t(3, 0, 4.09)", xlim = c(-20, 20))
+```
+
+Evidently, the _t_ distribution (with 3 degrees of freedom) is wider
+than the normal distribution. The former should be more robust to data
+with values that are less concentrated around the mean.
+
+```{r} 
+#| label: set_priors_1a
+#| eval: true
+#| echo: true
+priors <- prior(normal(31.21, 15.17), class = "Intercept") +
+    prior(student_t(3, 0, 4.09), class = "b") +
+    prior(student_t(3, 0, 15.17), class = "sigma")
+```
+
+
+##### Fit the model
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms1a
+#| eval: true
+#| echo: true
+#| cache: true
+dat1a.brm <- brm(bf(y ~ x),
+                data=dat,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0)
+```
+
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_1a
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1a.brm |>
+    conditional_effects() |>
+    plot(points = TRUE)
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_1a
+#| eval: true
+#| echo: true
+#| cache: true
+dat1a.brm2 <- update(dat1a.brm,
+    sample_prior = "yes"
+)
+```
+
+
+:::
+
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_1a
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1a.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE)
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_1a
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1a.brm2 |> tidybayes::get_variables()
+dat1a.brm2 |> hypothesis("x = 0") |> plot()
+dat1a.brm2 |> hypothesis("sigma = 0", class = "") |> plot()
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel2k, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat1a.brm2 |> tidybayes::get_variables()
+dat1a.brm2 |> SUYR_prior_and_posterior()
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Define priors
+
+Unless you explicitly direct `brm` to include a user-defined
+intercept, the priors on the default intercept should assume that the
+predictor(s) are centered (because `brm` will automatically center all
+continuous predictors).
+
+Lets try the following priors:
+
+- $\beta_0$: Normal prior centred at `r round(median(dat$y),2)` with a
+  variance of `r round(mad(dat$y),2)`
+  - mean: 
+    ```{r}
+    #| prior_y_mean_1b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat$y |> median() |> round(2)
+    ```
+  - variance: 
+    ```{r}
+    #| prior_y_var_1b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat$y |> mad() |> round(2)
+    ```
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centered at
+  0 with a variance of `r round(mad(dat$y)/mad(dat$x),2)`
+  - mean: since effects are differences and we may not want to
+    pre-determine the direction (polarity) of any trends, it is
+    typical to define effects priors with means of 0
+  - variance: 
+    ```{r}
+    #| prior_y_var1_1b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    mad(dat$y) / mad(dat$x) |> round(2)
+    ```
+ 
+- $\sigma$: (half) _t_ distribution (3 degrees of freedom) centred at
+  0 with a variance of `r round(mad(dat$y),2)`
+  - variance: 
+    ```{r}
+    #| prior_y_var_1b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    ```
+
+```{r} 
+#| label: set_priors_1b
+#| eval: true
+#| echo: true
+priors <- prior(normal(31.21, 15.17), class = "Intercept") +
+    prior(student_t(3, 0, 4.09), class = "b") +
+    prior(student_t(3, 0, 15.17), class = "sigma")
+```
+
+
+##### Fit the model
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \beta_1 (x_i - \bar{x})\\
+\end{align}
+$$
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms1b
+#| eval: true
+#| echo: true
+#| cache: true
+dat1b.brm <- brm(bf(y ~ scale(x, scale = FALSE)),
+                data=dat,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0)
+```
+
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_1b
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1b.brm |>
+    conditional_effects() |>
+    plot(points = TRUE)
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_1b
+#| eval: true
+#| echo: true
+#| cache: true
+dat1b.brm2 <- update(dat1b.brm,
+    sample_prior = "yes"
+)
+```
+
+
+:::
+
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_1b
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1b.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_1b
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1b.brm2 |> tidybayes::get_variables() 
+dat1b.brm2 |> hypothesis("scalexscaleEQFALSE = 0") |> plot()
+dat1b.brm2 |> hypothesis("sigma = 0", class = "") |> plot()
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel1b, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat1b.brm2 |> tidybayes::get_variables() 
+dat1b.brm2 |> SUYR_prior_and_posterior()
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Define priors
+
+When the predictor is standardised, it simplifies prior definition
+because we no longer need to consider the scale of the predictor.
+
+Lets try the following priors:
+
+- $\beta_0$: Normal prior centred at `r round(median(dat$y),2)` with a
+  variance of `r round(mad(dat$y),2)`
+  - mean: 
+    ```{r}
+    #| prior_y_mean_1c
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat$y |> median() |> round(2)
+    ```
+  - variance: 
+    ```{r}
+    #| prior_y_var_1c
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat$y |> mad() |> round(2)
+    ```
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centered at
+  0 with a variance of `r round(mad(dat$y),2)`
+  - mean: since effects are differences and we may not want to
+    pre-determine the direction (polarity) of any trends, it is
+    typical to define effects priors with means of 0
+  - variance: 
+    ```{r}
+    #| prior_y_var1_1c
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    mad(dat$y) |> round(2)
+    ```
+ 
+- $\sigma$: (half) _t_ distribution (3 degrees of freedom) centred at
+  0 with a variance of `r round(mad(dat$y),2)`
+  - variance: 
+    ```{r}
+    #| prior_y_var_1c
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    ```
+
+```{r} 
+#| label: set_priors_1c
+#| eval: true
+#| echo: true
+priors <- prior(normal(31.21, 15.17), class = "Intercept") +
+    prior(student_t(3, 0, 15.17), class = "b") +
+    prior(student_t(3, 0, 15.17), class = "sigma")
+```
+
+
+##### Fit the model
+
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \beta_1 (x_i - \bar{x})/\sigma_{x}\\
+\end{align}
+$$
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms1c
+#| eval: true
+#| echo: true
+#| cache: true
+dat1c.brm <- brm(bf(y ~ scale(x)),
+                data=dat,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0)
+```
+
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_1c
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1c.brm |>
+    conditional_effects() |>
+    plot(points = TRUE)
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_1c
+#| eval: true
+#| echo: true
+#| cache: true
+dat1c.brm2 <- update(dat1c.brm,
+    sample_prior = "yes"
+)
+```
+
+:::
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_1c
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1c.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE)
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_1c
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat1c.brm2 |> tidybayes::get_variables()
+dat1c.brm2 |> hypothesis("scalex = 0") |> plot()
+dat1c.brm2 |> hypothesis("sigma = 0", class = "") |> plot()
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel1c, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat1c.brm2 |> tidybayes::get_variables()
+dat1c.brm2 |> SUYR_prior_and_posterior()
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+:::::::
+
+### Example 2 (categorical predictor)
+
+::::::: {.panel-tabset}
+#### Treatment contrasts
+::::: {.panel-tabset}
+
+##### Define priors
+
+Lets try the following priors:
+
+```{r}
+#| label: prior_y_means_2a
+#| echo: FALSE
+#| cache: FALSE
+dat2_prior <- dat2 |>
+  group_by(x) |>
+  summarise(across(y, list(med = median, sd = sd, mad = mad))) |>
+  as.data.frame()
+
+dat2_prior_b <-
+  dat2 |>
+  group_by(x) |>
+  summarise(across(y, median)) |>
+  pull(y) |>
+  diff() |>
+  abs() |>
+  max()
+dat2_prior_sig <-
+  dat2 |>
+  group_by(x) |>
+  summarise(across(y, mad)) |>
+  pull(y) |>
+  max()
+```
+
+- $\beta_0$: Normal prior centred at `r round(dat2_prior[1,2],2)` with a
+  variance of `r round(dat2_prior[1,4],2)`
+  - mean: 
+    ```{r}
+    #| prior_y_mean_2a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat2 |>
+      group_by(x) |>
+        summarise(across(y, list(med = median, sd = sd, mad = mad)))
+    ```
+  - variance: 
+    ```{r}
+    #| prior_y_var_2a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat2 |>
+      group_by(x) |>
+        summarise(across(y, list(med = median, sd = sd, mad = mad)))
+    ```
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centered at
+  0 with a variance of `r round(dat2_prior_b,2)`
+  - mean: since effects are differences and we may not want to
+    pre-determine the direction (polarity) of any trends, it is
+    typical to define effects priors with means of 0
+  - variance: 
+    ```{r}
+    #| prior_y_var1_2a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat2 |>
+      group_by(x) |>
+      summarise(across(y, median)) |>
+      pull(y) |>
+      diff() |>
+      abs() |>
+      max()
+    ```
+ 
+- $\sigma$: (half) _t_ distribution (3 degrees of freedom) centred at
+  0 with a variance of `r round(dat2_prior_sig, 2)`
+  - variance: 
+    ```{r}
+    #| prior_y_var2_2a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat2 |>
+    group_by(x) |>
+    summarise(across(y, mad)) |>
+    pull(y) |>
+    max()
+    ```
+
+```{r} 
+#| label: set_priors_2a
+#| eval: true
+#| echo: true
+priors <- prior(normal(19.68, 1.87), class = "Intercept") +
+    prior(student_t(3, 0, 6.35), class = "b") +
+    prior(student_t(3, 0, 4.7), class = "sigma")
+```
+
+##### Fit the model
+
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \sum{\beta_j x_{ij}}\\
+\end{align}
+$$
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms2a
+#| eval: true
+#| echo: true
+#| cache: true
+dat2a.brm <- brm(bf(y ~ x),
+                data=dat2,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0) 
+```
+
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_2a
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat2a.brm |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_2a
+#| eval: true
+#| echo: true
+#| cache: true
+dat2a.brm2 <- update(dat2a.brm,
+    sample_prior = "yes"
+) 
+```
+
+:::
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_2a
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat2a.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_2a
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat2a.brm2 |> tidybayes::get_variables()
+dat2a.brm2 |> hypothesis("xmedium = 0") |> plot()
+dat2a.brm2 |> hypothesis("sigma = 0", class = "") |> plot() 
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel2a, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat2a.brm2 |> tidybayes::get_variables()
+dat2a.brm2 |> SUYR_prior_and_posterior() 
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+#### Means parameterisation
+
+::::: {.panel-tabset}
+
+##### Define priors
+
+Lets try the following priors:
+
+```{r}
+#| label: prior_y_means_2b
+#| echo: FALSE
+#| cache: FALSE
+dat2_prior <-
+  dat2 |>
+  summarise(across(y, list(med = median, sd = sd, mad = mad))) |>
+  as.data.frame()
+
+dat2_prior_sig <-
+  dat2 |>
+  group_by(x) |>
+  summarise(across(y, mad)) |>
+  pull(y) |>
+  max()
+```
+
+- $\beta$: _t_ distribution (3 degrees of freedom) prior centered at
+  `r round(dat2_prior[1,1], 2)` with a variance of `r round(dat2_prior[1,3],2)`
+  - mean: since each groups mean is being estimated separately, they
+    could either all have different priors, or more commonly, the same
+    priors.
+  - variance: 
+    ```{r}
+    #| prior_y_var1_2b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat2 |>
+        summarise(across(y, list(med = median, sd = sd, mad = mad)))
+    ```
+- $\sigma$: (half) _t_ distribution (3 degrees of freedom) centred at
+  0 with a variance of `r round(dat2_prior_sig, 2)`
+  - variance: 
+    ```{r}
+    #| prior_y_var2_2b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat2 |>
+    group_by(x) |>
+    summarise(across(y, mad)) |>
+    pull(y) |>
+    max()
+    ```
+
+```{r} 
+#| label: set_priors_2b
+#| eval: true
+#| echo: true
+priors <- prior(student_t(3, 16.18, 6.56), class = "b") +
+    prior(student_t(3, 0, 4.7), class = "sigma")
+```
+
+##### Fit the model
+
+$$
+\begin{align}
+y_i \sim{}& N(\mu_i, \sigma^2)\\
+\mu_i =& \beta_0 + \sum{\beta_j x_{ij}}\\
+\end{align}
+$$
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms2b
+#| eval: true
+#| echo: true
+#| cache: true
+dat2b.brm <- brm(bf(y ~ -1 + x),
+                data=dat2,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0) 
+```
+
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_2b
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat2b.brm |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_2b
+#| eval: true
+#| echo: true
+#| cache: true
+dat2b.brm2 <- update(dat2b.brm,
+    sample_prior = "yes"
+) 
+```
+
+:::
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_2b
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat2b.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_2b
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat2b.brm2 |> tidybayes::get_variables()
+dat2b.brm2 |> hypothesis("xcontrol = 0") |> plot()
+dat2b.brm2 |> hypothesis("xmedium = 0") |> plot()
+dat2b.brm2 |> hypothesis("sigma = 0", class = "") |> plot() 
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel2b, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat2b.brm2 |> tidybayes::get_variables()
+#dat2b.brm2 |> SUYR_prior_and_posterior() 
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+:::::::
+
+### Example 3 (Poisson data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+
+$$
+\begin{align}
+y_i \sim{}& Pois(\lambda_i)\\
+log(\lambda_i) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+::::: {.panel-tabset}
+
+##### Define priors
+
+When considering priors, it is important to remember that they apply
+to parameters on the link scale. For Poisson models, the link scale is
+log. So the following priors might be appropriate:
+
+- $\beta_0$: Normal prior centred at `r round(median(log(dat3$y)),2)` with a
+  variance of `r round(mad(log(dat3$y)),2)`
+  - mean: 
+    ```{r}
+    #| prior_y_mean_3a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3$y |>
+        log() |> 
+        median() |>
+        round(2)
+    ```
+  - variance: 
+    ```{r}
+    #| prior_y_var_3a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3$y |>
+        log() |> 
+        mad() |>
+        round(2)
+    ```
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centred at
+  0 with a variance of `r round(mad(log(dat3$y))/mad(log(dat3$x)),2)`
+  - mean: since effects are differences and we may not want to
+    pre-determine the direction (polarity) of any trends, it is
+    typical to define effects priors with means of 0
+  - variance: 
+    ```{r}
+    #| prior_y_var1_3a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3 |>
+        mutate(across(c(y, x), log)) |>
+        summarise(across(c(y, x), mad)) |>
+        mutate(round(y / x, 2))
+    ```
+ 
+```{r} 
+#| label: set_priors_3a
+#| eval: true
+#| echo: true
+priors <- prior(normal(2.00, 1.33), class = "Intercept") +
+    prior(student_t(3, 0, 2.00), class = "b")
+```
+
+##### Fit the model
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms3a
+#| eval: true
+#| echo: true
+#| cache: true
+dat3a.form <- bf(y ~ x, family = poisson(link = "log"))
+dat3a.brm <- brm(dat3a.form,
+                data=dat3,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0)
+```
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_3a
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3a.brm |>
+  conditional_effects() |>
+  plot(points = TRUE) |> _[[1]] +
+  scale_y_log10()
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_3a
+#| eval: true
+#| echo: true
+#| cache: true
+dat3a.brm2 <- update(dat3a.brm,
+    sample_prior = "yes"
+)
+```
+
+:::
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_3a
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3a.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_3a
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3a.brm2 |> tidybayes::get_variables() 
+dat3a.brm2 |> hypothesis("x = 0") |> plot()
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel3a, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat3a.brm2 |> tidybayes::get_variables() 
+dat3a.brm2 |> SUYR_prior_and_posterior()
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+
+#### Centered predictor
+
+$$
+\begin{align}
+y_i \sim{}& Pois(\mu_i)\\
+log(\mu_i) =& \beta_0 + (\beta_1 x_i - \bar{x})\\
+\end{align}
+$$
+
+::::: {.panel-tabset}
+
+##### Define priors
+
+When considering priors, it is important to remember that they apply
+to parameters on the link scale. For Poisson models, the link scale is
+log. So the following priors might be appropriate:
+
+- $\beta_0$: Normal prior centred at `r round(median(log(dat3$y)),2)` with a
+  variance of `r round(mad(log(dat3$y)),2)`
+  - mean: 
+    ```{r}
+    #| prior_y_mean_3b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3$y |>
+        log() |> 
+        median() |>
+        round(2)
+    ```
+  - variance: 
+    ```{r}
+    #| prior_y_var_3b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3$y |>
+        log() |> 
+        mad() |>
+        round(2)
+    ```
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centred at
+  0 with a variance of `r round(mad(log(dat3$y))/mad(log(dat3$x)),2)`
+  - mean: since effects are differences and we may not want to
+    pre-determine the direction (polarity) of any trends, it is
+    typical to define effects priors with means of 0
+  - variance: 
+    ```{r}
+    #| prior_y_var1_3b
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3 |>
+        mutate(across(c(y, x), log)) |>
+        summarise(across(c(y, x), mad)) |>
+        mutate(round(y / x, 2))
+    ```
+ 
+```{r} 
+#| label: set_priors_3b
+#| eval: true
+#| echo: true
+priors <- prior(normal(2.00, 1.33), class = "Intercept") +
+    prior(student_t(3, 0, 2.00), class = "b")
+```
+
+##### Fit the model
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms3b
+#| eval: true
+#| echo: true
+#| cache: true
+dat3b.form <- bf(y ~ scale(x, scale = FALSE), family = poisson(link = "log"))
+dat3b.brm <- brm(dat3b.form,
+                data=dat3,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0)
+```
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_3b
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3b.brm |>
+  conditional_effects() |>
+  plot(points = TRUE) |> _[[1]] +
+  scale_y_log10()
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_3b
+#| eval: true
+#| echo: true
+#| cache: true
+dat3b.brm2 <- update(dat3b.brm,
+    sample_prior = "yes"
+)
+```
+
+:::
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_3b
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3b.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_3b
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3b.brm2 |> tidybayes::get_variables() 
+dat3b.brm2 |> hypothesis("scalexscaleEQFALSE = 0") |> plot()
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel3b, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat3b.brm2 |> tidybayes::get_variables() 
+dat3b.brm2 |> SUYR_prior_and_posterior()
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+
+#### Standardised predictor
+
+$$
+\begin{align}
+y_i \sim{}& Pois(\lambda_i)\\
+log(\lambda_i) =& \beta_0 + (\beta_1 x_i - \bar{x})/\sigma_x\\
+\end{align}
+$$
+
+::::: {.panel-tabset}
+
+##### Define priors
+
+When considering priors, it is important to remember that they apply
+to parameters on the link scale. For Poisson models, the link scale is
+log. So the following priors might be appropriate:
+
+- $\beta_0$: Normal prior centred at `r round(median(log(dat3$y)),2)` with a
+  variance of `r round(mad(log(dat3$y)),2)`
+  - mean: 
+    ```{r}
+    #| prior_y_mean_3c
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3$y |>
+        log() |> 
+        median() |>
+        round(2)
+    ```
+  - variance: 
+    ```{r}
+    #| prior_y_var_3c
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3$y |>
+        log() |> 
+        mad() |>
+        round(2)
+    ```
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centred at
+  0 with a variance of `r round(mad(log(dat3$y)),2)`
+  - mean: since effects are differences and we may not want to
+    pre-determine the direction (polarity) of any trends, it is
+    typical to define effects priors with means of 0
+  - variance: 
+    ```{r}
+    #| prior_y_var1_3c
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat3$y |> log() |> mad() |> round(2)
+    ```
+ 
+```{r} 
+#| label: set_priors_3c
+#| eval: true
+#| echo: true
+priors <- prior(normal(2.00, 1.33), class = "Intercept") +
+    prior(student_t(3, 0, 1.33), class = "b")
+```
+
+##### Fit the model
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms3c
+#| eval: true
+#| echo: true
+#| cache: true
+dat3c.form <- bf(y ~ scale(x), family = poisson(link = "log"))
+dat3c.brm <- brm(dat3c.form,
+                data=dat3,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0)
+```
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_3c
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3c.brm |>
+  conditional_effects() |>
+  plot(points = TRUE) |> _[[1]] +
+  scale_y_log10()
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_3c
+#| eval: true
+#| echo: true
+#| cache: true
+dat3c.brm2 <- update(dat3c.brm,
+    sample_prior = "yes"
+)
+```
+
+:::
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_3c
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3c.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_3c
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat3c.brm2 |> tidybayes::get_variables() 
+dat3c.brm2 |> hypothesis("scalex = 0") |> plot()
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel3c, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat3c.brm2 |> tidybayes::get_variables() 
+dat3c.brm2 |> SUYR_prior_and_posterior()
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+:::::::
+
+### Example 5 (Binary data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, 1)\\
+log(\frac{\pi_i}{1-\pi_i}) =& \beta_0 + \beta_1 x_i\\
+\end{align}
+$$
+
+::::: {.panel-tabset}
+
+##### Define priors
+
+When considering priors, it is important to remember that they apply
+to parameters on the link scale. For Binary models, the link scale is
+logit. Binomial data is notoriously difficult to define priors for.  Nevertheless the following considerations are useful:
+
+- the observed response values are only ever either 0 or 1
+- a linear model is exploring whether the probability of a 1 changes from high to low or low to high according to the linear predictor
+- the switch in probability is likely to be somewhere near the middle of the $x$ range
+- with a centered predictor, the mean response is expected to be approximately 0.5
+- on a logit (log odds) scale, this corresponds to a value of 0.
+- on a logit (log odds) scale, values of -3 and 3 are considered very wide
+- on a logit scale, values between -1 and 1 are reasonable.
+
+So the following priors might be appropriate:
+
+- $\beta_0$: Normal prior centred at 0 with a
+variance of 1
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centred at
+  0 with a variance of 1
+
+```{r} 
+#| label: set_priors_5a
+#| eval: true
+#| echo: true
+priors <- prior(normal(0, 1), class = "Intercept") +
+    prior(student_t(3, 0, 1), class = "b")
+```
+
+##### Fit the model
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms5a
+#| eval: true
+#| echo: true
+#| cache: true
+dat5a.form <- bf(y ~ x, family = binomial(link = "logit"))
+dat5a.brm <- brm(dat5a.form,
+                data=dat5,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0)
+```
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+For Binary data, it is often more useful to explore the predictions on
+the link scale. Ribbons that extend much beyond -3 and 3 would
+definitely be considered wide enough.
+
+```{r}
+#| label: brms_conditional_effects_5a
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat5a.brm |>
+  conditional_effects(method = "posterior_linpred") 
+
+dat5a.brm |>
+  conditional_effects() |>
+  plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_5a
+#| eval: true
+#| echo: true
+#| cache: true
+dat5a.brm2 <- update(dat5a.brm,
+    sample_prior = "yes"
+)
+```
+
+:::
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_5a
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat5a.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_5a
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat5a.brm2 |> tidybayes::get_variables() 
+dat5a.brm2 |> hypothesis("x = 0") |> plot()
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel5a, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat5a.brm2 |> tidybayes::get_variables() 
+dat5a.brm2 |> SUYR_prior_and_posterior()
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+#### Standardised predictor
+
+$$
+\begin{align}
+y_i \sim{}& Bin(\pi_i, 1)\\
+log(\frac{\pi_i}{1 -\pi_i}) =& \beta_0 + (\beta_1 x_i - \bar{x})/\sigma_x\\
+\end{align}
+$$
+
+::::: {.panel-tabset}
+
+##### Define priors
+
+- $\beta_0$: Normal prior centred at 0 with a
+variance of 1
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centred at
+  0 with a variance of 1
+
+```{r} 
+#| label: set_priors_5c
+#| eval: true
+#| echo: true
+priors <- prior(normal(0, 1), class = "Intercept") +
+    prior(student_t(3, 0, 1), class = "b")
+```
+
+##### Fit the model
+
+1. start by fitting the model and sampling from the priors only
+
+::: {.indented}
+
+```{r}
+#| label: brms5c
+#| eval: true
+#| echo: true
+#| cache: true
+dat5c.form <- bf(y ~ scale(x), family = binomial(link = "logit"))
+dat5c.brm <- brm(dat5c.form,
+                data=dat5,
+                prior=priors,
+                sample_prior = 'only', 
+                iter = 5000,
+                warmup = 1000,
+                chains = 3, cores = 3,
+                thin = 5,
+                backend = 'cmdstan',
+                refresh = 0)
+```
+:::
+
+2. explore the range of posterior predictions resulting from the
+   priors alone
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects_5c
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat5c.brm |>
+  conditional_effects(method = "posterior_linpred") 
+```
+
+**Conclusions:** 
+
+- the grey ribbon above represents the credible range of the posterior
+  predictions
+- this ribbon is substantially wider than the observed data (black
+  points), suggesting that the priors are not overly narrow
+- the range of posterior predictions are not widely unreasonable
+  (although we could argue that negative predictions might be
+  illogical) since the maximums are not multiple orders of magnitude
+  above the observed data.
+
+
+:::
+
+3. now refit the model such that it samples from both the priors and
+   likelihood (that is allow the data to have an impact on the
+   estimates)
+
+::: {.indented}
+
+```{r}
+#| label: brms_fit2_5c
+#| eval: true
+#| echo: true
+#| cache: true
+dat5c.brm2 <- update(dat5c.brm,
+    sample_prior = "yes"
+)
+```
+
+:::
+
+4. re-explore the range of posterior predictions resulting from the
+   fitted model
+
+::: {.indented}
+
+```{r}
+#| label: brms_conditional_effects2_5c
+#| eval: true
+#| echo: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat5c.brm2 |>
+    conditional_effects() |>
+    plot(points = TRUE) 
+```
+
+**Conclusions:** 
+
+- the range of the posteriors are now substantially reduced (now that
+  the model includes both data and priors)
+- this suggests that the patterns are being driven predominantly by the data
+
+:::
+
+5. compare the priors and posteriors to further confirm that the
+   priors are not overly influential
+   
+::: {.indented}
+
+When we have indicated that the posterior should be informed by both
+the prior and the posterior, both prior (governed by priors alone) and
+posterior (governed by both priors and data/likelihood) draws are
+returned.  These can be compared by exploring the probabilities
+associated with specific hypotheses - the most obvious of which is
+that of no effect (that the parameter = 0).
+
+When doing so, ideally the posterior should be distinct from the
+prior. By distinct, I mean that the posteriors should be clearly
+distinguishable from the priors. Ideally, the priors should be less
+variable than the priors.  If this is not the case, it might suggest
+that the posteriors are being too strongly driven by the priors.
+
+```{r}
+#| labels: brms_prior_posterior_5c
+#| echo: true
+#| eval: true
+#| cache: true
+#| fig-width: 4
+#| fig-height: 3
+dat5c.brm2 |> tidybayes::get_variables() 
+dat5c.brm2 |> hypothesis("scalex = 0") |> plot()
+```
+
+Unfortunately, it is not possible to do this comparison sensibly for
+the intercept.  The reason for this is that the prior for intercept
+was applied to an intercept that is associated with centred
+continuous predictors (predictors are centred behind the scenes).
+Since we did not centre the predictor, the intercept returned is as if
+uncentred.  Hence, the prior and posterior are on different scales.
+ 
+```{r fitModel5c, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
+dat5c.brm2 |> tidybayes::get_variables() 
+dat5c.brm2 |> SUYR_prior_and_posterior()
+```
+
+**Conclusions:**
+
+- each of the priors are substantially wider than the posteriors
+- the posteriors are definitely distinct from their respective priors
+  and thus we can conclude that the priors and not driving the
+  posteriors (e.g. they are not influencing the outcomes)
+- the priors are simply regularising the parameters such that they are
+  only sampled from plausible regions
+
+:::
+
+:::::
+
+:::::::
+
+::::
+
+
+
 
 
 # References
