@@ -25,6 +25,9 @@ bibliography: resources/references.bib
 output_dir: "docs"
 ---
 
+```{r setup, include=FALSE,warning=FALSE, message=FALSE}
+options(tinytex.engine = 'xelatex')
+```
 
 # Preparations
 
@@ -760,6 +763,373 @@ The motivating examples are:
 - **Example 6** - simulated samples drawn from a Binomial distribution
   reminiscent of proportional data (such as counts of a particular
   taxa out of a total number of individuals)
+
+::: {.panel-tabset}
+
+## Example 1 (Gaussian data)
+
+Lets formally simulate the data illustrated above. The underlying
+process dictates that on average a one unit change in the predictor
+(`x`) will be associated with a five unit change in response (`y`) and
+when the predictor has a value of 0, the response will typically be 2.
+Hence, the response (`y`) will be related to the predictor (`x`) via
+the following:
+
+$$
+y = 2 + 5x
+$$
+
+This is a deterministic model, it has no uncertainty. In order to
+simulate actual data, we need to add some random noise. We will assume
+that the residuals are drawn from a Gaussian distribution with a mean
+of zero and standard deviation of 4. The predictor will comprise of 10
+uniformly distributed integer values between 1 and 10. We will round
+the response to two decimal places.
+
+For repeatability, a seed will be employed on the random number
+generator. Note, the smaller the dataset, the less it is likely to
+represent the underlying deterministic equation, so we should keep
+this in mind when we look at how closely our estimated parameters
+approximate the 'true' values. Hence, the seed has been chosen to
+yield data that maintain a general trend that is consistent with the
+defining parameters.
+
+```{r}
+#| label: sim
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(234)
+dat <- data.frame(x = 1:10) |>
+    mutate(y = round(2 + 5*x + rnorm(n = 10, mean = 0, sd = 4), digits = 2))
+dat
+ggplot(data = dat) + 
+geom_point(aes(y = y, x = x))
+```
+
+We will use these data in two ways. Firstly, to estimate the mean and
+variance of the reponse (`y`) ignoring the predcitor (`x`) and
+secondly to estimate the relationship between the reponse and
+predictor.
+
+For the former, we know that the mean and variance of the response
+(`y`) can be calculated as:
+
+$$
+\begin{align}
+\bar{y} =& \frac{1}{n}\sum^n_{i=1}y_i\\
+var(y) =& \frac{1}{n}\sum^n_{i=1}(y-\bar{y})^2\\
+sd(y) =& \sqrt{var(y)}
+\end{align}
+$$
+
+```{r}
+#| label: stats1
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+mean(dat$y)
+var(dat$y)
+sd(dat$y)
+```
+
+## Example 2 (categorical predictor)
+
+As previously described, categorical predictors are transformed into
+dummy codes prior to the fitting of the linear model. We will simulate
+a small data set with a single categorical predictor comprising a
+control and two treatment levels ('mediam', 'high'). To simplify
+things we will assume a Gaussian distribution, however most of the
+modelling steps would be the same regardless of the chosen
+distribution.
+
+The data will be drawn from three Gaussian distributions with a
+standard deviation of 4 and means of 20, 15 and 10. We will draw a
+total of 12 observations, four from each of the three populations.
+
+```{r}
+#| label: sim2
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(123)
+beta_0 <- 20
+beta <- c(-2, -10)
+sigma <- 4
+n <- 12
+x <- gl(3, 4, 12, labels = c('control', 'medium', 'high'))
+y <- (model.matrix(~x) %*% c(beta_0, beta)) + rnorm(12, 0, sigma)
+dat2 <- data.frame(x = x, y = y)
+dat2
+ggplot(data = dat2) + 
+geom_point(aes(y = y, x = x)) 
+```
+
+## Example 3 (Poisson data)
+
+The Poisson distribution is only parameterized by a single parameter
+($\lambda$) which represents both the mean and variance. Furthermore,
+Poisson data can only be positive integers.  
+
+Unlike simple trend between two Gaussian or uniform distributions,
+modelling against a Poisson distribution alters the scale to
+logarithms. This needs to be taken into account when we simulate the
+data. The parameters that we used to simulate the underlying processes
+need to either be on a logarithmic scale, or else converted to a
+logarithmic scale prior to using them for generating the random data.
+
+Moreover, for any model that involves a non-identity link function
+(such as a logarithmic link function for Poisson models), 'slope' is
+only constant on the scale of the link function. When it is back
+transformed onto the natural scale (scale of the data), it takes on a
+different meaning and interpretation.
+
+We will chose $\beta_0$ to represent a value of 1 when `x=0`. As for
+the 'effect' of the predictor on the response, lets say that for every
+one unit increase in the predictor the response increases by 40% (on
+the natural scale). Hence, on the log scale, the slope will be
+$log(1.5)=$ `r log(1.4)`.
+
+
+```{r}
+#| label: sim3
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(123)
+beta <- c(1, 1.40)
+beta <- log(beta)
+n <- 10
+dat3 <- data.frame(x=seq(from = 1, to = 10, len = n)) |>
+    mutate(y = rpois(n, lambda = exp(beta[1] + beta[2]*x)))
+dat3
+ggplot(data = dat3) + 
+geom_point(aes(y = y, x = x)) 
+```
+
+## Example 4 (NB data)
+
+In theory, count data should follow a Poisson distribution and
+therefore have properties like mean equal to variance (e.g.
+$\textnormal{Dispersion}=\frac{\sigma}{\mu}=1$). However as simple
+linear models are low dimensional representations of a system, it is
+often unlikely that such a simple model can capture all the
+variability in the response (counts). For example, if we were
+modelling the abundance of a species of intertidal snail within
+quadrats in relation to water depth, it is highly likely that water
+depth alone drives snail abundance. There are countless other
+influences that the model has not accounted for. As a result, the
+observed data might be more variable than a Poisson (of a particular
+mean) would expect and in such cases, the model is over-dispersed
+(more variance than expected).
+
+Over dispersed models under-estimate the variability and thus
+precision in estimates resulting in inflated confidence in outcomes
+(elevated Type I errors).
+
+There are numerous causes of over-dispersed count data (one of which
+is eluded to above). These are:
+
+- additional sources of variability not being accounted for in the
+  model (see above)
+- when the items being counted aggregate together. Although the
+  underlying items may have been generated by a Poisson process, the
+  items clump together. When the items are counted, they are more
+  likely to be in either in relatively low or relatively high
+  numbers - hence the data are more varied than would be expected from
+  their overall mean.
+- imperfect detection resulting in excessive zeros. Again the
+  underlying items may have been generated by a Poisson process,
+  however detecting and counting the items might not be completely
+  straight forward (particularly for more cryptic items). Hence, the
+  researcher may have recorded no individuals in a quadrat and yet
+  there was one or more present, they were just not obvious and were
+  not detected. That is, layered over the Poisson process is another
+  process that determines the detectability. So while the Poisson
+  might expect a certain proportion of zeros, the observed data might
+  have a substantially higher proportion of zeros - and thus higher
+  variance.
+
+This example will generate data that is drawn from a negative binomial
+distribution so as to broadly represent any one of the above causes.
+
+We will chose $\beta_0$ to represent a value of 1 when `x=0`. As for
+the 'effect' of the predictor on the response, lets say that for every
+one unit increase in the predictor the response increases by 40% (on
+the natural scale). Hence, on the log scale, the slope will be
+$log(1.5)=$ `r log(1.4)`. Finally, the dispersion parameter (ratio of
+variance to mean) will be 10.
+
+
+```{r}
+#| label: sim4
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(234)
+beta <- c(1, 1.40)
+beta <- log(beta)
+n <- 10
+size <- 10
+dat4 <- data.frame(x = seq(from = 1, to = 10, len = n)) |>
+    mutate(
+        mu = exp(beta[1] + beta[2] * x),
+        y = rnbinom(n, size = size, mu =  mu)
+    )
+dat4
+ggplot(data = dat4) + 
+geom_point(aes(y = y, x = x)) 
+```
+
+## Example 5 (Binary data)
+
+Binary data (presence/absence, dead/alive, yes/no, heads/tails, etc)
+pose unique challenges for linear modeling. Linear regression,
+designed for continuous outcomes, may not be directly applicable to
+binary responses. The nature of binary data violates assumptions of
+normality and homoscedasticity, which are fundamental to linear
+regression. Furthermore, linear models may predict probabilities
+outside the [0, 1] range, leading to unrealistic predictions.
+
+This example will generate data that is drawn from a bernoulli
+distribution so as to broadly represent presence/absence data.
+
+We will chose $\beta_0$ to represent the odds of a value of 1 when
+$x=0$ equal to $0.02$. This is equivalent to a probability of $y$
+being zero when $x=0$ of $\frac{0.02}{1+0.02}=0.0196$. E.g., at low
+$x$, the response is likely to be close to 0. For every one unit
+increase in $x$, we will stipulate a 2 times increase in odds that
+the expected response is equal to 1.
+
+
+```{r}
+#| label: sim5
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(234)
+beta <- c(0.02, 2)
+beta <- log(beta)
+n <- 10
+dat5 <- data.frame(x = seq(from = 1, to = 10, len = n)) |>
+    mutate(
+        y = as.numeric(rbernoulli(n, p = plogis(beta[1] + beta[2] * x)))
+    )
+dat5
+ggplot(data = dat5) + 
+geom_point(aes(y = y, x = x)) 
+```
+
+## Example 6 (Binomial data)
+
+Similar to binary data, proportional (binomial) data tend to violate
+normality and homogeneity of variance (particularly as mean
+proportions approach either 0% or 100%.
+
+This example will generate data that is drawn from a binomial
+distribution so as to broadly represent proportion data.
+
+We will chose $\beta_0$ to represent the odds of a particular trial
+(e.g. an individual) being of a particular type (e.g. species 1) when
+$x=0$ and to equal to $0.02$. This is equivalent to a probability of
+$y$ being of the focal type when $x=0$ of
+$\frac{0.02}{1+0.02}=0.0196$. E.g., at low $x$, the the probability
+that an individual is taxa 1 is likely to be close to 0. For every one
+unit increase in $x$, we will stipulate a 2.5 times increase in odds
+that the expected response is equal to 1.
+
+For this example, we will also convert the counts into proportions
+($y2$) by division with the number of trials ($5$).
+
+```{r}
+#| label: sim6
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(123)
+beta <- c(0.02, 2.5)
+beta <- log(beta)
+n <- 10
+trials <- 5
+dat6 <- data.frame(x = seq(from = 1, to = 10, len = n)) |>
+    mutate(
+      count = as.numeric(rbinom(n, size = trials, prob = plogis(beta[1] + beta[2] * x))),
+      total = trials,
+      y = count/total
+    )
+dat6
+ggplot(data = dat6) + 
+geom_point(aes(y = y, x = x)) 
+```
+
+
+:::
+
+
+# Exploratory data analysis
+
+Statistical models utilize data and the inherent statistical
+properties of distributions to discern patterns, relationships, and
+trends, enabling the extraction of meaningful insights, predictions,
+or inferences about the phenomena under investigation. To do so,
+statistical models make assumptions about the likely distributions
+from which the data were collected. Consequently, the reliability and
+validity of any statistical model depend upon adherence to these
+underlying assumptions.
+
+Exploratory Data Analysis (EDA) and assumption checking therefore play
+pivotal roles in the process of statistical analysis, offering
+essential tools to glean insights, assess the reliability of
+statistical methods, and ensure the validity of conclusions drawn from
+data. EDA involves visually and statistically examining datasets to
+understand their underlying patterns, distributions, and potential
+outliers. These initial steps provides an intuitive understanding of
+the data's structure and guides subsequent analyses. By scrutinizing
+assumptions, such as normality, homoscedasticity, and independence,
+researchers can identify potential limitations or violations that may
+impact the accuracy and reliability of their findings.
+
+Exploratory Data Analysis within the context of ecological statistical
+models usually comprise a set of targetted graphical summaries. They
+are not to be considered definitive diagnostics of the model
+assumptions, but rather a first pass to assess the obvious violations
+prior to the fitting of models. More definitive diagnostics can only
+be achieved after a model has been fit. 
+
+In addition to graphical summaries, there are numerous statistical
+tests to help explore possible violations of various statistical
+assumptions. These tests are less commonly used in ecology since they
+are often more sensitive to deviations from ideal than are the models
+that we are seeking to ensure. 
+
+Simple classic regression models are often the easiest models to fit
+and interpret and as such often represent a standard by which other
+alternate models are gauged. As you will see later in this tutorial,
+such models can actually be fit using closed form (exact solution)
+matrix algebra that can be performed by hand. Nevertheless, and
+perhaps as a result, they also impose some of the strictest
+assumptions. Although these collective assumptions are specific to
+gaussian models, they do provide a good introduction to model
+assumptions in general, so we will use them to motivate the more wider
+discussion.
+
+Simple (gaussian) linear models (represented below) make the following
+assumptions:
+
 
 
 # References
