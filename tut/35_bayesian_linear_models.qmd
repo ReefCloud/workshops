@@ -351,6 +351,180 @@ Focusing on Populations A and B, we would conclude:
   and B, the probability that the rate is 5% or greater is 
   `r round(mean(slopeA< -5),2)` and `r round(mean(slopeB < -5),2)`
   respectively.
+- the Bayesian approach allows us to query the posterior distribution
+  is many other ways in order to ask sensible biological questions.
+  For example, we might consider that a rate of change of 5% or
+  greater represents an important biological impact. For Population A
+  and B, the probability that the rate is 5% or greater is 
+  `r round(mean(slopeA< -5),2)` and `r round(mean(slopeB < -5),2)`
+  respectively.
+
+# Review of (generalised) linear models
+
+I would highly recommend reviewing the information in [the tutorial on
+generalised linear models](30_glm.html), particularly the sections
+describe linear models, assumption checking and generalised linear
+models (GLM). Whilst there are philosophical differences between
+frequentist and Bayesian statistics that have implications for how
+models are fit and interpreted, model choice and assumption checking
+principles are common between the two approaches. Hence, many of these
+topics will be assumed, and not fully described in the current
+tutorial.
+
+Recall from [the tutorial on generalised linear models](30_glm.html)
+that simple linear regression is a linear modelling process that
+models a single response variable against one or more predictors with
+a linear combination of coefficients and (in the case of a Gaussian
+model) can be expressed as:
+
+::: {.columns}
+
+:::: {.column width="48%"}
+$$y_i = \beta_0+ \beta_1 x_i+\epsilon_i \hspace{1cm}\epsilon\sim{}N(0,\sigma^2)$$
+
+where:
+
+- $y_i$ is the response value for each of the $i$ observations
+- $\beta_0$ is the y-intercept (value of $y$ when $x=0$)
+- $\beta_1$ is the slope (rate of chance in $y$ per unit chance in
+  $x$)
+- $x_i$ is the predictor value for each of the $i$ observations
+- $\epsilon_i$ is the residual value of each of the $i$ observations.
+  A residual is the difference between the observed value and the
+  value expected by the model.
+
+- $\epsilon\sim{}N(0,\sigma^2)$ indicates that the residuals are
+  normally distributed with a constant amount of variance
+
+::::
+
+:::: {.column width="48%"}
+
+```{r}
+#| label: residuals,
+#| eval: true
+#| echo: false
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(234)
+x=1:10
+y=2+5*x
+y1=2+5*x + rnorm(10,0,4) 
+lm1 <- lm(y1 ~ x)
+cc <- coef(lm1)
+r <- resid(lm1)
+#print(r)
+ff <- fitted(lm1)
+#print(ff)
+g2=ggplot(data=NULL, aes(y=y1, x=x)) + 
+    geom_segment(data = NULL, aes(y = ff, x = x, yend = y1, xend = x), colour = "red") +
+    geom_point() +
+    geom_abline(slope = cc[2], intercept = cc[1], colour = "blue") +
+    #annotate(geom='text', y=40, x=2, label=expression(y[i]==2+5*x[i]+epsilon[i]), parse=TRUE, hjust=0) +
+    annotate(geom='text', y=30, x=2.5, label=expression(residual~(epsilon[i])), parse=TRUE, hjust=1) +
+    annotate(geom='text', y=15, x=5, label=expression(slope~(beta[1])), parse=TRUE, hjust=0) +
+    annotate(geom='text', y=-5, x=1, label=expression(y-intercept~(beta[0])), parse=TRUE, hjust=0) +
+    geom_curve(aes(x = 2, y = 27, xend = 3.8, yend = 23), 
+             curvature = 0.3, # Adjust curvature as needed
+             arrow = arrow(length = unit(0.05, "inches"))) +
+    geom_curve(aes(x = 4.7, y = 15, xend = 3.7, yend = 18), 
+             curvature = -0.3, # Adjust curvature as needed
+             arrow = arrow(length = unit(0.05, "inches"))) +
+    geom_curve(aes(x = 0.7, y = -5, xend = -0.5, yend = -0.5), 
+             curvature = -0.3, # Adjust curvature as needed
+             arrow = arrow(length = unit(0.05, "inches"))) +
+    scale_y_continuous('y', limits = c(-10, 50)) +
+    xlim(-2, 10) +
+    theme_classic() +
+    theme(axis.text = element_blank(), axis.ticks = element_blank())
+g2
+```
+::::
+
+:::
+
+The above can be re-expressed and generalised as:
+$$
+y_i\sim{}Dist(\mu_i, ...)\\
+g(\mu_i) = \beta_0+ \beta_1 x_i
+$$
+
+where:
+
+- $Dist$ represents a distribution from the exponential family (such
+  as Gaussian, Poisson, Binomial, etc)
+- $...$ represents additional parameters relevant to the nominated
+  distribution (such as $\sigma^2$: Gaussian, $n$: Binomial and
+  $\phi$: Negative Binomial, etc)
+- $g()$ represents the link function (e.g. log: Poisson, logit:
+  Binomial, etc)
+
+The reliability of any model depends on the degree to which the data
+adheres to the model assumptions. Hence, as with frequentist models,
+exploratory data analysis (EDA) is a vital component of Bayesian
+modelling and since the model structures are similar between
+frequentist and Bayesian approaches, so too is EDA.
+
+# Bayesian (generalised) linear models
+
+For the purpose of introduction, we will start by exploring a Gaussian
+model with a very simple fabricated data set representing the
+relationship between a response ($y$) and a continuous predictor ($x =
+[1,2,3,4,5,6,7,8,9,10]$. The fabricated data set will comprise 10
+observations each drawn from normal distributions with a set standard
+deviation of 4. The means of the 10 populations will be determined by
+the following equation: 
+
+$$ \mu_i = 2 + 5\times x_i $$
+
+Let generate these data.
+
+```{r}
+#| label: sim1
+#| eval: true
+#| echo: true
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(234)
+dat <- data.frame(x = 1:10) |>
+    mutate(y = round(rnorm(n = 10, mean = 2 + (5 * x), sd = 4), digits = 2))
+dat
+```
+
+
+
+The model will will be fitting will be:
+
+$$
+\begin{align}
+y_i&\sim{}N(\mu_i, \sigma^2)\\
+\mu_i &= \beta_0+ \beta_1 x_i
+\end{align}
+$$
+
+The parameters that we are going to attempt to estimate are the
+y-intercept ($\beta_0$), the slope ($\beta_1$) and the underlying
+variance ($\sigma^2$). Recall (from tutorials on [statistical
+philosophies](21_statistical_philosophies.html) and
+[estimation](22_estimation.html))) that Bayesian models calculate
+**posterior** predictions ($P(H|D)$) from likelihood ($P(D|H)$) and
+**prior** expectations ($P(H)$). Therefore, in preparation for fitting
+a Bayesian model, we must consider what our prior expectations are for
+_all_ parameters.
+
+The individual responses ($y_i$, observed yields) are each expected to
+have been **independently** drawn from normal (**Gaussian**)
+distributions ($\mathcal{N}$). These distributions represent all the
+possible values of $y$ we could have obtained at the specific ($i^{th}$)
+level of $x$. Hence the $i^{th}$ $y$ observation is expected
+to have been drawn from a normal distribution with a mean of $\mu_i$.
+
+Although each distribution is expected to come from populations that
+differ in their means, we assume that all of these distributions have
+the **same variance** ($\sigma^2$).
+
 
 
 # References
