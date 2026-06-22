@@ -164,6 +164,100 @@ for (n in 1:1000) {
   if(AA[2,4]<0.05 & BB[2,4]>0.05 & abs(BB[2,1]-CC[2,1])<1) break
 }
 ```
+::: {.columns}
+
+:::: {.column width="32%"}
+```{r}
+#| label: PopA
+#| eval: true
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+#| tidy: true
+par(mar=c(3,3,0,0))
+plot(y~x,popA, ylim=c(0,250), axes=F, ann=F, pch=16)
+abline(lm(y~x,popA))
+axis(1)
+axis(2, las=1)
+mtext("x",1,line=2, cex=1.5)
+box(bty="l")
+popA.lm <- lm(y~x,popA)
+popA.sum<-summary(popA.lm)$coef
+```
+
+<p style="margin-left:30pt;">
+n: `r  nrow(popA)`<br>
+Slope: `r round(coef(popA.lm)[2],4)`<br>
+_t_: `r round(popA.sum[2,3],4)`<br>
+_p-value_: `r round(popA.sum[2,4],4)`<br>
+</p>
+
+::::
+
+:::: {.column width="32%"}
+```{r}
+#| label: PopB
+#| eval: true
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+#| tidy: true
+par(mar=c(3,3,0,0))
+plot(y~x,popB, ylim=c(0,250), axes=F, ann=F, pch=16)
+abline(lm(y~x,popB))
+axis(1)
+axis(2, las=1)
+mtext("x",1,line=2, cex=1.5)
+box(bty="l")
+popB.lm <- lm(y~x,popB)
+popB.sum<-summary(popB.lm)$coef
+```
+
+<p style="margin-left:30pt;">
+n: `r  nrow(popB)`<br>
+Slope: `r round(coef(popB.lm)[2],4)`<br>
+_t_: `r round(popB.sum[2,3],4)`<br>
+_p-value_: `r round(popB.sum[2,4],4)`<br>
+</p>
+
+::::
+
+:::: {.column width="32%"}
+```{r}
+#| label: PopC
+#| eval: true
+#| echo: false
+#| fig-width: 3
+#| fig-height: 3
+par(mar=c(3,3,0,0))
+plot(y~x,popC, ylim=c(0,250), axes=F, ann=F, pch=16)
+abline(lm(y~x,popC))
+axis(1)
+axis(2, las=1)
+mtext("x",1,line=2, cex=1.5)
+box(bty="l")
+popC.lm <- lm(y~x,popC)
+popC.sum<-summary(popC.lm)$coef
+```
+
+<p style="margin-left:30pt;">
+n: `r  nrow(popC)`<br>
+Slope: `r round(coef(popC.lm)[2],4)`<br>
+_t_: `r round(popC.sum[2,3],4)`<br>
+_p-value_: `r round(popC.sum[2,4],4)`<br>
+</p>
+
+::::
+
+:::
+
+
+From a traditional frequentist perspective, we would conclude that
+there is a 'significant' relationship in Population A and C
+($p<0.05$), yet not in Population B ($p>0.05$). Note, Population B and
+C were both generated from the same random distribution, it is just
+that Population C has a substantially higher number of observations.
+
 
 
 
