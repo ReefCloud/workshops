@@ -30,7 +30,7 @@ $(DOCS_HTML_FILES): docs/%.html: tut/%.qmd
 	$(info Source = $<; Destination = $@)
 	@echo $(notdir $@)
 	$(eval PUBLIC_DIR = $(DOCS_DIR))
-	echo "library(quarto); quarto_render(\"$<\")" | R --no-save --no-restore;
+	echo "library(quarto); quarto_render(\"$<\", output_format=\"html\")" | R --no-save --no-restore;
 	cp $(patsubst %.qmd, %.html, $<) $(patsubst %.qmd, %.html, $@)
 	#echo cp $(patsubst %.qmd, %.html, $@) $(TUT_SRC_DIR)
 	#echo "library(rmarkdown); source(\"resources/render.R\"); rmarkdown::render(\"$<\", output_format = my_html_document(template = \"../resources/tutorial_template.html\", css = \"../resources/tutorial_style.css\", theme = \"spacelab\", toc = TRUE, toc_float = TRUE, highlight = \"pygments\"))" | R --no-save --no-restore;\
