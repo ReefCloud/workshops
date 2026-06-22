@@ -56,5 +56,116 @@ little variability from a very subtle linear decline. By contrast, the
 second population appears to decline more dramatically, yet has
 substantially more variability.
 
+@Wade-2000 neatly illustrates the contrasting conclusions
+(particularly with respect to interpreting probability) that would be
+drawn by the frequentist and Bayesian approaches and in so doing
+highlights how and why the Bayesian approach provides outcomes that
+are more aligned with management requirements.
+
+This tutorial will start by replicating the demonstration of @Wade-2000.
+
+```{r}
+#| label: Pops
+#| eval: true
+#| echo: false
+#| fig-width: 10
+#| fig-height: 4
+#| tidy: true
+set.seed(1)
+x <- 1:10
+b <- -0.03
+a <- 200
+sigma <- 0.11
+mm <- model.matrix(~x)
+y <- (mm %*% c(a,b))+rnorm(length(x),0,sigma)
+#plot(y~x, ylim=c(0,150))
+#summary(lm(y~x))
+popA <- data.frame(y,x)
+
+set.seed(1)
+x <- 1:10
+b <- -0.1
+a <- 200
+sigma <- 0.38
+mm <- model.matrix(~x)
+y <- (mm %*% c(a,b))+rnorm(length(x),0,sigma)
+#plot(y~x, ylim=c(0,150))
+#summary(lm(y~x))
+popA <- data.frame(y,x)
+
+set.seed(1)
+x <- 1:10
+b <- -10
+a <- 200
+sigma <- 40
+mm <- model.matrix(~x)
+y <- (mm %*% c(a,b))+rnorm(length(x),0,sigma)
+#plot(y~x)
+#summary(lm(y~x))
+popB <- data.frame(y,x)
+#plot(y~x)
+
+set.seed(1)
+x <- seq(1,10,l=100)
+b <- -10
+a <- 200
+sigma <- 40
+mm <- model.matrix(~x)
+y <- (mm %*% c(a,b))+rnorm(length(x),0,sigma)
+#plot(y~x, ylim=c(0,150))
+#summary(lm(y~x))
+popC <- data.frame(y,x)
+#plot(y~x)
+
+#par(mar=c(3,3,0,0),mfrow=c(1,3))
+#plot(y~x,popA, ylim=c(0,250))
+#abline(lm(y~x,popA))
+#plot(y~x,popB, ylim=c(0,250))
+#abline(lm(y~x,popB))
+#plot(y~x,popC, ylim=c(0,250))
+#abline(lm(y~x,popC))
+
+##THIS IS BETTER
+for (n in 1:1000) {
+  set.seed(n)
+  x <- 1:10
+  b <- -0.1
+  a <- 200
+  sigma <- 0.38
+  mm <- model.matrix(~x)
+  y <- (mm %*% c(a,b))+rnorm(length(x),0,sigma)
+  (popA <- data.frame(y,x))
+  
+  set.seed(n)
+  x <- 1:10
+  b <- -10
+  a <- 200
+  sigma <- 40
+  mm <- model.matrix(~x)
+  y <- (mm %*% c(a,b))+rnorm(length(x),0,sigma)
+  (popB <- data.frame(y,x))
+  
+  set.seed(n)
+  x <- seq(1,10,l=100)
+  b <- -10
+  a <- 200
+  sigma <- 40
+  mm <- model.matrix(~x)
+  y <- (mm %*% c(a,b))+rnorm(length(x),0,sigma)
+  popC <- data.frame(y,x)
+  
+  aa<-popA.lm <- lm(y~x,popA)
+  bb<-popB.lm <- lm(y~x,popB)
+  cc<-popC.lm <- lm(y~x,popC)
+  AA<-summary(popA.lm)$coef
+  BB<-summary(popB.lm)$coef
+  CC<-summary(popC.lm)$coef
+  
+  if(AA[2,4]<0.05 & BB[2,4]>0.05 & abs(BB[2,1]-CC[2,1])<1) break
+}
+```
+
+
+
 # References
 
