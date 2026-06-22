@@ -87,3 +87,27 @@ jobs:
           Rscript -e "install.packages('INLA',repos=c(getOption('repos'),INLA='https://inla.r-inla-download.org/R/stable'), dep=TRUE)"
           Rscript -e "install.packages('RandomFields', repos = c('https://spatstat.r-universe.dev', 'https://cloud.r-project.org'))"
           Rscript -e "install.packages('RandomFieldsUtils', repos = c('https://spatstat.r-universe.dev', 'https://cloud.r-project.org'))"
+
+      - name: Install CmdStan
+        shell: Rscript {0}
+        run: |
+          version <- "2.34.1"
+          url <- sprintf("https://github.com/stan-dev/cmdstan/releases/download/v%s/cmdstan-%s.tar.gz", version, version)
+          cmdstanr::install_cmdstan(cores = 2, release_url = url)
+          #cmdstanr::check_cmdstan_toolchain(fix = TRUE)
+          #cmdstanr::install_cmdstan(cores = 2)
+          #cmdstan <- file.path(Sys.getenv("RUNNER_TEMP"), "cmdstan")
+          #file.rename(cmdstanr::cmdstan_path(), cmdstan)
+          #lines <- paste0("\nCMDSTAN=", cmdstan, "\n")
+          #cat(lines, file = "~/.Renviron", append = TRUE)
+
+      - name: install tinytex
+        uses: r-lib/actions/setup-tinytex@v2
+      - run: |
+          tlmgr --version
+          tlmgr update --self
+
+      - name: Install additional LaTeX packages
+        run: |
+          tlmgr install titlesec
+          tlmgr list --only-installed
