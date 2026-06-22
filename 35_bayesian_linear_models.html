@@ -4880,8 +4880,12 @@ display: none
   <li><a href="#preparations" id="toc-preparations" class="nav-link active" data-scroll-target="#preparations"><span class="header-section-number">1</span> Preparations</a></li>
   <li><a href="#a-philosophical-note" id="toc-a-philosophical-note" class="nav-link" data-scroll-target="#a-philosophical-note"><span class="header-section-number">2</span> A philosophical note</a></li>
   <li><a href="#review-of-generalised-linear-models" id="toc-review-of-generalised-linear-models" class="nav-link" data-scroll-target="#review-of-generalised-linear-models"><span class="header-section-number">3</span> Review of (generalised) linear models</a></li>
-  <li><a href="#bayesian-generalised-linear-models" id="toc-bayesian-generalised-linear-models" class="nav-link" data-scroll-target="#bayesian-generalised-linear-models"><span class="header-section-number">4</span> Bayesian (generalised) linear models</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">5</span> References</a></li>
+  <li><a href="#bayesian-generalised-linear-models" id="toc-bayesian-generalised-linear-models" class="nav-link" data-scroll-target="#bayesian-generalised-linear-models"><span class="header-section-number">4</span> Bayesian (generalised) linear models</a>
+  <ul class="collapse">
+  <li><a href="#priors" id="toc-priors" class="nav-link" data-scroll-target="#priors"><span class="header-section-number">4.1</span> Priors</a></li>
+  </ul></li>
+  <li><a href="#example-data" id="toc-example-data" class="nav-link" data-scroll-target="#example-data"><span class="header-section-number">5</span> Example data</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">6</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -5084,8 +5088,219 @@ y_i&amp;\sim{}N(\mu_i, \sigma^2)\\
 <p>The parameters that we are going to attempt to estimate are the y-intercept (<span class="math inline">\beta_0</span>), the slope (<span class="math inline">\beta_1</span>) and the underlying variance (<span class="math inline">\sigma^2</span>). Recall (from tutorials on <a href="21_statistical_philosophies.html">statistical philosophies</a> and <a href="22_estimation.html">estimation</a>)) that Bayesian models calculate <strong>posterior</strong> predictions (<span class="math inline">P(H|D)</span>) from likelihood (<span class="math inline">P(D|H)</span>) and <strong>prior</strong> expectations (<span class="math inline">P(H)</span>). Therefore, in preparation for fitting a Bayesian model, we must consider what our prior expectations are for <em>all</em> parameters.</p>
 <p>The individual responses (<span class="math inline">y_i</span>, observed yields) are each expected to have been <strong>independently</strong> drawn from normal (<strong>Gaussian</strong>) distributions (<span class="math inline">\mathcal{N}</span>). These distributions represent all the possible values of <span class="math inline">y</span> we could have obtained at the specific (<span class="math inline">i^{th}</span>) level of <span class="math inline">x</span>. Hence the <span class="math inline">i^{th}</span> <span class="math inline">y</span> observation is expected to have been drawn from a normal distribution with a mean of <span class="math inline">\mu_i</span>.</p>
 <p>Although each distribution is expected to come from populations that differ in their means, we assume that all of these distributions have the <strong>same variance</strong> (<span class="math inline">\sigma^2</span>).</p>
+<section id="priors" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="priors"><span class="header-section-number">4.1</span> Priors</h2>
+<p>We need to supply priors for each of the parameters to be estimated (<span class="math inline">\beta_0</span>, <span class="math inline">\beta_1</span> and <span class="math inline">\sigma</span>). Whilst we want these priors to be sufficiently vague as to not influence the outcomes of the analysis (and thus be equivalent to the frequentist analysis), we do not want the priors to be so vague (wide) that they permit the MCMC sampler to drift off into parameter space that is both illogical as well as numerically awkward.</p>
+<p>Proffering sensible priors is one of the most difficult aspects of performing Bayesian analyses. For instances where there are some previous knowledge available and a desire to incorporate those data, the difficulty is in how to ensure that the information is incorporated correctly. However, for instances where there are no previous relevant information and so a desire to have the posteriors driven entirely by the new data, the difficulty is in how to define priors that are both vague enough (not bias results in their direction) and yet not so vague as to allow the MCMC sampler to drift off into unsupported regions (and thus get stuck and yield spurious estimates).</p>
+<p>For early implementations of MCMC sampling routines (such as Metropolis Hasting and Gibbs), it was fairly common to see very vague priors being defined. For example, the priors on effects, were typically normal priors with mean of 0 and variance of <code>1e+06</code> (1,00,000). These are very vague priors. Yet for some samplers (e.g. NUTS), such vague priors can encourage poor behaviour of the sampler - particularly if the posterior is complex. It is now generally advised that priors should (where possible) be somewhat <strong>weakly informative</strong> and to some extent, represent the bounds of what are feasible and sensible estimates.</p>
+<p>The degree to which priors <strong>influence</strong> an outcome (whether by having a pulling effect on the estimates or by encouraging the sampler to drift off into unsupported regions of the posterior) is dependent on:</p>
+<ul>
+<li>the relative sparsity of the data - the larger the data, the less weight the priors have and thus less influence they exert.</li>
+<li>the complexity of the model (and thus posterior) - the more parameters, the more sensitive the sampler is to the priors.</li>
+</ul>
+<p>The sampled posterior is the product of both the likelihood and the prior - all of which are multidimensional. For most applications, it would be vertically impossible to define a sensible multidimensional prior. Hence, our only option is to define priors on individual parameters (e.g. the intercept, slope(s), variance etc) and to hope that if they are individually sensible, they will remain collectively sensible.</p>
+<p>So having (hopefully) impressed upon the notion that priors are an important consideration, I will now attempt to synthesise some of the approaches that can be employed to arrive at weakly informative priors that have been gleaned from various sources. Largely, this advice has come from the following resources:</p>
+<ul>
+<li>https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations</li>
+<li>http://svmiller.com/blog/2021/02/thinking-about-your-priors-bayesian-analysis/</li>
+</ul>
+<p>I will outline some of the current main recommendations before summarising some approaches in a table.</p>
+<ul>
+<li>weakly informative priors should contain enough information so as to regularise (discourage unreasonable parameter estimates whilst allowing all reasonable estimates).</li>
+<li>for effects parameters on scaled (standardised) data, an argument could be made for a normal distribution with a standard deviation of 1 (e.g. <code>normal(0,1)</code>), although some prefer a <em>t</em> distribution with 3 degrees of freedom and standard deviation of 1 (e.g. <code>student_t(3,0,1)</code>) - apparently a flatter <em>t</em> is a more robust prior than a normal as an uninformative prior…</li>
+<li>for un-scaled data, the above priors can be scaled by using the standard deviation of the data as the prior standard deviation (e.g. <code>student_t(3,0,sd(y))</code>, or <code>sudent_t(3,0,sd(y)/sd(x))</code>)</li>
+<li>for priors of hierachical standard deviations, priors should encourage shrinkage towards 0 (particularly if the number of groups is small, since otherwise, the sampler will tend to be more responsive to “noise”).</li>
+</ul>
+<p>In this tutorial series, we will perform Bayesian analysis in the STAN language via an R interface. Two popular interfaces that greatly simplify the specification of Bayesian models are <a href="https://paul-buerkner.github.io/brms/">brms</a> and <a href="https://mc-stan.org/rstanarm/">rstanarm</a>. We will exclusively focus on the former as it is far more flexible.</p>
+<table class="table-primary table-bordered table-sm paramsTable small caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 31%">
+<col style="width: 27%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Parameter</th>
+<th>brms</th>
+<th>rstanarm</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gaussian</td>
+<td>Intercept</td>
+<td><code>student_t(3,median(y),mad(y))</code></td>
+<td><code>normal(mean(y),2.5*sd(y))</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>‘Population effects’ (slopes, betas)</td>
+<td>flat, improper priors</td>
+<td><code>normal(0,2.5*sd(y)/sd(x))</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Sigma</td>
+<td><code>student_t(3,0,mad(y))</code></td>
+<td><code>exponential(1/sd(y))</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>‘Group-level effects’</td>
+<td><code>student_t(3,0,mad(y))</code></td>
+<td><code>decov(1,1,1,1)</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Correlation on group-level effects</td>
+<td><code>ljk_corr_cholesky(1)</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Poisson</td>
+<td>Intercept</td>
+<td><code>student_t(3,median(y),mad(y))</code></td>
+<td><code>normal(mean(y),2.5*sd(y))</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>‘Population effects’ (slopes, betas)</td>
+<td>flat, improper priors</td>
+<td><code>normal(0,2.5*sd(y)/sd(x))</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>‘Group-level effects’</td>
+<td><code>student_t(3,0,mad(y))</code></td>
+<td><code>decov(1,1,1,1)</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Correlation on group-level effects</td>
+<td><code>ljk_corr_cholesky(1)</code></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Negative binomial</td>
+<td>Intercept</td>
+<td><code>student_t(3,median(y),mad(y))</code></td>
+<td><code>normal(mean(y),2.5*sd(y))</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>‘Population effects’ (slopes, betas)</td>
+<td>flat, improper priors</td>
+<td><code>normal(0,2.5*sd(y)/sd(x))</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Shape</td>
+<td><code>gamma(0.01, 0.01)</code></td>
+<td><code>exponential(1/sd(y))</code></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>‘Group-level effects’</td>
+<td><code>student_t(3,0,mad(y))</code></td>
+<td><code>decov(1,1,1,1)</code></td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Correlation on group-level effects</td>
+<td><code>ljk_corr_cholesky(1)</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<p><code>brms</code></p>
+<p>https://github.com/paul-buerkner/brms/blob/c2b24475d727c8afd8bfc95947c18793b8ce2892/R/priors.R</p>
+<ol type="1">
+<li>In the above, for non-Gaussian families, <code>y</code> is first transformed according to the family link. If the family link is <code>log</code>, then 0.1 is first added to 0 values.</li>
+<li>in <code>brms</code> the minimum standard deviation for the Intercept prior is <code>2.5</code></li>
+<li>in <code>brms</code> the minimum standard deviation for group-level priors is <code>10</code>.</li>
+</ol>
+<p><code>rstanarm</code></p>
+<p>http://mc-stan.org/rstanarm/articles/priors.html</p>
+<ol type="1">
+<li>in <code>rstanarm</code> priors on standard deviation and correlation associated with group-level effects are packaged up into a single prior (<code>decov</code> which is a decomposition of the variance and covariance matrix).</li>
+</ol>
+<p>In my experience, I find that the above priors tend to be a little bit too wide for many ecological applications and I often prefer to use 1.5 rather than 2.5 as the multiplier.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In Bayesian models, centering of predictors offers huge numerical advantages. So important is it to center that <code>brms</code> automatically centers any continuous predictors for you. However, since the user has not necessarily centered the predictors, the user might misinterpret the outputs from a <code>brms</code> model. Consequently, when fitting a model, <code>brms</code> also generates y-intercept values that are consistent with un-centered values and these are the estimates returned to the user.</p>
+<p>Nevertheless, I would recommend that you should always explicitly center continuous predictors to provide more meaningful interpretations of the y-intercept. I would also highly recommend standardising continuous predictors - this will not only help speed up and stabilise the model, it will simplify the spefication of priors - see the specific examples later in this tutorial.</p>
+</div>
+</div>
+<p>Based on the above, for our fabricated data, lets assign the following priors:</p>
+<ul>
+<li><span class="math inline">\beta_0</span>: Normal prior centred at 31.21 with a variance of 15.17
+<ul>
+<li><p>mean:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>dat<span class="sc">$</span>y <span class="sc">|&gt;</span> <span class="fu">median</span>() <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 31.21</code></pre>
+</div>
+</div></li>
+<li><p>variance:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>dat<span class="sc">$</span>y <span class="sc">|&gt;</span> <span class="fu">mad</span>() <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 15.17</code></pre>
+</div>
+</div></li>
+</ul></li>
+<li><span class="math inline">\beta_1</span>: <em>t</em> distribution (3 degrees of freedom) prior centred at 0 with a variance of 4.09
+<ul>
+<li><p>mean: since effects are differences and we may not want to pre-determine the direction (polarity) of any trends, it is typical to define effects priors with means of 0</p></li>
+<li><p>variance:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">mad</span>(dat<span class="sc">$</span>y) <span class="sc">/</span> <span class="fu">mad</span>(dat<span class="sc">$</span>x) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4.090138</code></pre>
+</div>
+</div></li>
+</ul></li>
+<li><span class="math inline">\sigma</span>: (half) <em>t</em> distribution (3 degrees of freedom) centred at 0 with a variance of 15.17
+<ul>
+<li><p>variance:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>dat<span class="sc">$</span>y <span class="sc">|&gt;</span> <span class="fu">mad</span>() <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 15.17</code></pre>
+</div>
+</div></li>
+</ul></li>
+</ul>
+<p>Note, again, when fitting models through either <code>rstanarm</code> or <code>brms</code>, the priors assume that the predictor(s) have been centred and are to be applied on the link scale. In this case the link scale is an identity.</p>
+<p>Similar logic can be applied for models that employ different distributions. In the following sections, we will define numerous sets of data (each of which represents different major forms of ecological data) and see how we can set appropriate priors in each case. In working through these example, it is worth reflecting on how much simpler prior specification is if we use standardised predictors.</p>
 </section>
-<section id="references" class="level1" data-number="5">
+</section>
+<section id="example-data" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Example data</h1>
+<p>This tutorial will blend theoretical discussions with actual calculations and model fits. I believe that by bridging the divide between theory and application, we all gain better understanding. The applied components of this tutorial will be motivated by numerous fabricated data sets. The advantage of simulated data over real data is that with simulated data, we know the ‘truth’ and can therefore gauge the accuracy of estimates.</p>
+<p>The motivating examples are:</p>
+<ul>
+<li><strong>Example 1</strong> - simulated samples drawn from a Gaussian (normal) distribution reminiscent of data collected on measurements (such as body mass)</li>
+<li><strong>Example 2</strong> - simulated Gaussian samples drawn three different populations representing three different treatment levels (e.g. body masses of three different species)</li>
+<li><strong>Example 3</strong> - simulated samples drawn from a Poisson distribution reminiscent of count data (such as number of individuals of a species within quadrats)</li>
+<li><strong>Example 4</strong> - simulated samples drawn from a Negative Binomial distribution reminiscent of over-dispersed count data (such as number of individuals of a species that tends to aggregate in groups)</li>
+<li><strong>Example 5</strong> - simulated samples drawn from a Bernoulli (binomial with <span class="math inline">n = 1</span>) distribution reminiscent of binary data (such as the presence/absence of a species within sites)</li>
+<li><strong>Example 6</strong> - simulated samples drawn from a Binomial distribution reminiscent of proportional data (such as counts of a particular taxa out of a total number of individuals)</li>
+</ul>
+</section>
+<section id="references" class="level1" data-number="6">
 
 
 
@@ -5094,7 +5309,7 @@ y_i&amp;\sim{}N(\mu_i, \sigma^2)\\
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">5 References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">6 References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
 <div id="ref-Wade-2000" class="csl-entry" role="listitem">
 Wade, Paul R. 2000. <span>“Bayesian Methods in Conservation Biology.”</span> <em>Conservation Biology</em> 14 (5): 1308–16. https://doi.org/<a href="https://doi.org/10.1046/j.1523-1739.2000.99415.x">https://doi.org/10.1046/j.1523-1739.2000.99415.x</a>.
 </div>
@@ -5550,536 +5765,771 @@ Wade, Paul R. 2000. <span>“Bayesian Methods in Conservation Biology.”</span>
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">---</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="an">title:</span><span class="co"> Bayesian linear models</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="an">author:</span><span class="co"> &quot;Murray Logan&quot;</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="an">date:</span><span class="co"> &quot;`r format(Sys.time(), &#39;%d %B, %Y&#39;)`&quot;</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a><span class="an">format:</span><span class="co"> </span></span>
-<span id="cb4-6"><a href="#cb4-6"></a><span class="co">  html:</span></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="co">    toc: true</span></span>
-<span id="cb4-8"><a href="#cb4-8"></a><span class="co">    toc-float: true</span></span>
-<span id="cb4-9"><a href="#cb4-9"></a><span class="co">    number-sections: true</span></span>
-<span id="cb4-10"><a href="#cb4-10"></a><span class="co">    number-depth: 3</span></span>
-<span id="cb4-11"><a href="#cb4-11"></a><span class="co">    embed-resources: true</span></span>
-<span id="cb4-12"><a href="#cb4-12"></a><span class="co">    code-fold: false</span></span>
-<span id="cb4-13"><a href="#cb4-13"></a><span class="co">    code-tools: true</span></span>
-<span id="cb4-14"><a href="#cb4-14"></a><span class="co">    code-summary: &quot;Show the code&quot;</span></span>
-<span id="cb4-15"><a href="#cb4-15"></a><span class="co">    html-math-method: katex</span></span>
-<span id="cb4-16"><a href="#cb4-16"></a><span class="an">execute:</span></span>
-<span id="cb4-17"><a href="#cb4-17"></a><span class="co">  keep-md: true</span></span>
-<span id="cb4-18"><a href="#cb4-18"></a><span class="an">crossref:</span></span>
-<span id="cb4-19"><a href="#cb4-19"></a><span class="co">  fig-title: &#39;**Figure**&#39;</span></span>
-<span id="cb4-20"><a href="#cb4-20"></a><span class="co">  fig-labels: arabic</span></span>
-<span id="cb4-21"><a href="#cb4-21"></a><span class="co">  tbl-title: &#39;**Table**&#39;</span></span>
-<span id="cb4-22"><a href="#cb4-22"></a><span class="co">  tbl-labels: arabic</span></span>
-<span id="cb4-23"><a href="#cb4-23"></a><span class="an">engine:</span><span class="co"> knitr</span></span>
-<span id="cb4-24"><a href="#cb4-24"></a><span class="an">bibliography:</span><span class="co"> resources/references.bib</span></span>
-<span id="cb4-25"><a href="#cb4-25"></a><span class="an">output_dir:</span><span class="co"> &quot;docs&quot;</span></span>
-<span id="cb4-26"><a href="#cb4-26"></a><span class="co">---</span></span>
-<span id="cb4-27"><a href="#cb4-27"></a></span>
-<span id="cb4-28"><a href="#cb4-28"></a></span>
-<span id="cb4-29"><a href="#cb4-29"></a><span class="fu"># Preparations</span></span>
-<span id="cb4-30"><a href="#cb4-30"></a></span>
-<span id="cb4-31"><a href="#cb4-31"></a>Load the necessary libraries</span>
-<span id="cb4-32"><a href="#cb4-32"></a></span>
-<span id="cb4-35"><a href="#cb4-35"></a><span class="in">```{r}</span></span>
-<span id="cb4-36"><a href="#cb4-36"></a><span class="co">#| label: libraries</span></span>
-<span id="cb4-37"><a href="#cb4-37"></a><span class="co">#| eval: true</span></span>
-<span id="cb4-38"><a href="#cb4-38"></a><span class="co">#| warning: false</span></span>
-<span id="cb4-39"><a href="#cb4-39"></a><span class="co">#| message: false</span></span>
-<span id="cb4-40"><a href="#cb4-40"></a><span class="co">#| cache: false</span></span>
-<span id="cb4-41"><a href="#cb4-41"></a><span class="fu">library</span>(tidyverse)   <span class="co">#for data wrangling and plotting</span></span>
-<span id="cb4-42"><a href="#cb4-42"></a><span class="fu">library</span>(DHARMa)      <span class="co">#for simulated residuals</span></span>
-<span id="cb4-43"><a href="#cb4-43"></a><span class="fu">library</span>(performance) <span class="co">#for model diagnostics</span></span>
-<span id="cb4-44"><a href="#cb4-44"></a><span class="fu">library</span>(see)         <span class="co">#for model diagnostics</span></span>
-<span id="cb4-45"><a href="#cb4-45"></a><span class="fu">library</span>(brms)        <span class="co">#for Bayesian models</span></span>
-<span id="cb4-46"><a href="#cb4-46"></a><span class="fu">library</span>(tidybayes)   <span class="co">#for exploring Bayesian PKPDmodels</span></span>
-<span id="cb4-47"><a href="#cb4-47"></a><span class="fu">library</span>(rstan)       <span class="co">#for diagnostics plots</span></span>
-<span id="cb4-48"><a href="#cb4-48"></a><span class="fu">library</span>(bayesplot)   <span class="co">#for diagnostic plots</span></span>
-<span id="cb4-49"><a href="#cb4-49"></a><span class="fu">library</span>(patchwork)   <span class="co">#for arranging multiple plots</span></span>
-<span id="cb4-50"><a href="#cb4-50"></a><span class="fu">library</span>(HDInterval)  <span class="co">#for HPD intervals</span></span>
-<span id="cb4-51"><a href="#cb4-51"></a><span class="fu">library</span>(bayestestR)  <span class="co">#for ROPE</span></span>
-<span id="cb4-52"><a href="#cb4-52"></a><span class="fu">library</span>(emmeans)     <span class="co">#for estimated marginal means</span></span>
-<span id="cb4-53"><a href="#cb4-53"></a><span class="fu">source</span>(<span class="st">&quot;helperfunctions.R&quot;</span>)</span>
-<span id="cb4-54"><a href="#cb4-54"></a><span class="in">```</span></span>
-<span id="cb4-55"><a href="#cb4-55"></a></span>
-<span id="cb4-56"><a href="#cb4-56"></a>Many biologists and ecologists get a little twitchy and nervous around</span>
-<span id="cb4-57"><a href="#cb4-57"></a>mathematical and statistical formulae and nomenclature. Whilst it is</span>
-<span id="cb4-58"><a href="#cb4-58"></a>possible to perform basic statistics without too much regard for the</span>
-<span id="cb4-59"><a href="#cb4-59"></a>actual equation (model) being employed, as the complexity of the</span>
-<span id="cb4-60"><a href="#cb4-60"></a>analysis increases, the need to understand the underlying model</span>
-<span id="cb4-61"><a href="#cb4-61"></a>becomes increasingly important. Moreover, model specification in BUGS</span>
-<span id="cb4-62"><a href="#cb4-62"></a>(the language used to program Bayesian modelling) aligns very closely</span>
-<span id="cb4-63"><a href="#cb4-63"></a>to the underlying formulae. Hence a good understanding of the</span>
-<span id="cb4-64"><a href="#cb4-64"></a>underlying model is vital to be able to create a sensible Bayesian</span>
-<span id="cb4-65"><a href="#cb4-65"></a>model. Consequently, I will always present the linear model formulae</span>
-<span id="cb4-66"><a href="#cb4-66"></a>along with the analysis. If you start to feel some form of disorder</span>
-<span id="cb4-67"><a href="#cb4-67"></a>starting to develop, you might like to run through the Tutorials and</span>
-<span id="cb4-68"><a href="#cb4-68"></a>Workshops twice (the first time ignoring the formulae). </span>
-<span id="cb4-69"><a href="#cb4-69"></a></span>
-<span id="cb4-70"><a href="#cb4-70"></a><span class="fu"># A philosophical note</span></span>
-<span id="cb4-71"><a href="#cb4-71"></a></span>
-<span id="cb4-72"><a href="#cb4-72"></a>To introduce the philosophical and mathematical differences between</span>
-<span id="cb4-73"><a href="#cb4-73"></a>classical (frequentist) and Bayesian statistics, @Wade-2000 presented</span>
-<span id="cb4-74"><a href="#cb4-74"></a>a provocative yet compelling trend analysis of two hypothetical</span>
-<span id="cb4-75"><a href="#cb4-75"></a>populations. The temporal trend of one of the populations shows very</span>
-<span id="cb4-76"><a href="#cb4-76"></a>little variability from a very subtle linear decline. By contrast, the</span>
-<span id="cb4-77"><a href="#cb4-77"></a>second population appears to decline more dramatically, yet has</span>
-<span id="cb4-78"><a href="#cb4-78"></a>substantially more variability.</span>
-<span id="cb4-79"><a href="#cb4-79"></a></span>
-<span id="cb4-80"><a href="#cb4-80"></a>@Wade-2000 neatly illustrates the contrasting conclusions</span>
-<span id="cb4-81"><a href="#cb4-81"></a>(particularly with respect to interpreting probability) that would be</span>
-<span id="cb4-82"><a href="#cb4-82"></a>drawn by the frequentist and Bayesian approaches and in so doing</span>
-<span id="cb4-83"><a href="#cb4-83"></a>highlights how and why the Bayesian approach provides outcomes that</span>
-<span id="cb4-84"><a href="#cb4-84"></a>are more aligned with management requirements.</span>
-<span id="cb4-85"><a href="#cb4-85"></a></span>
-<span id="cb4-86"><a href="#cb4-86"></a>This tutorial will start by replicating the demonstration of @Wade-2000.</span>
-<span id="cb4-87"><a href="#cb4-87"></a></span>
-<span id="cb4-90"><a href="#cb4-90"></a><span class="in">```{r}</span></span>
-<span id="cb4-91"><a href="#cb4-91"></a><span class="co">#| label: Pops</span></span>
-<span id="cb4-92"><a href="#cb4-92"></a><span class="co">#| eval: true</span></span>
-<span id="cb4-93"><a href="#cb4-93"></a><span class="co">#| echo: false</span></span>
-<span id="cb4-94"><a href="#cb4-94"></a><span class="co">#| fig-width: 10</span></span>
-<span id="cb4-95"><a href="#cb4-95"></a><span class="co">#| fig-height: 4</span></span>
-<span id="cb4-96"><a href="#cb4-96"></a><span class="co">#| tidy: true</span></span>
-<span id="cb4-97"><a href="#cb4-97"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb4-98"><a href="#cb4-98"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
-<span id="cb4-99"><a href="#cb4-99"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.03</span></span>
-<span id="cb4-100"><a href="#cb4-100"></a>a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb4-101"><a href="#cb4-101"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.11</span></span>
-<span id="cb4-102"><a href="#cb4-102"></a>mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
-<span id="cb4-103"><a href="#cb4-103"></a>y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
-<span id="cb4-104"><a href="#cb4-104"></a><span class="co">#plot(y~x, ylim=c(0,150))</span></span>
-<span id="cb4-105"><a href="#cb4-105"></a><span class="co">#summary(lm(y~x))</span></span>
-<span id="cb4-106"><a href="#cb4-106"></a>popA <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
-<span id="cb4-107"><a href="#cb4-107"></a></span>
-<span id="cb4-108"><a href="#cb4-108"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb4-109"><a href="#cb4-109"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
-<span id="cb4-110"><a href="#cb4-110"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.1</span></span>
-<span id="cb4-111"><a href="#cb4-111"></a>a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb4-112"><a href="#cb4-112"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.38</span></span>
-<span id="cb4-113"><a href="#cb4-113"></a>mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
-<span id="cb4-114"><a href="#cb4-114"></a>y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
-<span id="cb4-115"><a href="#cb4-115"></a><span class="co">#plot(y~x, ylim=c(0,150))</span></span>
-<span id="cb4-116"><a href="#cb4-116"></a><span class="co">#summary(lm(y~x))</span></span>
-<span id="cb4-117"><a href="#cb4-117"></a>popA <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
-<span id="cb4-118"><a href="#cb4-118"></a></span>
-<span id="cb4-119"><a href="#cb4-119"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb4-120"><a href="#cb4-120"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
-<span id="cb4-121"><a href="#cb4-121"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span></span>
-<span id="cb4-122"><a href="#cb4-122"></a>a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb4-123"><a href="#cb4-123"></a>sigma <span class="ot">&lt;-</span> <span class="dv">40</span></span>
-<span id="cb4-124"><a href="#cb4-124"></a>mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
-<span id="cb4-125"><a href="#cb4-125"></a>y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
-<span id="cb4-126"><a href="#cb4-126"></a><span class="co">#plot(y~x)</span></span>
-<span id="cb4-127"><a href="#cb4-127"></a><span class="co">#summary(lm(y~x))</span></span>
-<span id="cb4-128"><a href="#cb4-128"></a>popB <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
-<span id="cb4-129"><a href="#cb4-129"></a><span class="co">#plot(y~x)</span></span>
-<span id="cb4-130"><a href="#cb4-130"></a></span>
-<span id="cb4-131"><a href="#cb4-131"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb4-132"><a href="#cb4-132"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="at">l=</span><span class="dv">100</span>)</span>
-<span id="cb4-133"><a href="#cb4-133"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span></span>
-<span id="cb4-134"><a href="#cb4-134"></a>a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb4-135"><a href="#cb4-135"></a>sigma <span class="ot">&lt;-</span> <span class="dv">40</span></span>
-<span id="cb4-136"><a href="#cb4-136"></a>mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
-<span id="cb4-137"><a href="#cb4-137"></a>y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
-<span id="cb4-138"><a href="#cb4-138"></a><span class="co">#plot(y~x, ylim=c(0,150))</span></span>
-<span id="cb4-139"><a href="#cb4-139"></a><span class="co">#summary(lm(y~x))</span></span>
-<span id="cb4-140"><a href="#cb4-140"></a>popC <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
-<span id="cb4-141"><a href="#cb4-141"></a><span class="co">#plot(y~x)</span></span>
-<span id="cb4-142"><a href="#cb4-142"></a></span>
-<span id="cb4-143"><a href="#cb4-143"></a><span class="co">#par(mar=c(3,3,0,0),mfrow=c(1,3))</span></span>
-<span id="cb4-144"><a href="#cb4-144"></a><span class="co">#plot(y~x,popA, ylim=c(0,250))</span></span>
-<span id="cb4-145"><a href="#cb4-145"></a><span class="co">#abline(lm(y~x,popA))</span></span>
-<span id="cb4-146"><a href="#cb4-146"></a><span class="co">#plot(y~x,popB, ylim=c(0,250))</span></span>
-<span id="cb4-147"><a href="#cb4-147"></a><span class="co">#abline(lm(y~x,popB))</span></span>
-<span id="cb4-148"><a href="#cb4-148"></a><span class="co">#plot(y~x,popC, ylim=c(0,250))</span></span>
-<span id="cb4-149"><a href="#cb4-149"></a><span class="co">#abline(lm(y~x,popC))</span></span>
-<span id="cb4-150"><a href="#cb4-150"></a></span>
-<span id="cb4-151"><a href="#cb4-151"></a><span class="do">##THIS IS BETTER</span></span>
-<span id="cb4-152"><a href="#cb4-152"></a><span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>) {</span>
-<span id="cb4-153"><a href="#cb4-153"></a>  <span class="fu">set.seed</span>(n)</span>
-<span id="cb4-154"><a href="#cb4-154"></a>  x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
-<span id="cb4-155"><a href="#cb4-155"></a>  b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.1</span></span>
-<span id="cb4-156"><a href="#cb4-156"></a>  a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb4-157"><a href="#cb4-157"></a>  sigma <span class="ot">&lt;-</span> <span class="fl">0.38</span></span>
-<span id="cb4-158"><a href="#cb4-158"></a>  mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
-<span id="cb4-159"><a href="#cb4-159"></a>  y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
-<span id="cb4-160"><a href="#cb4-160"></a>  (popA <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x))</span>
-<span id="cb4-161"><a href="#cb4-161"></a>  </span>
-<span id="cb4-162"><a href="#cb4-162"></a>  <span class="fu">set.seed</span>(n)</span>
-<span id="cb4-163"><a href="#cb4-163"></a>  x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
-<span id="cb4-164"><a href="#cb4-164"></a>  b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span></span>
-<span id="cb4-165"><a href="#cb4-165"></a>  a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb4-166"><a href="#cb4-166"></a>  sigma <span class="ot">&lt;-</span> <span class="dv">40</span></span>
-<span id="cb4-167"><a href="#cb4-167"></a>  mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
-<span id="cb4-168"><a href="#cb4-168"></a>  y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
-<span id="cb4-169"><a href="#cb4-169"></a>  (popB <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x))</span>
-<span id="cb4-170"><a href="#cb4-170"></a>  </span>
-<span id="cb4-171"><a href="#cb4-171"></a>  <span class="fu">set.seed</span>(n)</span>
-<span id="cb4-172"><a href="#cb4-172"></a>  x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="at">l=</span><span class="dv">100</span>)</span>
-<span id="cb4-173"><a href="#cb4-173"></a>  b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span></span>
-<span id="cb4-174"><a href="#cb4-174"></a>  a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb4-175"><a href="#cb4-175"></a>  sigma <span class="ot">&lt;-</span> <span class="dv">40</span></span>
-<span id="cb4-176"><a href="#cb4-176"></a>  mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
-<span id="cb4-177"><a href="#cb4-177"></a>  y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
-<span id="cb4-178"><a href="#cb4-178"></a>  popC <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
-<span id="cb4-179"><a href="#cb4-179"></a>  </span>
-<span id="cb4-180"><a href="#cb4-180"></a>  aa<span class="ot">&lt;-</span>popA.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popA)</span>
-<span id="cb4-181"><a href="#cb4-181"></a>  bb<span class="ot">&lt;-</span>popB.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popB)</span>
-<span id="cb4-182"><a href="#cb4-182"></a>  cc<span class="ot">&lt;-</span>popC.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popC)</span>
-<span id="cb4-183"><a href="#cb4-183"></a>  AA<span class="ot">&lt;-</span><span class="fu">summary</span>(popA.lm)<span class="sc">$</span>coef</span>
-<span id="cb4-184"><a href="#cb4-184"></a>  BB<span class="ot">&lt;-</span><span class="fu">summary</span>(popB.lm)<span class="sc">$</span>coef</span>
-<span id="cb4-185"><a href="#cb4-185"></a>  CC<span class="ot">&lt;-</span><span class="fu">summary</span>(popC.lm)<span class="sc">$</span>coef</span>
-<span id="cb4-186"><a href="#cb4-186"></a>  </span>
-<span id="cb4-187"><a href="#cb4-187"></a>  <span class="cf">if</span>(AA[<span class="dv">2</span>,<span class="dv">4</span>]<span class="sc">&lt;</span><span class="fl">0.05</span> <span class="sc">&amp;</span> BB[<span class="dv">2</span>,<span class="dv">4</span>]<span class="sc">&gt;</span><span class="fl">0.05</span> <span class="sc">&amp;</span> <span class="fu">abs</span>(BB[<span class="dv">2</span>,<span class="dv">1</span>]<span class="sc">-</span>CC[<span class="dv">2</span>,<span class="dv">1</span>])<span class="sc">&lt;</span><span class="dv">1</span>) <span class="cf">break</span></span>
-<span id="cb4-188"><a href="#cb4-188"></a>}</span>
-<span id="cb4-189"><a href="#cb4-189"></a><span class="in">```</span></span>
-<span id="cb4-190"><a href="#cb4-190"></a>::: {.columns}</span>
-<span id="cb4-191"><a href="#cb4-191"></a></span>
-<span id="cb4-192"><a href="#cb4-192"></a>:::: {.column width=&quot;32%&quot;}</span>
-<span id="cb4-195"><a href="#cb4-195"></a><span class="in">```{r}</span></span>
-<span id="cb4-196"><a href="#cb4-196"></a><span class="co">#| label: PopA</span></span>
-<span id="cb4-197"><a href="#cb4-197"></a><span class="co">#| eval: true</span></span>
-<span id="cb4-198"><a href="#cb4-198"></a><span class="co">#| echo: false</span></span>
-<span id="cb4-199"><a href="#cb4-199"></a><span class="co">#| fig-width: 3</span></span>
-<span id="cb4-200"><a href="#cb4-200"></a><span class="co">#| fig-height: 3</span></span>
-<span id="cb4-201"><a href="#cb4-201"></a><span class="co">#| tidy: true</span></span>
-<span id="cb4-202"><a href="#cb4-202"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">0</span>))</span>
-<span id="cb4-203"><a href="#cb4-203"></a><span class="fu">plot</span>(y<span class="sc">~</span>x,popA, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">250</span>), <span class="at">axes=</span>F, <span class="at">ann=</span>F, <span class="at">pch=</span><span class="dv">16</span>)</span>
-<span id="cb4-204"><a href="#cb4-204"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x,popA))</span>
-<span id="cb4-205"><a href="#cb4-205"></a><span class="fu">axis</span>(<span class="dv">1</span>)</span>
-<span id="cb4-206"><a href="#cb4-206"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">las=</span><span class="dv">1</span>)</span>
-<span id="cb4-207"><a href="#cb4-207"></a><span class="fu">mtext</span>(<span class="st">&quot;x&quot;</span>,<span class="dv">1</span>,<span class="at">line=</span><span class="dv">2</span>, <span class="at">cex=</span><span class="fl">1.5</span>)</span>
-<span id="cb4-208"><a href="#cb4-208"></a><span class="fu">box</span>(<span class="at">bty=</span><span class="st">&quot;l&quot;</span>)</span>
-<span id="cb4-209"><a href="#cb4-209"></a>popA.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popA)</span>
-<span id="cb4-210"><a href="#cb4-210"></a>popA.sum<span class="ot">&lt;-</span><span class="fu">summary</span>(popA.lm)<span class="sc">$</span>coef</span>
-<span id="cb4-211"><a href="#cb4-211"></a><span class="in">```</span></span>
-<span id="cb4-212"><a href="#cb4-212"></a></span>
-<span id="cb4-213"><a href="#cb4-213"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;margin-left:30pt;&quot;</span><span class="dt">&gt;</span></span>
-<span id="cb4-214"><a href="#cb4-214"></a>n: <span class="in">`r  nrow(popA)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-215"><a href="#cb4-215"></a>Slope: <span class="in">`r round(coef(popA.lm)[2],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-216"><a href="#cb4-216"></a>_t_: <span class="in">`r round(popA.sum[2,3],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-217"><a href="#cb4-217"></a>_p-value_: <span class="in">`r round(popA.sum[2,4],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-218"><a href="#cb4-218"></a><span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
-<span id="cb4-219"><a href="#cb4-219"></a></span>
-<span id="cb4-220"><a href="#cb4-220"></a>::::</span>
-<span id="cb4-221"><a href="#cb4-221"></a></span>
-<span id="cb4-222"><a href="#cb4-222"></a>:::: {.column width=&quot;32%&quot;}</span>
-<span id="cb4-225"><a href="#cb4-225"></a><span class="in">```{r}</span></span>
-<span id="cb4-226"><a href="#cb4-226"></a><span class="co">#| label: PopB</span></span>
-<span id="cb4-227"><a href="#cb4-227"></a><span class="co">#| eval: true</span></span>
-<span id="cb4-228"><a href="#cb4-228"></a><span class="co">#| echo: false</span></span>
-<span id="cb4-229"><a href="#cb4-229"></a><span class="co">#| fig-width: 3</span></span>
-<span id="cb4-230"><a href="#cb4-230"></a><span class="co">#| fig-height: 3</span></span>
-<span id="cb4-231"><a href="#cb4-231"></a><span class="co">#| tidy: true</span></span>
-<span id="cb4-232"><a href="#cb4-232"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">0</span>))</span>
-<span id="cb4-233"><a href="#cb4-233"></a><span class="fu">plot</span>(y<span class="sc">~</span>x,popB, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">250</span>), <span class="at">axes=</span>F, <span class="at">ann=</span>F, <span class="at">pch=</span><span class="dv">16</span>)</span>
-<span id="cb4-234"><a href="#cb4-234"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x,popB))</span>
-<span id="cb4-235"><a href="#cb4-235"></a><span class="fu">axis</span>(<span class="dv">1</span>)</span>
-<span id="cb4-236"><a href="#cb4-236"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">las=</span><span class="dv">1</span>)</span>
-<span id="cb4-237"><a href="#cb4-237"></a><span class="fu">mtext</span>(<span class="st">&quot;x&quot;</span>,<span class="dv">1</span>,<span class="at">line=</span><span class="dv">2</span>, <span class="at">cex=</span><span class="fl">1.5</span>)</span>
-<span id="cb4-238"><a href="#cb4-238"></a><span class="fu">box</span>(<span class="at">bty=</span><span class="st">&quot;l&quot;</span>)</span>
-<span id="cb4-239"><a href="#cb4-239"></a>popB.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popB)</span>
-<span id="cb4-240"><a href="#cb4-240"></a>popB.sum<span class="ot">&lt;-</span><span class="fu">summary</span>(popB.lm)<span class="sc">$</span>coef</span>
-<span id="cb4-241"><a href="#cb4-241"></a><span class="in">```</span></span>
-<span id="cb4-242"><a href="#cb4-242"></a></span>
-<span id="cb4-243"><a href="#cb4-243"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;margin-left:30pt;&quot;</span><span class="dt">&gt;</span></span>
-<span id="cb4-244"><a href="#cb4-244"></a>n: <span class="in">`r  nrow(popB)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-245"><a href="#cb4-245"></a>Slope: <span class="in">`r round(coef(popB.lm)[2],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-246"><a href="#cb4-246"></a>_t_: <span class="in">`r round(popB.sum[2,3],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-247"><a href="#cb4-247"></a>_p-value_: <span class="in">`r round(popB.sum[2,4],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-248"><a href="#cb4-248"></a><span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
-<span id="cb4-249"><a href="#cb4-249"></a></span>
-<span id="cb4-250"><a href="#cb4-250"></a>::::</span>
-<span id="cb4-251"><a href="#cb4-251"></a></span>
-<span id="cb4-252"><a href="#cb4-252"></a>:::: {.column width=&quot;32%&quot;}</span>
-<span id="cb4-255"><a href="#cb4-255"></a><span class="in">```{r}</span></span>
-<span id="cb4-256"><a href="#cb4-256"></a><span class="co">#| label: PopC</span></span>
-<span id="cb4-257"><a href="#cb4-257"></a><span class="co">#| eval: true</span></span>
-<span id="cb4-258"><a href="#cb4-258"></a><span class="co">#| echo: false</span></span>
-<span id="cb4-259"><a href="#cb4-259"></a><span class="co">#| fig-width: 3</span></span>
-<span id="cb4-260"><a href="#cb4-260"></a><span class="co">#| fig-height: 3</span></span>
-<span id="cb4-261"><a href="#cb4-261"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">0</span>))</span>
-<span id="cb4-262"><a href="#cb4-262"></a><span class="fu">plot</span>(y<span class="sc">~</span>x,popC, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">250</span>), <span class="at">axes=</span>F, <span class="at">ann=</span>F, <span class="at">pch=</span><span class="dv">16</span>)</span>
-<span id="cb4-263"><a href="#cb4-263"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x,popC))</span>
-<span id="cb4-264"><a href="#cb4-264"></a><span class="fu">axis</span>(<span class="dv">1</span>)</span>
-<span id="cb4-265"><a href="#cb4-265"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">las=</span><span class="dv">1</span>)</span>
-<span id="cb4-266"><a href="#cb4-266"></a><span class="fu">mtext</span>(<span class="st">&quot;x&quot;</span>,<span class="dv">1</span>,<span class="at">line=</span><span class="dv">2</span>, <span class="at">cex=</span><span class="fl">1.5</span>)</span>
-<span id="cb4-267"><a href="#cb4-267"></a><span class="fu">box</span>(<span class="at">bty=</span><span class="st">&quot;l&quot;</span>)</span>
-<span id="cb4-268"><a href="#cb4-268"></a>popC.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popC)</span>
-<span id="cb4-269"><a href="#cb4-269"></a>popC.sum<span class="ot">&lt;-</span><span class="fu">summary</span>(popC.lm)<span class="sc">$</span>coef</span>
-<span id="cb4-270"><a href="#cb4-270"></a><span class="in">```</span></span>
-<span id="cb4-271"><a href="#cb4-271"></a></span>
-<span id="cb4-272"><a href="#cb4-272"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;margin-left:30pt;&quot;</span><span class="dt">&gt;</span></span>
-<span id="cb4-273"><a href="#cb4-273"></a>n: <span class="in">`r  nrow(popC)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-274"><a href="#cb4-274"></a>Slope: <span class="in">`r round(coef(popC.lm)[2],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-275"><a href="#cb4-275"></a>_t_: <span class="in">`r round(popC.sum[2,3],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-276"><a href="#cb4-276"></a>_p-value_: <span class="in">`r round(popC.sum[2,4],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
-<span id="cb4-277"><a href="#cb4-277"></a><span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
-<span id="cb4-278"><a href="#cb4-278"></a></span>
-<span id="cb4-279"><a href="#cb4-279"></a>::::</span>
-<span id="cb4-280"><a href="#cb4-280"></a></span>
-<span id="cb4-281"><a href="#cb4-281"></a>:::</span>
-<span id="cb4-282"><a href="#cb4-282"></a></span>
-<span id="cb4-283"><a href="#cb4-283"></a></span>
-<span id="cb4-284"><a href="#cb4-284"></a>From a traditional frequentist perspective, we would conclude that</span>
-<span id="cb4-285"><a href="#cb4-285"></a>there is a &#39;significant&#39; relationship in Population A and C</span>
-<span id="cb4-286"><a href="#cb4-286"></a>($p&lt;0.05$), yet not in Population B ($p&gt;0.05$). Note, Population B and</span>
-<span id="cb4-287"><a href="#cb4-287"></a>C were both generated from the same random distribution, it is just</span>
-<span id="cb4-288"><a href="#cb4-288"></a>that Population C has a substantially higher number of observations.</span>
-<span id="cb4-289"><a href="#cb4-289"></a></span>
-<span id="cb4-290"><a href="#cb4-290"></a>The above illustrates a couple of things</span>
-<span id="cb4-291"><a href="#cb4-291"></a></span>
-<span id="cb4-292"><a href="#cb4-292"></a><span class="ss">- </span>statistical significance does not necessarily translate into</span>
-<span id="cb4-293"><a href="#cb4-293"></a>  biological importance. The percentage of decline for Population A is</span>
-<span id="cb4-294"><a href="#cb4-294"></a>  `r p1 &lt;- predict(popA.lm, data.frame( x=c(1,10)));</span>
-<span id="cb4-295"><a href="#cb4-295"></a>  round(100*(p1<span class="co">[</span><span class="ot">1</span><span class="co">]</span>-p1<span class="co">[</span><span class="ot">2</span><span class="co">]</span>)/p1<span class="co">[</span><span class="ot">1</span><span class="co">]</span>,2)` where as the percentage of decline</span>
-<span id="cb4-296"><a href="#cb4-296"></a>  for Population B is `r p1 &lt;- predict(popB.lm, data.frame(x=c(1,10)));</span>
-<span id="cb4-297"><a href="#cb4-297"></a>  round(100*(p1<span class="co">[</span><span class="ot">1</span><span class="co">]</span>-p1<span class="co">[</span><span class="ot">2</span><span class="co">]</span>)/p1<span class="co">[</span><span class="ot">1</span><span class="co">]</span>,2)`. That is Population B is declining</span>
-<span id="cb4-298"><a href="#cb4-298"></a>  at nearly 10 times the rate of Population A. That sounds rather</span>
-<span id="cb4-299"><a href="#cb4-299"></a>  important, yet on the basis of the hypothesis test, we would dismiss</span>
-<span id="cb4-300"><a href="#cb4-300"></a>  the decline in Population B.</span>
-<span id="cb4-301"><a href="#cb4-301"></a></span>
-<span id="cb4-302"><a href="#cb4-302"></a><span class="ss">- </span>that a _p_-value is just the probability of detecting an effect or</span>
-<span id="cb4-303"><a href="#cb4-303"></a>  relationship - what is the probability that the sample size is large</span>
-<span id="cb4-304"><a href="#cb4-304"></a>  enough to pick up a difference.</span>
-<span id="cb4-305"><a href="#cb4-305"></a></span>
-<span id="cb4-306"><a href="#cb4-306"></a>Let us now look at it from a Bayesian perspective. I will just provide</span>
-<span id="cb4-307"><a href="#cb4-307"></a>the posterior distributions (densities scaled to 0-1 so that they can</span>
-<span id="cb4-308"><a href="#cb4-308"></a>be plotted together) for the slope for each population.</span>
-<span id="cb4-309"><a href="#cb4-309"></a></span>
-<span id="cb4-312"><a href="#cb4-312"></a><span class="in">```{r}</span></span>
-<span id="cb4-313"><a href="#cb4-313"></a><span class="co">#| label: Pop_densities</span></span>
-<span id="cb4-314"><a href="#cb4-314"></a><span class="co">#| eval: true</span></span>
-<span id="cb4-315"><a href="#cb4-315"></a><span class="co">#| echo: false</span></span>
-<span id="cb4-316"><a href="#cb4-316"></a><span class="co">#| fig-width: 9</span></span>
-<span id="cb4-317"><a href="#cb4-317"></a><span class="co">#| fig-height: 4</span></span>
-<span id="cb4-318"><a href="#cb4-318"></a><span class="co">#| warning: false</span></span>
-<span id="cb4-319"><a href="#cb4-319"></a><span class="co">#| message: false</span></span>
-<span id="cb4-320"><a href="#cb4-320"></a><span class="co">#| results: hide</span></span>
-<span id="cb4-321"><a href="#cb4-321"></a><span class="co">#| cache: true</span></span>
-<span id="cb4-322"><a href="#cb4-322"></a><span class="do">## PopA</span></span>
-<span id="cb4-323"><a href="#cb4-323"></a>popA.brm <span class="ot">&lt;-</span> <span class="fu">brm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> popA)</span>
-<span id="cb4-324"><a href="#cb4-324"></a>slopeA <span class="ot">&lt;-</span> popA.brm <span class="sc">|&gt;</span></span>
-<span id="cb4-325"><a href="#cb4-325"></a>    <span class="fu">as_draws_df</span>() <span class="sc">|&gt;</span></span>
-<span id="cb4-326"><a href="#cb4-326"></a>    <span class="fu">pull</span>(<span class="st">&quot;b_x&quot;</span>)</span>
-<span id="cb4-327"><a href="#cb4-327"></a><span class="do">## PopB</span></span>
-<span id="cb4-328"><a href="#cb4-328"></a>popB.brm <span class="ot">&lt;-</span> <span class="fu">brm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> popB)</span>
-<span id="cb4-329"><a href="#cb4-329"></a>slopeB <span class="ot">&lt;-</span> popB.brm <span class="sc">|&gt;</span></span>
-<span id="cb4-330"><a href="#cb4-330"></a>    <span class="fu">as_draws_df</span>() <span class="sc">|&gt;</span></span>
-<span id="cb4-331"><a href="#cb4-331"></a>    <span class="fu">pull</span>(<span class="st">&quot;b_x&quot;</span>)</span>
-<span id="cb4-332"><a href="#cb4-332"></a><span class="do">## PopC</span></span>
-<span id="cb4-333"><a href="#cb4-333"></a>popC.brm <span class="ot">&lt;-</span> <span class="fu">brm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> popC)</span>
-<span id="cb4-334"><a href="#cb4-334"></a>slopeC <span class="ot">&lt;-</span> popC.brm <span class="sc">|&gt;</span></span>
-<span id="cb4-335"><a href="#cb4-335"></a>    <span class="fu">as_draws_df</span>() <span class="sc">|&gt;</span></span>
-<span id="cb4-336"><a href="#cb4-336"></a>    <span class="fu">pull</span>(<span class="st">&quot;b_x&quot;</span>)</span>
-<span id="cb4-337"><a href="#cb4-337"></a></span>
-<span id="cb4-338"><a href="#cb4-338"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb4-339"><a href="#cb4-339"></a>    <span class="fu">geom_density</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">x =</span> slopeA, <span class="at">y =</span> ..scaled..)) <span class="sc">+</span></span>
-<span id="cb4-340"><a href="#cb4-340"></a>    <span class="fu">geom_density</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">x =</span> slopeB, <span class="at">y =</span> ..scaled..)) <span class="sc">+</span></span>
-<span id="cb4-341"><a href="#cb4-341"></a>    <span class="fu">geom_density</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">x =</span> slopeC, <span class="at">y =</span> ..scaled..)) <span class="sc">+</span></span>
-<span id="cb4-342"><a href="#cb4-342"></a>    <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Relative probability&quot;</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb4-343"><a href="#cb4-343"></a>    <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Regression slope&quot;</span>) <span class="sc">+</span></span>
-<span id="cb4-344"><a href="#cb4-344"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb4-345"><a href="#cb4-345"></a>  <span class="fu">theme</span>(</span>
-<span id="cb4-346"><a href="#cb4-346"></a>      <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb4-347"><a href="#cb4-347"></a>      <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>()</span>
-<span id="cb4-348"><a href="#cb4-348"></a>    )</span>
-<span id="cb4-349"><a href="#cb4-349"></a><span class="in">```</span></span>
-<span id="cb4-350"><a href="#cb4-350"></a></span>
-<span id="cb4-351"><a href="#cb4-351"></a>Focusing on Populations A and B, we would conclude:</span>
-<span id="cb4-352"><a href="#cb4-352"></a></span>
-<span id="cb4-353"><a href="#cb4-353"></a><span class="ss">- </span>the mean (plus or minus CI) slopes for Population A and B are </span>
-<span id="cb4-354"><a href="#cb4-354"></a>  <span class="in">`r round(mean(slopeA),2)`</span> (`r paste(round(quantile(slopeA,</span>
-<span id="cb4-355"><a href="#cb4-355"></a>  p=c(0.025,0.975)),2),collapse=&quot;,&quot;)<span class="in">`) and `</span>r round(mean(slopeB),2)`</span>
-<span id="cb4-356"><a href="#cb4-356"></a>  (`r paste(round(quantile(slopeB,</span>
-<span id="cb4-357"><a href="#cb4-357"></a>  p=c(0.025,0.975)),2),collapse=&quot;,&quot;)`) respectively.</span>
-<span id="cb4-358"><a href="#cb4-358"></a></span>
-<span id="cb4-359"><a href="#cb4-359"></a><span class="ss">- </span>the Bayesian approach allows us to query the posterior distribution</span>
-<span id="cb4-360"><a href="#cb4-360"></a>  is many other ways in order to ask sensible biological questions.</span>
-<span id="cb4-361"><a href="#cb4-361"></a>  For example, we might consider that a rate of change of 5% or</span>
-<span id="cb4-362"><a href="#cb4-362"></a>  greater represents an important biological impact. For Population A</span>
-<span id="cb4-363"><a href="#cb4-363"></a>  and B, the probability that the rate is 5% or greater is </span>
-<span id="cb4-364"><a href="#cb4-364"></a>  <span class="in">`r round(mean(slopeA&lt; -5),2)`</span> and <span class="in">`r round(mean(slopeB &lt; -5),2)`</span></span>
-<span id="cb4-365"><a href="#cb4-365"></a>  respectively.</span>
-<span id="cb4-366"><a href="#cb4-366"></a><span class="ss">- </span>the Bayesian approach allows us to query the posterior distribution</span>
-<span id="cb4-367"><a href="#cb4-367"></a>  is many other ways in order to ask sensible biological questions.</span>
-<span id="cb4-368"><a href="#cb4-368"></a>  For example, we might consider that a rate of change of 5% or</span>
-<span id="cb4-369"><a href="#cb4-369"></a>  greater represents an important biological impact. For Population A</span>
-<span id="cb4-370"><a href="#cb4-370"></a>  and B, the probability that the rate is 5% or greater is </span>
-<span id="cb4-371"><a href="#cb4-371"></a>  <span class="in">`r round(mean(slopeA&lt; -5),2)`</span> and <span class="in">`r round(mean(slopeB &lt; -5),2)`</span></span>
-<span id="cb4-372"><a href="#cb4-372"></a>  respectively.</span>
-<span id="cb4-373"><a href="#cb4-373"></a></span>
-<span id="cb4-374"><a href="#cb4-374"></a><span class="fu"># Review of (generalised) linear models</span></span>
-<span id="cb4-375"><a href="#cb4-375"></a></span>
-<span id="cb4-376"><a href="#cb4-376"></a>I would highly recommend reviewing the information in [the tutorial on</span>
-<span id="cb4-377"><a href="#cb4-377"></a>generalised linear models](30_glm.html), particularly the sections</span>
-<span id="cb4-378"><a href="#cb4-378"></a>describe linear models, assumption checking and generalised linear</span>
-<span id="cb4-379"><a href="#cb4-379"></a>models (GLM). Whilst there are philosophical differences between</span>
-<span id="cb4-380"><a href="#cb4-380"></a>frequentist and Bayesian statistics that have implications for how</span>
-<span id="cb4-381"><a href="#cb4-381"></a>models are fit and interpreted, model choice and assumption checking</span>
-<span id="cb4-382"><a href="#cb4-382"></a>principles are common between the two approaches. Hence, many of these</span>
-<span id="cb4-383"><a href="#cb4-383"></a>topics will be assumed, and not fully described in the current</span>
-<span id="cb4-384"><a href="#cb4-384"></a>tutorial.</span>
-<span id="cb4-385"><a href="#cb4-385"></a></span>
-<span id="cb4-386"><a href="#cb4-386"></a>Recall from <span class="co">[</span><span class="ot">the tutorial on generalised linear models</span><span class="co">](30_glm.html)</span></span>
-<span id="cb4-387"><a href="#cb4-387"></a>that simple linear regression is a linear modelling process that</span>
-<span id="cb4-388"><a href="#cb4-388"></a>models a single response variable against one or more predictors with</span>
-<span id="cb4-389"><a href="#cb4-389"></a>a linear combination of coefficients and (in the case of a Gaussian</span>
-<span id="cb4-390"><a href="#cb4-390"></a>model) can be expressed as:</span>
-<span id="cb4-391"><a href="#cb4-391"></a></span>
-<span id="cb4-392"><a href="#cb4-392"></a>::: {.columns}</span>
-<span id="cb4-393"><a href="#cb4-393"></a></span>
-<span id="cb4-394"><a href="#cb4-394"></a>:::: {.column width=&quot;48%&quot;}</span>
-<span id="cb4-395"><a href="#cb4-395"></a>$$y_i = \beta_0+ \beta_1 x_i+\epsilon_i \hspace{1cm}\epsilon\sim{}N(0,\sigma^2)$$</span>
-<span id="cb4-396"><a href="#cb4-396"></a></span>
-<span id="cb4-397"><a href="#cb4-397"></a>where:</span>
-<span id="cb4-398"><a href="#cb4-398"></a></span>
-<span id="cb4-399"><a href="#cb4-399"></a><span class="ss">- </span>$y_i$ is the response value for each of the $i$ observations</span>
-<span id="cb4-400"><a href="#cb4-400"></a><span class="ss">- </span>$\beta_0$ is the y-intercept (value of $y$ when $x=0$)</span>
-<span id="cb4-401"><a href="#cb4-401"></a><span class="ss">- </span>$\beta_1$ is the slope (rate of chance in $y$ per unit chance in</span>
-<span id="cb4-402"><a href="#cb4-402"></a>  $x$)</span>
-<span id="cb4-403"><a href="#cb4-403"></a><span class="ss">- </span>$x_i$ is the predictor value for each of the $i$ observations</span>
-<span id="cb4-404"><a href="#cb4-404"></a><span class="ss">- </span>$\epsilon_i$ is the residual value of each of the $i$ observations.</span>
-<span id="cb4-405"><a href="#cb4-405"></a>  A residual is the difference between the observed value and the</span>
-<span id="cb4-406"><a href="#cb4-406"></a>  value expected by the model.</span>
-<span id="cb4-407"><a href="#cb4-407"></a></span>
-<span id="cb4-408"><a href="#cb4-408"></a><span class="ss">- </span>$\epsilon\sim{}N(0,\sigma^2)$ indicates that the residuals are</span>
-<span id="cb4-409"><a href="#cb4-409"></a>  normally distributed with a constant amount of variance</span>
-<span id="cb4-410"><a href="#cb4-410"></a></span>
-<span id="cb4-411"><a href="#cb4-411"></a>::::</span>
-<span id="cb4-412"><a href="#cb4-412"></a></span>
-<span id="cb4-413"><a href="#cb4-413"></a>:::: {.column width=&quot;48%&quot;}</span>
-<span id="cb4-414"><a href="#cb4-414"></a></span>
-<span id="cb4-417"><a href="#cb4-417"></a><span class="in">```{r}</span></span>
-<span id="cb4-418"><a href="#cb4-418"></a><span class="co">#| label: residuals,</span></span>
-<span id="cb4-419"><a href="#cb4-419"></a><span class="co">#| eval: true</span></span>
-<span id="cb4-420"><a href="#cb4-420"></a><span class="co">#| echo: false</span></span>
-<span id="cb4-421"><a href="#cb4-421"></a><span class="co">#| fig-height: 3</span></span>
-<span id="cb4-422"><a href="#cb4-422"></a><span class="co">#| fig-width: 3</span></span>
-<span id="cb4-423"><a href="#cb4-423"></a><span class="co">#| warning: false</span></span>
-<span id="cb4-424"><a href="#cb4-424"></a><span class="fu">set.seed</span>(<span class="dv">234</span>)</span>
-<span id="cb4-425"><a href="#cb4-425"></a>x<span class="ot">=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
-<span id="cb4-426"><a href="#cb4-426"></a>y<span class="ot">=</span><span class="dv">2</span><span class="sc">+</span><span class="dv">5</span><span class="sc">*</span>x</span>
-<span id="cb4-427"><a href="#cb4-427"></a>y1<span class="ot">=</span><span class="dv">2</span><span class="sc">+</span><span class="dv">5</span><span class="sc">*</span>x <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">10</span>,<span class="dv">0</span>,<span class="dv">4</span>) </span>
-<span id="cb4-428"><a href="#cb4-428"></a>lm1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y1 <span class="sc">~</span> x)</span>
-<span id="cb4-429"><a href="#cb4-429"></a>cc <span class="ot">&lt;-</span> <span class="fu">coef</span>(lm1)</span>
-<span id="cb4-430"><a href="#cb4-430"></a>r <span class="ot">&lt;-</span> <span class="fu">resid</span>(lm1)</span>
-<span id="cb4-431"><a href="#cb4-431"></a><span class="co">#print(r)</span></span>
-<span id="cb4-432"><a href="#cb4-432"></a>ff <span class="ot">&lt;-</span> <span class="fu">fitted</span>(lm1)</span>
-<span id="cb4-433"><a href="#cb4-433"></a><span class="co">#print(ff)</span></span>
-<span id="cb4-434"><a href="#cb4-434"></a>g2<span class="ot">=</span><span class="fu">ggplot</span>(<span class="at">data=</span><span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y=</span>y1, <span class="at">x=</span>x)) <span class="sc">+</span> </span>
-<span id="cb4-435"><a href="#cb4-435"></a>    <span class="fu">geom_segment</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> ff, <span class="at">x =</span> x, <span class="at">yend =</span> y1, <span class="at">xend =</span> x), <span class="at">colour =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
-<span id="cb4-436"><a href="#cb4-436"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb4-437"><a href="#cb4-437"></a>    <span class="fu">geom_abline</span>(<span class="at">slope =</span> cc[<span class="dv">2</span>], <span class="at">intercept =</span> cc[<span class="dv">1</span>], <span class="at">colour =</span> <span class="st">&quot;blue&quot;</span>) <span class="sc">+</span></span>
-<span id="cb4-438"><a href="#cb4-438"></a>    <span class="co">#annotate(geom=&#39;text&#39;, y=40, x=2, label=expression(y[i]==2+5*x[i]+epsilon[i]), parse=TRUE, hjust=0) +</span></span>
-<span id="cb4-439"><a href="#cb4-439"></a>    <span class="fu">annotate</span>(<span class="at">geom=</span><span class="st">&#39;text&#39;</span>, <span class="at">y=</span><span class="dv">30</span>, <span class="at">x=</span><span class="fl">2.5</span>, <span class="at">label=</span><span class="fu">expression</span>(residual<span class="sc">~</span>(epsilon[i])), <span class="at">parse=</span><span class="cn">TRUE</span>, <span class="at">hjust=</span><span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb4-440"><a href="#cb4-440"></a>    <span class="fu">annotate</span>(<span class="at">geom=</span><span class="st">&#39;text&#39;</span>, <span class="at">y=</span><span class="dv">15</span>, <span class="at">x=</span><span class="dv">5</span>, <span class="at">label=</span><span class="fu">expression</span>(slope<span class="sc">~</span>(beta[<span class="dv">1</span>])), <span class="at">parse=</span><span class="cn">TRUE</span>, <span class="at">hjust=</span><span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb4-441"><a href="#cb4-441"></a>    <span class="fu">annotate</span>(<span class="at">geom=</span><span class="st">&#39;text&#39;</span>, <span class="at">y=</span><span class="sc">-</span><span class="dv">5</span>, <span class="at">x=</span><span class="dv">1</span>, <span class="at">label=</span><span class="fu">expression</span>(y<span class="sc">-</span>intercept<span class="sc">~</span>(beta[<span class="dv">0</span>])), <span class="at">parse=</span><span class="cn">TRUE</span>, <span class="at">hjust=</span><span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb4-442"><a href="#cb4-442"></a>    <span class="fu">geom_curve</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">27</span>, <span class="at">xend =</span> <span class="fl">3.8</span>, <span class="at">yend =</span> <span class="dv">23</span>), </span>
-<span id="cb4-443"><a href="#cb4-443"></a>             <span class="at">curvature =</span> <span class="fl">0.3</span>, <span class="co"># Adjust curvature as needed</span></span>
-<span id="cb4-444"><a href="#cb4-444"></a>             <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;inches&quot;</span>))) <span class="sc">+</span></span>
-<span id="cb4-445"><a href="#cb4-445"></a>    <span class="fu">geom_curve</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">4.7</span>, <span class="at">y =</span> <span class="dv">15</span>, <span class="at">xend =</span> <span class="fl">3.7</span>, <span class="at">yend =</span> <span class="dv">18</span>), </span>
-<span id="cb4-446"><a href="#cb4-446"></a>             <span class="at">curvature =</span> <span class="sc">-</span><span class="fl">0.3</span>, <span class="co"># Adjust curvature as needed</span></span>
-<span id="cb4-447"><a href="#cb4-447"></a>             <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;inches&quot;</span>))) <span class="sc">+</span></span>
-<span id="cb4-448"><a href="#cb4-448"></a>    <span class="fu">geom_curve</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">0.7</span>, <span class="at">y =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">xend =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">yend =</span> <span class="sc">-</span><span class="fl">0.5</span>), </span>
-<span id="cb4-449"><a href="#cb4-449"></a>             <span class="at">curvature =</span> <span class="sc">-</span><span class="fl">0.3</span>, <span class="co"># Adjust curvature as needed</span></span>
-<span id="cb4-450"><a href="#cb4-450"></a>             <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;inches&quot;</span>))) <span class="sc">+</span></span>
-<span id="cb4-451"><a href="#cb4-451"></a>    <span class="fu">scale_y_continuous</span>(<span class="st">&#39;y&#39;</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">50</span>)) <span class="sc">+</span></span>
-<span id="cb4-452"><a href="#cb4-452"></a>    <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">10</span>) <span class="sc">+</span></span>
-<span id="cb4-453"><a href="#cb4-453"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
-<span id="cb4-454"><a href="#cb4-454"></a>    <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(), <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span>
-<span id="cb4-455"><a href="#cb4-455"></a>g2</span>
-<span id="cb4-456"><a href="#cb4-456"></a><span class="in">```</span></span>
-<span id="cb4-457"><a href="#cb4-457"></a>::::</span>
-<span id="cb4-458"><a href="#cb4-458"></a></span>
-<span id="cb4-459"><a href="#cb4-459"></a>:::</span>
-<span id="cb4-460"><a href="#cb4-460"></a></span>
-<span id="cb4-461"><a href="#cb4-461"></a>The above can be re-expressed and generalised as:</span>
-<span id="cb4-462"><a href="#cb4-462"></a>$$</span>
-<span id="cb4-463"><a href="#cb4-463"></a>y_i\sim{}Dist(\mu_i, ...)<span class="sc">\\</span></span>
-<span id="cb4-464"><a href="#cb4-464"></a>g(\mu_i) = \beta_0+ \beta_1 x_i</span>
-<span id="cb4-465"><a href="#cb4-465"></a>$$</span>
-<span id="cb4-466"><a href="#cb4-466"></a></span>
-<span id="cb4-467"><a href="#cb4-467"></a>where:</span>
-<span id="cb4-468"><a href="#cb4-468"></a></span>
-<span id="cb4-469"><a href="#cb4-469"></a><span class="ss">- </span>$Dist$ represents a distribution from the exponential family (such</span>
-<span id="cb4-470"><a href="#cb4-470"></a>  as Gaussian, Poisson, Binomial, etc)</span>
-<span id="cb4-471"><a href="#cb4-471"></a><span class="ss">- </span>$...$ represents additional parameters relevant to the nominated</span>
-<span id="cb4-472"><a href="#cb4-472"></a>  distribution (such as $\sigma^2$: Gaussian, $n$: Binomial and</span>
-<span id="cb4-473"><a href="#cb4-473"></a>  $\phi$: Negative Binomial, etc)</span>
-<span id="cb4-474"><a href="#cb4-474"></a><span class="ss">- </span>$g()$ represents the link function (e.g. log: Poisson, logit:</span>
-<span id="cb4-475"><a href="#cb4-475"></a>  Binomial, etc)</span>
-<span id="cb4-476"><a href="#cb4-476"></a></span>
-<span id="cb4-477"><a href="#cb4-477"></a>The reliability of any model depends on the degree to which the data</span>
-<span id="cb4-478"><a href="#cb4-478"></a>adheres to the model assumptions. Hence, as with frequentist models,</span>
-<span id="cb4-479"><a href="#cb4-479"></a>exploratory data analysis (EDA) is a vital component of Bayesian</span>
-<span id="cb4-480"><a href="#cb4-480"></a>modelling and since the model structures are similar between</span>
-<span id="cb4-481"><a href="#cb4-481"></a>frequentist and Bayesian approaches, so too is EDA.</span>
-<span id="cb4-482"><a href="#cb4-482"></a></span>
-<span id="cb4-483"><a href="#cb4-483"></a><span class="fu"># Bayesian (generalised) linear models</span></span>
-<span id="cb4-484"><a href="#cb4-484"></a></span>
-<span id="cb4-485"><a href="#cb4-485"></a>For the purpose of introduction, we will start by exploring a Gaussian</span>
-<span id="cb4-486"><a href="#cb4-486"></a>model with a very simple fabricated data set representing the</span>
-<span id="cb4-487"><a href="#cb4-487"></a>relationship between a response ($y$) and a continuous predictor ($x =</span>
-<span id="cb4-488"><a href="#cb4-488"></a><span class="co">[</span><span class="ot">1,2,3,4,5,6,7,8,9,10</span><span class="co">]</span>$. The fabricated data set will comprise 10</span>
-<span id="cb4-489"><a href="#cb4-489"></a>observations each drawn from normal distributions with a set standard</span>
-<span id="cb4-490"><a href="#cb4-490"></a>deviation of 4. The means of the 10 populations will be determined by</span>
-<span id="cb4-491"><a href="#cb4-491"></a>the following equation: </span>
-<span id="cb4-492"><a href="#cb4-492"></a></span>
-<span id="cb4-493"><a href="#cb4-493"></a>$$ \mu_i = 2 + 5\times x_i $$</span>
-<span id="cb4-494"><a href="#cb4-494"></a></span>
-<span id="cb4-495"><a href="#cb4-495"></a>Let generate these data.</span>
-<span id="cb4-496"><a href="#cb4-496"></a></span>
-<span id="cb4-499"><a href="#cb4-499"></a><span class="in">```{r}</span></span>
-<span id="cb4-500"><a href="#cb4-500"></a><span class="co">#| label: sim1</span></span>
-<span id="cb4-501"><a href="#cb4-501"></a><span class="co">#| eval: true</span></span>
-<span id="cb4-502"><a href="#cb4-502"></a><span class="co">#| echo: true</span></span>
-<span id="cb4-503"><a href="#cb4-503"></a><span class="co">#| fig-height: 3</span></span>
-<span id="cb4-504"><a href="#cb4-504"></a><span class="co">#| fig-width: 3</span></span>
-<span id="cb4-505"><a href="#cb4-505"></a><span class="co">#| warning: false</span></span>
-<span id="cb4-506"><a href="#cb4-506"></a><span class="fu">set.seed</span>(<span class="dv">234</span>)</span>
-<span id="cb4-507"><a href="#cb4-507"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">|&gt;</span></span>
-<span id="cb4-508"><a href="#cb4-508"></a>    <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">round</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">mean =</span> <span class="dv">2</span> <span class="sc">+</span> (<span class="dv">5</span> <span class="sc">*</span> x), <span class="at">sd =</span> <span class="dv">4</span>), <span class="at">digits =</span> <span class="dv">2</span>))</span>
-<span id="cb4-509"><a href="#cb4-509"></a>dat</span>
-<span id="cb4-510"><a href="#cb4-510"></a><span class="in">```</span></span>
-<span id="cb4-511"><a href="#cb4-511"></a></span>
-<span id="cb4-512"><a href="#cb4-512"></a></span>
-<span id="cb4-513"><a href="#cb4-513"></a></span>
-<span id="cb4-514"><a href="#cb4-514"></a>The model will will be fitting will be:</span>
-<span id="cb4-515"><a href="#cb4-515"></a></span>
-<span id="cb4-516"><a href="#cb4-516"></a>$$</span>
-<span id="cb4-517"><a href="#cb4-517"></a>\begin{align}</span>
-<span id="cb4-518"><a href="#cb4-518"></a>y_i&amp;\sim{}N(\mu_i, \sigma^2)<span class="sc">\\</span></span>
-<span id="cb4-519"><a href="#cb4-519"></a>\mu_i &amp;= \beta_0+ \beta_1 x_i</span>
-<span id="cb4-520"><a href="#cb4-520"></a>\end{align}</span>
-<span id="cb4-521"><a href="#cb4-521"></a>$$</span>
-<span id="cb4-522"><a href="#cb4-522"></a></span>
-<span id="cb4-523"><a href="#cb4-523"></a>The parameters that we are going to attempt to estimate are the</span>
-<span id="cb4-524"><a href="#cb4-524"></a>y-intercept ($\beta_0$), the slope ($\beta_1$) and the underlying</span>
-<span id="cb4-525"><a href="#cb4-525"></a>variance ($\sigma^2$). Recall (from tutorials on [statistical</span>
-<span id="cb4-526"><a href="#cb4-526"></a>philosophies](21_statistical_philosophies.html) and</span>
-<span id="cb4-527"><a href="#cb4-527"></a><span class="co">[</span><span class="ot">estimation</span><span class="co">](22_estimation.html)</span>)) that Bayesian models calculate</span>
-<span id="cb4-528"><a href="#cb4-528"></a>**posterior** predictions ($P(H|D)$) from likelihood ($P(D|H)$) and</span>
-<span id="cb4-529"><a href="#cb4-529"></a>**prior** expectations ($P(H)$). Therefore, in preparation for fitting</span>
-<span id="cb4-530"><a href="#cb4-530"></a>a Bayesian model, we must consider what our prior expectations are for</span>
-<span id="cb4-531"><a href="#cb4-531"></a>_all_ parameters.</span>
-<span id="cb4-532"><a href="#cb4-532"></a></span>
-<span id="cb4-533"><a href="#cb4-533"></a>The individual responses ($y_i$, observed yields) are each expected to</span>
-<span id="cb4-534"><a href="#cb4-534"></a>have been **independently** drawn from normal (**Gaussian**)</span>
-<span id="cb4-535"><a href="#cb4-535"></a>distributions ($\mathcal{N}$). These distributions represent all the</span>
-<span id="cb4-536"><a href="#cb4-536"></a>possible values of $y$ we could have obtained at the specific ($i^{th}$)</span>
-<span id="cb4-537"><a href="#cb4-537"></a>level of $x$. Hence the $i^{th}$ $y$ observation is expected</span>
-<span id="cb4-538"><a href="#cb4-538"></a>to have been drawn from a normal distribution with a mean of $\mu_i$.</span>
-<span id="cb4-539"><a href="#cb4-539"></a></span>
-<span id="cb4-540"><a href="#cb4-540"></a>Although each distribution is expected to come from populations that</span>
-<span id="cb4-541"><a href="#cb4-541"></a>differ in their means, we assume that all of these distributions have</span>
-<span id="cb4-542"><a href="#cb4-542"></a>the **same variance** ($\sigma^2$).</span>
-<span id="cb4-543"><a href="#cb4-543"></a></span>
-<span id="cb4-544"><a href="#cb4-544"></a></span>
-<span id="cb4-545"><a href="#cb4-545"></a></span>
-<span id="cb4-546"><a href="#cb4-546"></a><span class="fu"># References</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb12-1"><a href="#cb12-1"></a><span class="co">---</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="an">title:</span><span class="co"> Bayesian linear models</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="an">author:</span><span class="co"> &quot;Murray Logan&quot;</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="an">date:</span><span class="co"> &quot;`r format(Sys.time(), &#39;%d %B, %Y&#39;)`&quot;</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="an">format:</span><span class="co"> </span></span>
+<span id="cb12-6"><a href="#cb12-6"></a><span class="co">  html:</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a><span class="co">    toc: true</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a><span class="co">    toc-float: true</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a><span class="co">    number-sections: true</span></span>
+<span id="cb12-10"><a href="#cb12-10"></a><span class="co">    number-depth: 3</span></span>
+<span id="cb12-11"><a href="#cb12-11"></a><span class="co">    embed-resources: true</span></span>
+<span id="cb12-12"><a href="#cb12-12"></a><span class="co">    code-fold: false</span></span>
+<span id="cb12-13"><a href="#cb12-13"></a><span class="co">    code-tools: true</span></span>
+<span id="cb12-14"><a href="#cb12-14"></a><span class="co">    code-summary: &quot;Show the code&quot;</span></span>
+<span id="cb12-15"><a href="#cb12-15"></a><span class="co">    html-math-method: katex</span></span>
+<span id="cb12-16"><a href="#cb12-16"></a><span class="an">execute:</span></span>
+<span id="cb12-17"><a href="#cb12-17"></a><span class="co">  keep-md: true</span></span>
+<span id="cb12-18"><a href="#cb12-18"></a><span class="an">crossref:</span></span>
+<span id="cb12-19"><a href="#cb12-19"></a><span class="co">  fig-title: &#39;**Figure**&#39;</span></span>
+<span id="cb12-20"><a href="#cb12-20"></a><span class="co">  fig-labels: arabic</span></span>
+<span id="cb12-21"><a href="#cb12-21"></a><span class="co">  tbl-title: &#39;**Table**&#39;</span></span>
+<span id="cb12-22"><a href="#cb12-22"></a><span class="co">  tbl-labels: arabic</span></span>
+<span id="cb12-23"><a href="#cb12-23"></a><span class="an">engine:</span><span class="co"> knitr</span></span>
+<span id="cb12-24"><a href="#cb12-24"></a><span class="an">bibliography:</span><span class="co"> resources/references.bib</span></span>
+<span id="cb12-25"><a href="#cb12-25"></a><span class="an">output_dir:</span><span class="co"> &quot;docs&quot;</span></span>
+<span id="cb12-26"><a href="#cb12-26"></a><span class="co">---</span></span>
+<span id="cb12-27"><a href="#cb12-27"></a></span>
+<span id="cb12-28"><a href="#cb12-28"></a></span>
+<span id="cb12-29"><a href="#cb12-29"></a><span class="fu"># Preparations</span></span>
+<span id="cb12-30"><a href="#cb12-30"></a></span>
+<span id="cb12-31"><a href="#cb12-31"></a>Load the necessary libraries</span>
+<span id="cb12-32"><a href="#cb12-32"></a></span>
+<span id="cb12-35"><a href="#cb12-35"></a><span class="in">```{r}</span></span>
+<span id="cb12-36"><a href="#cb12-36"></a><span class="co">#| label: libraries</span></span>
+<span id="cb12-37"><a href="#cb12-37"></a><span class="co">#| eval: true</span></span>
+<span id="cb12-38"><a href="#cb12-38"></a><span class="co">#| warning: false</span></span>
+<span id="cb12-39"><a href="#cb12-39"></a><span class="co">#| message: false</span></span>
+<span id="cb12-40"><a href="#cb12-40"></a><span class="co">#| cache: false</span></span>
+<span id="cb12-41"><a href="#cb12-41"></a><span class="fu">library</span>(tidyverse)   <span class="co">#for data wrangling and plotting</span></span>
+<span id="cb12-42"><a href="#cb12-42"></a><span class="fu">library</span>(DHARMa)      <span class="co">#for simulated residuals</span></span>
+<span id="cb12-43"><a href="#cb12-43"></a><span class="fu">library</span>(performance) <span class="co">#for model diagnostics</span></span>
+<span id="cb12-44"><a href="#cb12-44"></a><span class="fu">library</span>(see)         <span class="co">#for model diagnostics</span></span>
+<span id="cb12-45"><a href="#cb12-45"></a><span class="fu">library</span>(brms)        <span class="co">#for Bayesian models</span></span>
+<span id="cb12-46"><a href="#cb12-46"></a><span class="fu">library</span>(tidybayes)   <span class="co">#for exploring Bayesian PKPDmodels</span></span>
+<span id="cb12-47"><a href="#cb12-47"></a><span class="fu">library</span>(rstan)       <span class="co">#for diagnostics plots</span></span>
+<span id="cb12-48"><a href="#cb12-48"></a><span class="fu">library</span>(bayesplot)   <span class="co">#for diagnostic plots</span></span>
+<span id="cb12-49"><a href="#cb12-49"></a><span class="fu">library</span>(patchwork)   <span class="co">#for arranging multiple plots</span></span>
+<span id="cb12-50"><a href="#cb12-50"></a><span class="fu">library</span>(HDInterval)  <span class="co">#for HPD intervals</span></span>
+<span id="cb12-51"><a href="#cb12-51"></a><span class="fu">library</span>(bayestestR)  <span class="co">#for ROPE</span></span>
+<span id="cb12-52"><a href="#cb12-52"></a><span class="fu">library</span>(emmeans)     <span class="co">#for estimated marginal means</span></span>
+<span id="cb12-53"><a href="#cb12-53"></a><span class="fu">source</span>(<span class="st">&quot;helperfunctions.R&quot;</span>)</span>
+<span id="cb12-54"><a href="#cb12-54"></a><span class="in">```</span></span>
+<span id="cb12-55"><a href="#cb12-55"></a></span>
+<span id="cb12-56"><a href="#cb12-56"></a>Many biologists and ecologists get a little twitchy and nervous around</span>
+<span id="cb12-57"><a href="#cb12-57"></a>mathematical and statistical formulae and nomenclature. Whilst it is</span>
+<span id="cb12-58"><a href="#cb12-58"></a>possible to perform basic statistics without too much regard for the</span>
+<span id="cb12-59"><a href="#cb12-59"></a>actual equation (model) being employed, as the complexity of the</span>
+<span id="cb12-60"><a href="#cb12-60"></a>analysis increases, the need to understand the underlying model</span>
+<span id="cb12-61"><a href="#cb12-61"></a>becomes increasingly important. Moreover, model specification in BUGS</span>
+<span id="cb12-62"><a href="#cb12-62"></a>(the language used to program Bayesian modelling) aligns very closely</span>
+<span id="cb12-63"><a href="#cb12-63"></a>to the underlying formulae. Hence a good understanding of the</span>
+<span id="cb12-64"><a href="#cb12-64"></a>underlying model is vital to be able to create a sensible Bayesian</span>
+<span id="cb12-65"><a href="#cb12-65"></a>model. Consequently, I will always present the linear model formulae</span>
+<span id="cb12-66"><a href="#cb12-66"></a>along with the analysis. If you start to feel some form of disorder</span>
+<span id="cb12-67"><a href="#cb12-67"></a>starting to develop, you might like to run through the Tutorials and</span>
+<span id="cb12-68"><a href="#cb12-68"></a>Workshops twice (the first time ignoring the formulae). </span>
+<span id="cb12-69"><a href="#cb12-69"></a></span>
+<span id="cb12-70"><a href="#cb12-70"></a><span class="fu"># A philosophical note</span></span>
+<span id="cb12-71"><a href="#cb12-71"></a></span>
+<span id="cb12-72"><a href="#cb12-72"></a>To introduce the philosophical and mathematical differences between</span>
+<span id="cb12-73"><a href="#cb12-73"></a>classical (frequentist) and Bayesian statistics, @Wade-2000 presented</span>
+<span id="cb12-74"><a href="#cb12-74"></a>a provocative yet compelling trend analysis of two hypothetical</span>
+<span id="cb12-75"><a href="#cb12-75"></a>populations. The temporal trend of one of the populations shows very</span>
+<span id="cb12-76"><a href="#cb12-76"></a>little variability from a very subtle linear decline. By contrast, the</span>
+<span id="cb12-77"><a href="#cb12-77"></a>second population appears to decline more dramatically, yet has</span>
+<span id="cb12-78"><a href="#cb12-78"></a>substantially more variability.</span>
+<span id="cb12-79"><a href="#cb12-79"></a></span>
+<span id="cb12-80"><a href="#cb12-80"></a>@Wade-2000 neatly illustrates the contrasting conclusions</span>
+<span id="cb12-81"><a href="#cb12-81"></a>(particularly with respect to interpreting probability) that would be</span>
+<span id="cb12-82"><a href="#cb12-82"></a>drawn by the frequentist and Bayesian approaches and in so doing</span>
+<span id="cb12-83"><a href="#cb12-83"></a>highlights how and why the Bayesian approach provides outcomes that</span>
+<span id="cb12-84"><a href="#cb12-84"></a>are more aligned with management requirements.</span>
+<span id="cb12-85"><a href="#cb12-85"></a></span>
+<span id="cb12-86"><a href="#cb12-86"></a>This tutorial will start by replicating the demonstration of @Wade-2000.</span>
+<span id="cb12-87"><a href="#cb12-87"></a></span>
+<span id="cb12-90"><a href="#cb12-90"></a><span class="in">```{r}</span></span>
+<span id="cb12-91"><a href="#cb12-91"></a><span class="co">#| label: Pops</span></span>
+<span id="cb12-92"><a href="#cb12-92"></a><span class="co">#| eval: true</span></span>
+<span id="cb12-93"><a href="#cb12-93"></a><span class="co">#| echo: false</span></span>
+<span id="cb12-94"><a href="#cb12-94"></a><span class="co">#| fig-width: 10</span></span>
+<span id="cb12-95"><a href="#cb12-95"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb12-96"><a href="#cb12-96"></a><span class="co">#| tidy: true</span></span>
+<span id="cb12-97"><a href="#cb12-97"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb12-98"><a href="#cb12-98"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb12-99"><a href="#cb12-99"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.03</span></span>
+<span id="cb12-100"><a href="#cb12-100"></a>a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb12-101"><a href="#cb12-101"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.11</span></span>
+<span id="cb12-102"><a href="#cb12-102"></a>mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
+<span id="cb12-103"><a href="#cb12-103"></a>y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
+<span id="cb12-104"><a href="#cb12-104"></a><span class="co">#plot(y~x, ylim=c(0,150))</span></span>
+<span id="cb12-105"><a href="#cb12-105"></a><span class="co">#summary(lm(y~x))</span></span>
+<span id="cb12-106"><a href="#cb12-106"></a>popA <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
+<span id="cb12-107"><a href="#cb12-107"></a></span>
+<span id="cb12-108"><a href="#cb12-108"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb12-109"><a href="#cb12-109"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb12-110"><a href="#cb12-110"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.1</span></span>
+<span id="cb12-111"><a href="#cb12-111"></a>a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb12-112"><a href="#cb12-112"></a>sigma <span class="ot">&lt;-</span> <span class="fl">0.38</span></span>
+<span id="cb12-113"><a href="#cb12-113"></a>mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
+<span id="cb12-114"><a href="#cb12-114"></a>y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
+<span id="cb12-115"><a href="#cb12-115"></a><span class="co">#plot(y~x, ylim=c(0,150))</span></span>
+<span id="cb12-116"><a href="#cb12-116"></a><span class="co">#summary(lm(y~x))</span></span>
+<span id="cb12-117"><a href="#cb12-117"></a>popA <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
+<span id="cb12-118"><a href="#cb12-118"></a></span>
+<span id="cb12-119"><a href="#cb12-119"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb12-120"><a href="#cb12-120"></a>x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb12-121"><a href="#cb12-121"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span></span>
+<span id="cb12-122"><a href="#cb12-122"></a>a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb12-123"><a href="#cb12-123"></a>sigma <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb12-124"><a href="#cb12-124"></a>mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
+<span id="cb12-125"><a href="#cb12-125"></a>y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
+<span id="cb12-126"><a href="#cb12-126"></a><span class="co">#plot(y~x)</span></span>
+<span id="cb12-127"><a href="#cb12-127"></a><span class="co">#summary(lm(y~x))</span></span>
+<span id="cb12-128"><a href="#cb12-128"></a>popB <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
+<span id="cb12-129"><a href="#cb12-129"></a><span class="co">#plot(y~x)</span></span>
+<span id="cb12-130"><a href="#cb12-130"></a></span>
+<span id="cb12-131"><a href="#cb12-131"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb12-132"><a href="#cb12-132"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="at">l=</span><span class="dv">100</span>)</span>
+<span id="cb12-133"><a href="#cb12-133"></a>b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span></span>
+<span id="cb12-134"><a href="#cb12-134"></a>a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb12-135"><a href="#cb12-135"></a>sigma <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb12-136"><a href="#cb12-136"></a>mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
+<span id="cb12-137"><a href="#cb12-137"></a>y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
+<span id="cb12-138"><a href="#cb12-138"></a><span class="co">#plot(y~x, ylim=c(0,150))</span></span>
+<span id="cb12-139"><a href="#cb12-139"></a><span class="co">#summary(lm(y~x))</span></span>
+<span id="cb12-140"><a href="#cb12-140"></a>popC <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
+<span id="cb12-141"><a href="#cb12-141"></a><span class="co">#plot(y~x)</span></span>
+<span id="cb12-142"><a href="#cb12-142"></a></span>
+<span id="cb12-143"><a href="#cb12-143"></a><span class="co">#par(mar=c(3,3,0,0),mfrow=c(1,3))</span></span>
+<span id="cb12-144"><a href="#cb12-144"></a><span class="co">#plot(y~x,popA, ylim=c(0,250))</span></span>
+<span id="cb12-145"><a href="#cb12-145"></a><span class="co">#abline(lm(y~x,popA))</span></span>
+<span id="cb12-146"><a href="#cb12-146"></a><span class="co">#plot(y~x,popB, ylim=c(0,250))</span></span>
+<span id="cb12-147"><a href="#cb12-147"></a><span class="co">#abline(lm(y~x,popB))</span></span>
+<span id="cb12-148"><a href="#cb12-148"></a><span class="co">#plot(y~x,popC, ylim=c(0,250))</span></span>
+<span id="cb12-149"><a href="#cb12-149"></a><span class="co">#abline(lm(y~x,popC))</span></span>
+<span id="cb12-150"><a href="#cb12-150"></a></span>
+<span id="cb12-151"><a href="#cb12-151"></a><span class="do">##THIS IS BETTER</span></span>
+<span id="cb12-152"><a href="#cb12-152"></a><span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>) {</span>
+<span id="cb12-153"><a href="#cb12-153"></a>  <span class="fu">set.seed</span>(n)</span>
+<span id="cb12-154"><a href="#cb12-154"></a>  x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb12-155"><a href="#cb12-155"></a>  b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">0.1</span></span>
+<span id="cb12-156"><a href="#cb12-156"></a>  a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb12-157"><a href="#cb12-157"></a>  sigma <span class="ot">&lt;-</span> <span class="fl">0.38</span></span>
+<span id="cb12-158"><a href="#cb12-158"></a>  mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
+<span id="cb12-159"><a href="#cb12-159"></a>  y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
+<span id="cb12-160"><a href="#cb12-160"></a>  (popA <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x))</span>
+<span id="cb12-161"><a href="#cb12-161"></a>  </span>
+<span id="cb12-162"><a href="#cb12-162"></a>  <span class="fu">set.seed</span>(n)</span>
+<span id="cb12-163"><a href="#cb12-163"></a>  x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb12-164"><a href="#cb12-164"></a>  b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span></span>
+<span id="cb12-165"><a href="#cb12-165"></a>  a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb12-166"><a href="#cb12-166"></a>  sigma <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb12-167"><a href="#cb12-167"></a>  mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
+<span id="cb12-168"><a href="#cb12-168"></a>  y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
+<span id="cb12-169"><a href="#cb12-169"></a>  (popB <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x))</span>
+<span id="cb12-170"><a href="#cb12-170"></a>  </span>
+<span id="cb12-171"><a href="#cb12-171"></a>  <span class="fu">set.seed</span>(n)</span>
+<span id="cb12-172"><a href="#cb12-172"></a>  x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">10</span>,<span class="at">l=</span><span class="dv">100</span>)</span>
+<span id="cb12-173"><a href="#cb12-173"></a>  b <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">10</span></span>
+<span id="cb12-174"><a href="#cb12-174"></a>  a <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb12-175"><a href="#cb12-175"></a>  sigma <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb12-176"><a href="#cb12-176"></a>  mm <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>x)</span>
+<span id="cb12-177"><a href="#cb12-177"></a>  y <span class="ot">&lt;-</span> (mm <span class="sc">%*%</span> <span class="fu">c</span>(a,b))<span class="sc">+</span><span class="fu">rnorm</span>(<span class="fu">length</span>(x),<span class="dv">0</span>,sigma)</span>
+<span id="cb12-178"><a href="#cb12-178"></a>  popC <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(y,x)</span>
+<span id="cb12-179"><a href="#cb12-179"></a>  </span>
+<span id="cb12-180"><a href="#cb12-180"></a>  aa<span class="ot">&lt;-</span>popA.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popA)</span>
+<span id="cb12-181"><a href="#cb12-181"></a>  bb<span class="ot">&lt;-</span>popB.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popB)</span>
+<span id="cb12-182"><a href="#cb12-182"></a>  cc<span class="ot">&lt;-</span>popC.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popC)</span>
+<span id="cb12-183"><a href="#cb12-183"></a>  AA<span class="ot">&lt;-</span><span class="fu">summary</span>(popA.lm)<span class="sc">$</span>coef</span>
+<span id="cb12-184"><a href="#cb12-184"></a>  BB<span class="ot">&lt;-</span><span class="fu">summary</span>(popB.lm)<span class="sc">$</span>coef</span>
+<span id="cb12-185"><a href="#cb12-185"></a>  CC<span class="ot">&lt;-</span><span class="fu">summary</span>(popC.lm)<span class="sc">$</span>coef</span>
+<span id="cb12-186"><a href="#cb12-186"></a>  </span>
+<span id="cb12-187"><a href="#cb12-187"></a>  <span class="cf">if</span>(AA[<span class="dv">2</span>,<span class="dv">4</span>]<span class="sc">&lt;</span><span class="fl">0.05</span> <span class="sc">&amp;</span> BB[<span class="dv">2</span>,<span class="dv">4</span>]<span class="sc">&gt;</span><span class="fl">0.05</span> <span class="sc">&amp;</span> <span class="fu">abs</span>(BB[<span class="dv">2</span>,<span class="dv">1</span>]<span class="sc">-</span>CC[<span class="dv">2</span>,<span class="dv">1</span>])<span class="sc">&lt;</span><span class="dv">1</span>) <span class="cf">break</span></span>
+<span id="cb12-188"><a href="#cb12-188"></a>}</span>
+<span id="cb12-189"><a href="#cb12-189"></a><span class="in">```</span></span>
+<span id="cb12-190"><a href="#cb12-190"></a>::: {.columns}</span>
+<span id="cb12-191"><a href="#cb12-191"></a></span>
+<span id="cb12-192"><a href="#cb12-192"></a>:::: {.column width=&quot;32%&quot;}</span>
+<span id="cb12-195"><a href="#cb12-195"></a><span class="in">```{r}</span></span>
+<span id="cb12-196"><a href="#cb12-196"></a><span class="co">#| label: PopA</span></span>
+<span id="cb12-197"><a href="#cb12-197"></a><span class="co">#| eval: true</span></span>
+<span id="cb12-198"><a href="#cb12-198"></a><span class="co">#| echo: false</span></span>
+<span id="cb12-199"><a href="#cb12-199"></a><span class="co">#| fig-width: 3</span></span>
+<span id="cb12-200"><a href="#cb12-200"></a><span class="co">#| fig-height: 3</span></span>
+<span id="cb12-201"><a href="#cb12-201"></a><span class="co">#| tidy: true</span></span>
+<span id="cb12-202"><a href="#cb12-202"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb12-203"><a href="#cb12-203"></a><span class="fu">plot</span>(y<span class="sc">~</span>x,popA, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">250</span>), <span class="at">axes=</span>F, <span class="at">ann=</span>F, <span class="at">pch=</span><span class="dv">16</span>)</span>
+<span id="cb12-204"><a href="#cb12-204"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x,popA))</span>
+<span id="cb12-205"><a href="#cb12-205"></a><span class="fu">axis</span>(<span class="dv">1</span>)</span>
+<span id="cb12-206"><a href="#cb12-206"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">las=</span><span class="dv">1</span>)</span>
+<span id="cb12-207"><a href="#cb12-207"></a><span class="fu">mtext</span>(<span class="st">&quot;x&quot;</span>,<span class="dv">1</span>,<span class="at">line=</span><span class="dv">2</span>, <span class="at">cex=</span><span class="fl">1.5</span>)</span>
+<span id="cb12-208"><a href="#cb12-208"></a><span class="fu">box</span>(<span class="at">bty=</span><span class="st">&quot;l&quot;</span>)</span>
+<span id="cb12-209"><a href="#cb12-209"></a>popA.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popA)</span>
+<span id="cb12-210"><a href="#cb12-210"></a>popA.sum<span class="ot">&lt;-</span><span class="fu">summary</span>(popA.lm)<span class="sc">$</span>coef</span>
+<span id="cb12-211"><a href="#cb12-211"></a><span class="in">```</span></span>
+<span id="cb12-212"><a href="#cb12-212"></a></span>
+<span id="cb12-213"><a href="#cb12-213"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;margin-left:30pt;&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb12-214"><a href="#cb12-214"></a>n: <span class="in">`r  nrow(popA)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-215"><a href="#cb12-215"></a>Slope: <span class="in">`r round(coef(popA.lm)[2],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-216"><a href="#cb12-216"></a>_t_: <span class="in">`r round(popA.sum[2,3],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-217"><a href="#cb12-217"></a>_p-value_: <span class="in">`r round(popA.sum[2,4],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-218"><a href="#cb12-218"></a><span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb12-219"><a href="#cb12-219"></a></span>
+<span id="cb12-220"><a href="#cb12-220"></a>::::</span>
+<span id="cb12-221"><a href="#cb12-221"></a></span>
+<span id="cb12-222"><a href="#cb12-222"></a>:::: {.column width=&quot;32%&quot;}</span>
+<span id="cb12-225"><a href="#cb12-225"></a><span class="in">```{r}</span></span>
+<span id="cb12-226"><a href="#cb12-226"></a><span class="co">#| label: PopB</span></span>
+<span id="cb12-227"><a href="#cb12-227"></a><span class="co">#| eval: true</span></span>
+<span id="cb12-228"><a href="#cb12-228"></a><span class="co">#| echo: false</span></span>
+<span id="cb12-229"><a href="#cb12-229"></a><span class="co">#| fig-width: 3</span></span>
+<span id="cb12-230"><a href="#cb12-230"></a><span class="co">#| fig-height: 3</span></span>
+<span id="cb12-231"><a href="#cb12-231"></a><span class="co">#| tidy: true</span></span>
+<span id="cb12-232"><a href="#cb12-232"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb12-233"><a href="#cb12-233"></a><span class="fu">plot</span>(y<span class="sc">~</span>x,popB, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">250</span>), <span class="at">axes=</span>F, <span class="at">ann=</span>F, <span class="at">pch=</span><span class="dv">16</span>)</span>
+<span id="cb12-234"><a href="#cb12-234"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x,popB))</span>
+<span id="cb12-235"><a href="#cb12-235"></a><span class="fu">axis</span>(<span class="dv">1</span>)</span>
+<span id="cb12-236"><a href="#cb12-236"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">las=</span><span class="dv">1</span>)</span>
+<span id="cb12-237"><a href="#cb12-237"></a><span class="fu">mtext</span>(<span class="st">&quot;x&quot;</span>,<span class="dv">1</span>,<span class="at">line=</span><span class="dv">2</span>, <span class="at">cex=</span><span class="fl">1.5</span>)</span>
+<span id="cb12-238"><a href="#cb12-238"></a><span class="fu">box</span>(<span class="at">bty=</span><span class="st">&quot;l&quot;</span>)</span>
+<span id="cb12-239"><a href="#cb12-239"></a>popB.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popB)</span>
+<span id="cb12-240"><a href="#cb12-240"></a>popB.sum<span class="ot">&lt;-</span><span class="fu">summary</span>(popB.lm)<span class="sc">$</span>coef</span>
+<span id="cb12-241"><a href="#cb12-241"></a><span class="in">```</span></span>
+<span id="cb12-242"><a href="#cb12-242"></a></span>
+<span id="cb12-243"><a href="#cb12-243"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;margin-left:30pt;&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb12-244"><a href="#cb12-244"></a>n: <span class="in">`r  nrow(popB)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-245"><a href="#cb12-245"></a>Slope: <span class="in">`r round(coef(popB.lm)[2],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-246"><a href="#cb12-246"></a>_t_: <span class="in">`r round(popB.sum[2,3],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-247"><a href="#cb12-247"></a>_p-value_: <span class="in">`r round(popB.sum[2,4],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-248"><a href="#cb12-248"></a><span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb12-249"><a href="#cb12-249"></a></span>
+<span id="cb12-250"><a href="#cb12-250"></a>::::</span>
+<span id="cb12-251"><a href="#cb12-251"></a></span>
+<span id="cb12-252"><a href="#cb12-252"></a>:::: {.column width=&quot;32%&quot;}</span>
+<span id="cb12-255"><a href="#cb12-255"></a><span class="in">```{r}</span></span>
+<span id="cb12-256"><a href="#cb12-256"></a><span class="co">#| label: PopC</span></span>
+<span id="cb12-257"><a href="#cb12-257"></a><span class="co">#| eval: true</span></span>
+<span id="cb12-258"><a href="#cb12-258"></a><span class="co">#| echo: false</span></span>
+<span id="cb12-259"><a href="#cb12-259"></a><span class="co">#| fig-width: 3</span></span>
+<span id="cb12-260"><a href="#cb12-260"></a><span class="co">#| fig-height: 3</span></span>
+<span id="cb12-261"><a href="#cb12-261"></a><span class="fu">par</span>(<span class="at">mar=</span><span class="fu">c</span>(<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">0</span>,<span class="dv">0</span>))</span>
+<span id="cb12-262"><a href="#cb12-262"></a><span class="fu">plot</span>(y<span class="sc">~</span>x,popC, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">250</span>), <span class="at">axes=</span>F, <span class="at">ann=</span>F, <span class="at">pch=</span><span class="dv">16</span>)</span>
+<span id="cb12-263"><a href="#cb12-263"></a><span class="fu">abline</span>(<span class="fu">lm</span>(y<span class="sc">~</span>x,popC))</span>
+<span id="cb12-264"><a href="#cb12-264"></a><span class="fu">axis</span>(<span class="dv">1</span>)</span>
+<span id="cb12-265"><a href="#cb12-265"></a><span class="fu">axis</span>(<span class="dv">2</span>, <span class="at">las=</span><span class="dv">1</span>)</span>
+<span id="cb12-266"><a href="#cb12-266"></a><span class="fu">mtext</span>(<span class="st">&quot;x&quot;</span>,<span class="dv">1</span>,<span class="at">line=</span><span class="dv">2</span>, <span class="at">cex=</span><span class="fl">1.5</span>)</span>
+<span id="cb12-267"><a href="#cb12-267"></a><span class="fu">box</span>(<span class="at">bty=</span><span class="st">&quot;l&quot;</span>)</span>
+<span id="cb12-268"><a href="#cb12-268"></a>popC.lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(y<span class="sc">~</span>x,popC)</span>
+<span id="cb12-269"><a href="#cb12-269"></a>popC.sum<span class="ot">&lt;-</span><span class="fu">summary</span>(popC.lm)<span class="sc">$</span>coef</span>
+<span id="cb12-270"><a href="#cb12-270"></a><span class="in">```</span></span>
+<span id="cb12-271"><a href="#cb12-271"></a></span>
+<span id="cb12-272"><a href="#cb12-272"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;margin-left:30pt;&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb12-273"><a href="#cb12-273"></a>n: <span class="in">`r  nrow(popC)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-274"><a href="#cb12-274"></a>Slope: <span class="in">`r round(coef(popC.lm)[2],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-275"><a href="#cb12-275"></a>_t_: <span class="in">`r round(popC.sum[2,3],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-276"><a href="#cb12-276"></a>_p-value_: <span class="in">`r round(popC.sum[2,4],4)`</span><span class="dt">&lt;</span><span class="kw">br</span><span class="dt">&gt;</span></span>
+<span id="cb12-277"><a href="#cb12-277"></a><span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb12-278"><a href="#cb12-278"></a></span>
+<span id="cb12-279"><a href="#cb12-279"></a>::::</span>
+<span id="cb12-280"><a href="#cb12-280"></a></span>
+<span id="cb12-281"><a href="#cb12-281"></a>:::</span>
+<span id="cb12-282"><a href="#cb12-282"></a></span>
+<span id="cb12-283"><a href="#cb12-283"></a></span>
+<span id="cb12-284"><a href="#cb12-284"></a>From a traditional frequentist perspective, we would conclude that</span>
+<span id="cb12-285"><a href="#cb12-285"></a>there is a &#39;significant&#39; relationship in Population A and C</span>
+<span id="cb12-286"><a href="#cb12-286"></a>($p&lt;0.05$), yet not in Population B ($p&gt;0.05$). Note, Population B and</span>
+<span id="cb12-287"><a href="#cb12-287"></a>C were both generated from the same random distribution, it is just</span>
+<span id="cb12-288"><a href="#cb12-288"></a>that Population C has a substantially higher number of observations.</span>
+<span id="cb12-289"><a href="#cb12-289"></a></span>
+<span id="cb12-290"><a href="#cb12-290"></a>The above illustrates a couple of things</span>
+<span id="cb12-291"><a href="#cb12-291"></a></span>
+<span id="cb12-292"><a href="#cb12-292"></a><span class="ss">- </span>statistical significance does not necessarily translate into</span>
+<span id="cb12-293"><a href="#cb12-293"></a>  biological importance. The percentage of decline for Population A is</span>
+<span id="cb12-294"><a href="#cb12-294"></a>  `r p1 &lt;- predict(popA.lm, data.frame( x=c(1,10)));</span>
+<span id="cb12-295"><a href="#cb12-295"></a>  round(100*(p1<span class="co">[</span><span class="ot">1</span><span class="co">]</span>-p1<span class="co">[</span><span class="ot">2</span><span class="co">]</span>)/p1<span class="co">[</span><span class="ot">1</span><span class="co">]</span>,2)` where as the percentage of decline</span>
+<span id="cb12-296"><a href="#cb12-296"></a>  for Population B is `r p1 &lt;- predict(popB.lm, data.frame(x=c(1,10)));</span>
+<span id="cb12-297"><a href="#cb12-297"></a>  round(100*(p1<span class="co">[</span><span class="ot">1</span><span class="co">]</span>-p1<span class="co">[</span><span class="ot">2</span><span class="co">]</span>)/p1<span class="co">[</span><span class="ot">1</span><span class="co">]</span>,2)`. That is Population B is declining</span>
+<span id="cb12-298"><a href="#cb12-298"></a>  at nearly 10 times the rate of Population A. That sounds rather</span>
+<span id="cb12-299"><a href="#cb12-299"></a>  important, yet on the basis of the hypothesis test, we would dismiss</span>
+<span id="cb12-300"><a href="#cb12-300"></a>  the decline in Population B.</span>
+<span id="cb12-301"><a href="#cb12-301"></a></span>
+<span id="cb12-302"><a href="#cb12-302"></a><span class="ss">- </span>that a _p_-value is just the probability of detecting an effect or</span>
+<span id="cb12-303"><a href="#cb12-303"></a>  relationship - what is the probability that the sample size is large</span>
+<span id="cb12-304"><a href="#cb12-304"></a>  enough to pick up a difference.</span>
+<span id="cb12-305"><a href="#cb12-305"></a></span>
+<span id="cb12-306"><a href="#cb12-306"></a>Let us now look at it from a Bayesian perspective. I will just provide</span>
+<span id="cb12-307"><a href="#cb12-307"></a>the posterior distributions (densities scaled to 0-1 so that they can</span>
+<span id="cb12-308"><a href="#cb12-308"></a>be plotted together) for the slope for each population.</span>
+<span id="cb12-309"><a href="#cb12-309"></a></span>
+<span id="cb12-312"><a href="#cb12-312"></a><span class="in">```{r}</span></span>
+<span id="cb12-313"><a href="#cb12-313"></a><span class="co">#| label: Pop_densities</span></span>
+<span id="cb12-314"><a href="#cb12-314"></a><span class="co">#| eval: true</span></span>
+<span id="cb12-315"><a href="#cb12-315"></a><span class="co">#| echo: false</span></span>
+<span id="cb12-316"><a href="#cb12-316"></a><span class="co">#| fig-width: 9</span></span>
+<span id="cb12-317"><a href="#cb12-317"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb12-318"><a href="#cb12-318"></a><span class="co">#| warning: false</span></span>
+<span id="cb12-319"><a href="#cb12-319"></a><span class="co">#| message: false</span></span>
+<span id="cb12-320"><a href="#cb12-320"></a><span class="co">#| results: hide</span></span>
+<span id="cb12-321"><a href="#cb12-321"></a><span class="co">#| cache: true</span></span>
+<span id="cb12-322"><a href="#cb12-322"></a><span class="do">## PopA</span></span>
+<span id="cb12-323"><a href="#cb12-323"></a>popA.brm <span class="ot">&lt;-</span> <span class="fu">brm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> popA)</span>
+<span id="cb12-324"><a href="#cb12-324"></a>slopeA <span class="ot">&lt;-</span> popA.brm <span class="sc">|&gt;</span></span>
+<span id="cb12-325"><a href="#cb12-325"></a>    <span class="fu">as_draws_df</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-326"><a href="#cb12-326"></a>    <span class="fu">pull</span>(<span class="st">&quot;b_x&quot;</span>)</span>
+<span id="cb12-327"><a href="#cb12-327"></a><span class="do">## PopB</span></span>
+<span id="cb12-328"><a href="#cb12-328"></a>popB.brm <span class="ot">&lt;-</span> <span class="fu">brm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> popB)</span>
+<span id="cb12-329"><a href="#cb12-329"></a>slopeB <span class="ot">&lt;-</span> popB.brm <span class="sc">|&gt;</span></span>
+<span id="cb12-330"><a href="#cb12-330"></a>    <span class="fu">as_draws_df</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-331"><a href="#cb12-331"></a>    <span class="fu">pull</span>(<span class="st">&quot;b_x&quot;</span>)</span>
+<span id="cb12-332"><a href="#cb12-332"></a><span class="do">## PopC</span></span>
+<span id="cb12-333"><a href="#cb12-333"></a>popC.brm <span class="ot">&lt;-</span> <span class="fu">brm</span>(y <span class="sc">~</span> x, <span class="at">data =</span> popC)</span>
+<span id="cb12-334"><a href="#cb12-334"></a>slopeC <span class="ot">&lt;-</span> popC.brm <span class="sc">|&gt;</span></span>
+<span id="cb12-335"><a href="#cb12-335"></a>    <span class="fu">as_draws_df</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-336"><a href="#cb12-336"></a>    <span class="fu">pull</span>(<span class="st">&quot;b_x&quot;</span>)</span>
+<span id="cb12-337"><a href="#cb12-337"></a></span>
+<span id="cb12-338"><a href="#cb12-338"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb12-339"><a href="#cb12-339"></a>    <span class="fu">geom_density</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">x =</span> slopeA, <span class="at">y =</span> ..scaled..)) <span class="sc">+</span></span>
+<span id="cb12-340"><a href="#cb12-340"></a>    <span class="fu">geom_density</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">x =</span> slopeB, <span class="at">y =</span> ..scaled..)) <span class="sc">+</span></span>
+<span id="cb12-341"><a href="#cb12-341"></a>    <span class="fu">geom_density</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">x =</span> slopeC, <span class="at">y =</span> ..scaled..)) <span class="sc">+</span></span>
+<span id="cb12-342"><a href="#cb12-342"></a>    <span class="fu">scale_y_continuous</span>(<span class="st">&quot;Relative probability&quot;</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb12-343"><a href="#cb12-343"></a>    <span class="fu">scale_x_continuous</span>(<span class="st">&quot;Regression slope&quot;</span>) <span class="sc">+</span></span>
+<span id="cb12-344"><a href="#cb12-344"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb12-345"><a href="#cb12-345"></a>  <span class="fu">theme</span>(</span>
+<span id="cb12-346"><a href="#cb12-346"></a>      <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb12-347"><a href="#cb12-347"></a>      <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb12-348"><a href="#cb12-348"></a>    )</span>
+<span id="cb12-349"><a href="#cb12-349"></a><span class="in">```</span></span>
+<span id="cb12-350"><a href="#cb12-350"></a></span>
+<span id="cb12-351"><a href="#cb12-351"></a>Focusing on Populations A and B, we would conclude:</span>
+<span id="cb12-352"><a href="#cb12-352"></a></span>
+<span id="cb12-353"><a href="#cb12-353"></a><span class="ss">- </span>the mean (plus or minus CI) slopes for Population A and B are </span>
+<span id="cb12-354"><a href="#cb12-354"></a>  <span class="in">`r round(mean(slopeA),2)`</span> (`r paste(round(quantile(slopeA,</span>
+<span id="cb12-355"><a href="#cb12-355"></a>  p=c(0.025,0.975)),2),collapse=&quot;,&quot;)<span class="in">`) and `</span>r round(mean(slopeB),2)`</span>
+<span id="cb12-356"><a href="#cb12-356"></a>  (`r paste(round(quantile(slopeB,</span>
+<span id="cb12-357"><a href="#cb12-357"></a>  p=c(0.025,0.975)),2),collapse=&quot;,&quot;)`) respectively.</span>
+<span id="cb12-358"><a href="#cb12-358"></a></span>
+<span id="cb12-359"><a href="#cb12-359"></a><span class="ss">- </span>the Bayesian approach allows us to query the posterior distribution</span>
+<span id="cb12-360"><a href="#cb12-360"></a>  is many other ways in order to ask sensible biological questions.</span>
+<span id="cb12-361"><a href="#cb12-361"></a>  For example, we might consider that a rate of change of 5% or</span>
+<span id="cb12-362"><a href="#cb12-362"></a>  greater represents an important biological impact. For Population A</span>
+<span id="cb12-363"><a href="#cb12-363"></a>  and B, the probability that the rate is 5% or greater is </span>
+<span id="cb12-364"><a href="#cb12-364"></a>  <span class="in">`r round(mean(slopeA&lt; -5),2)`</span> and <span class="in">`r round(mean(slopeB &lt; -5),2)`</span></span>
+<span id="cb12-365"><a href="#cb12-365"></a>  respectively.</span>
+<span id="cb12-366"><a href="#cb12-366"></a><span class="ss">- </span>the Bayesian approach allows us to query the posterior distribution</span>
+<span id="cb12-367"><a href="#cb12-367"></a>  is many other ways in order to ask sensible biological questions.</span>
+<span id="cb12-368"><a href="#cb12-368"></a>  For example, we might consider that a rate of change of 5% or</span>
+<span id="cb12-369"><a href="#cb12-369"></a>  greater represents an important biological impact. For Population A</span>
+<span id="cb12-370"><a href="#cb12-370"></a>  and B, the probability that the rate is 5% or greater is </span>
+<span id="cb12-371"><a href="#cb12-371"></a>  <span class="in">`r round(mean(slopeA&lt; -5),2)`</span> and <span class="in">`r round(mean(slopeB &lt; -5),2)`</span></span>
+<span id="cb12-372"><a href="#cb12-372"></a>  respectively.</span>
+<span id="cb12-373"><a href="#cb12-373"></a></span>
+<span id="cb12-374"><a href="#cb12-374"></a><span class="fu"># Review of (generalised) linear models</span></span>
+<span id="cb12-375"><a href="#cb12-375"></a></span>
+<span id="cb12-376"><a href="#cb12-376"></a>I would highly recommend reviewing the information in [the tutorial on</span>
+<span id="cb12-377"><a href="#cb12-377"></a>generalised linear models](30_glm.html), particularly the sections</span>
+<span id="cb12-378"><a href="#cb12-378"></a>describe linear models, assumption checking and generalised linear</span>
+<span id="cb12-379"><a href="#cb12-379"></a>models (GLM). Whilst there are philosophical differences between</span>
+<span id="cb12-380"><a href="#cb12-380"></a>frequentist and Bayesian statistics that have implications for how</span>
+<span id="cb12-381"><a href="#cb12-381"></a>models are fit and interpreted, model choice and assumption checking</span>
+<span id="cb12-382"><a href="#cb12-382"></a>principles are common between the two approaches. Hence, many of these</span>
+<span id="cb12-383"><a href="#cb12-383"></a>topics will be assumed, and not fully described in the current</span>
+<span id="cb12-384"><a href="#cb12-384"></a>tutorial.</span>
+<span id="cb12-385"><a href="#cb12-385"></a></span>
+<span id="cb12-386"><a href="#cb12-386"></a>Recall from <span class="co">[</span><span class="ot">the tutorial on generalised linear models</span><span class="co">](30_glm.html)</span></span>
+<span id="cb12-387"><a href="#cb12-387"></a>that simple linear regression is a linear modelling process that</span>
+<span id="cb12-388"><a href="#cb12-388"></a>models a single response variable against one or more predictors with</span>
+<span id="cb12-389"><a href="#cb12-389"></a>a linear combination of coefficients and (in the case of a Gaussian</span>
+<span id="cb12-390"><a href="#cb12-390"></a>model) can be expressed as:</span>
+<span id="cb12-391"><a href="#cb12-391"></a></span>
+<span id="cb12-392"><a href="#cb12-392"></a>::: {.columns}</span>
+<span id="cb12-393"><a href="#cb12-393"></a></span>
+<span id="cb12-394"><a href="#cb12-394"></a>:::: {.column width=&quot;48%&quot;}</span>
+<span id="cb12-395"><a href="#cb12-395"></a>$$y_i = \beta_0+ \beta_1 x_i+\epsilon_i \hspace{1cm}\epsilon\sim{}N(0,\sigma^2)$$</span>
+<span id="cb12-396"><a href="#cb12-396"></a></span>
+<span id="cb12-397"><a href="#cb12-397"></a>where:</span>
+<span id="cb12-398"><a href="#cb12-398"></a></span>
+<span id="cb12-399"><a href="#cb12-399"></a><span class="ss">- </span>$y_i$ is the response value for each of the $i$ observations</span>
+<span id="cb12-400"><a href="#cb12-400"></a><span class="ss">- </span>$\beta_0$ is the y-intercept (value of $y$ when $x=0$)</span>
+<span id="cb12-401"><a href="#cb12-401"></a><span class="ss">- </span>$\beta_1$ is the slope (rate of chance in $y$ per unit chance in</span>
+<span id="cb12-402"><a href="#cb12-402"></a>  $x$)</span>
+<span id="cb12-403"><a href="#cb12-403"></a><span class="ss">- </span>$x_i$ is the predictor value for each of the $i$ observations</span>
+<span id="cb12-404"><a href="#cb12-404"></a><span class="ss">- </span>$\epsilon_i$ is the residual value of each of the $i$ observations.</span>
+<span id="cb12-405"><a href="#cb12-405"></a>  A residual is the difference between the observed value and the</span>
+<span id="cb12-406"><a href="#cb12-406"></a>  value expected by the model.</span>
+<span id="cb12-407"><a href="#cb12-407"></a></span>
+<span id="cb12-408"><a href="#cb12-408"></a><span class="ss">- </span>$\epsilon\sim{}N(0,\sigma^2)$ indicates that the residuals are</span>
+<span id="cb12-409"><a href="#cb12-409"></a>  normally distributed with a constant amount of variance</span>
+<span id="cb12-410"><a href="#cb12-410"></a></span>
+<span id="cb12-411"><a href="#cb12-411"></a>::::</span>
+<span id="cb12-412"><a href="#cb12-412"></a></span>
+<span id="cb12-413"><a href="#cb12-413"></a>:::: {.column width=&quot;48%&quot;}</span>
+<span id="cb12-414"><a href="#cb12-414"></a></span>
+<span id="cb12-417"><a href="#cb12-417"></a><span class="in">```{r}</span></span>
+<span id="cb12-418"><a href="#cb12-418"></a><span class="co">#| label: residuals,</span></span>
+<span id="cb12-419"><a href="#cb12-419"></a><span class="co">#| eval: true</span></span>
+<span id="cb12-420"><a href="#cb12-420"></a><span class="co">#| echo: false</span></span>
+<span id="cb12-421"><a href="#cb12-421"></a><span class="co">#| fig-height: 3</span></span>
+<span id="cb12-422"><a href="#cb12-422"></a><span class="co">#| fig-width: 3</span></span>
+<span id="cb12-423"><a href="#cb12-423"></a><span class="co">#| warning: false</span></span>
+<span id="cb12-424"><a href="#cb12-424"></a><span class="fu">set.seed</span>(<span class="dv">234</span>)</span>
+<span id="cb12-425"><a href="#cb12-425"></a>x<span class="ot">=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="cb12-426"><a href="#cb12-426"></a>y<span class="ot">=</span><span class="dv">2</span><span class="sc">+</span><span class="dv">5</span><span class="sc">*</span>x</span>
+<span id="cb12-427"><a href="#cb12-427"></a>y1<span class="ot">=</span><span class="dv">2</span><span class="sc">+</span><span class="dv">5</span><span class="sc">*</span>x <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">10</span>,<span class="dv">0</span>,<span class="dv">4</span>) </span>
+<span id="cb12-428"><a href="#cb12-428"></a>lm1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y1 <span class="sc">~</span> x)</span>
+<span id="cb12-429"><a href="#cb12-429"></a>cc <span class="ot">&lt;-</span> <span class="fu">coef</span>(lm1)</span>
+<span id="cb12-430"><a href="#cb12-430"></a>r <span class="ot">&lt;-</span> <span class="fu">resid</span>(lm1)</span>
+<span id="cb12-431"><a href="#cb12-431"></a><span class="co">#print(r)</span></span>
+<span id="cb12-432"><a href="#cb12-432"></a>ff <span class="ot">&lt;-</span> <span class="fu">fitted</span>(lm1)</span>
+<span id="cb12-433"><a href="#cb12-433"></a><span class="co">#print(ff)</span></span>
+<span id="cb12-434"><a href="#cb12-434"></a>g2<span class="ot">=</span><span class="fu">ggplot</span>(<span class="at">data=</span><span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y=</span>y1, <span class="at">x=</span>x)) <span class="sc">+</span> </span>
+<span id="cb12-435"><a href="#cb12-435"></a>    <span class="fu">geom_segment</span>(<span class="at">data =</span> <span class="cn">NULL</span>, <span class="fu">aes</span>(<span class="at">y =</span> ff, <span class="at">x =</span> x, <span class="at">yend =</span> y1, <span class="at">xend =</span> x), <span class="at">colour =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb12-436"><a href="#cb12-436"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb12-437"><a href="#cb12-437"></a>    <span class="fu">geom_abline</span>(<span class="at">slope =</span> cc[<span class="dv">2</span>], <span class="at">intercept =</span> cc[<span class="dv">1</span>], <span class="at">colour =</span> <span class="st">&quot;blue&quot;</span>) <span class="sc">+</span></span>
+<span id="cb12-438"><a href="#cb12-438"></a>    <span class="co">#annotate(geom=&#39;text&#39;, y=40, x=2, label=expression(y[i]==2+5*x[i]+epsilon[i]), parse=TRUE, hjust=0) +</span></span>
+<span id="cb12-439"><a href="#cb12-439"></a>    <span class="fu">annotate</span>(<span class="at">geom=</span><span class="st">&#39;text&#39;</span>, <span class="at">y=</span><span class="dv">30</span>, <span class="at">x=</span><span class="fl">2.5</span>, <span class="at">label=</span><span class="fu">expression</span>(residual<span class="sc">~</span>(epsilon[i])), <span class="at">parse=</span><span class="cn">TRUE</span>, <span class="at">hjust=</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb12-440"><a href="#cb12-440"></a>    <span class="fu">annotate</span>(<span class="at">geom=</span><span class="st">&#39;text&#39;</span>, <span class="at">y=</span><span class="dv">15</span>, <span class="at">x=</span><span class="dv">5</span>, <span class="at">label=</span><span class="fu">expression</span>(slope<span class="sc">~</span>(beta[<span class="dv">1</span>])), <span class="at">parse=</span><span class="cn">TRUE</span>, <span class="at">hjust=</span><span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb12-441"><a href="#cb12-441"></a>    <span class="fu">annotate</span>(<span class="at">geom=</span><span class="st">&#39;text&#39;</span>, <span class="at">y=</span><span class="sc">-</span><span class="dv">5</span>, <span class="at">x=</span><span class="dv">1</span>, <span class="at">label=</span><span class="fu">expression</span>(y<span class="sc">-</span>intercept<span class="sc">~</span>(beta[<span class="dv">0</span>])), <span class="at">parse=</span><span class="cn">TRUE</span>, <span class="at">hjust=</span><span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb12-442"><a href="#cb12-442"></a>    <span class="fu">geom_curve</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">2</span>, <span class="at">y =</span> <span class="dv">27</span>, <span class="at">xend =</span> <span class="fl">3.8</span>, <span class="at">yend =</span> <span class="dv">23</span>), </span>
+<span id="cb12-443"><a href="#cb12-443"></a>             <span class="at">curvature =</span> <span class="fl">0.3</span>, <span class="co"># Adjust curvature as needed</span></span>
+<span id="cb12-444"><a href="#cb12-444"></a>             <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;inches&quot;</span>))) <span class="sc">+</span></span>
+<span id="cb12-445"><a href="#cb12-445"></a>    <span class="fu">geom_curve</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">4.7</span>, <span class="at">y =</span> <span class="dv">15</span>, <span class="at">xend =</span> <span class="fl">3.7</span>, <span class="at">yend =</span> <span class="dv">18</span>), </span>
+<span id="cb12-446"><a href="#cb12-446"></a>             <span class="at">curvature =</span> <span class="sc">-</span><span class="fl">0.3</span>, <span class="co"># Adjust curvature as needed</span></span>
+<span id="cb12-447"><a href="#cb12-447"></a>             <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;inches&quot;</span>))) <span class="sc">+</span></span>
+<span id="cb12-448"><a href="#cb12-448"></a>    <span class="fu">geom_curve</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fl">0.7</span>, <span class="at">y =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">xend =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">yend =</span> <span class="sc">-</span><span class="fl">0.5</span>), </span>
+<span id="cb12-449"><a href="#cb12-449"></a>             <span class="at">curvature =</span> <span class="sc">-</span><span class="fl">0.3</span>, <span class="co"># Adjust curvature as needed</span></span>
+<span id="cb12-450"><a href="#cb12-450"></a>             <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.05</span>, <span class="st">&quot;inches&quot;</span>))) <span class="sc">+</span></span>
+<span id="cb12-451"><a href="#cb12-451"></a>    <span class="fu">scale_y_continuous</span>(<span class="st">&#39;y&#39;</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">10</span>, <span class="dv">50</span>)) <span class="sc">+</span></span>
+<span id="cb12-452"><a href="#cb12-452"></a>    <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">2</span>, <span class="dv">10</span>) <span class="sc">+</span></span>
+<span id="cb12-453"><a href="#cb12-453"></a>    <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb12-454"><a href="#cb12-454"></a>    <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(), <span class="at">axis.ticks =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb12-455"><a href="#cb12-455"></a>g2</span>
+<span id="cb12-456"><a href="#cb12-456"></a><span class="in">```</span></span>
+<span id="cb12-457"><a href="#cb12-457"></a>::::</span>
+<span id="cb12-458"><a href="#cb12-458"></a></span>
+<span id="cb12-459"><a href="#cb12-459"></a>:::</span>
+<span id="cb12-460"><a href="#cb12-460"></a></span>
+<span id="cb12-461"><a href="#cb12-461"></a>The above can be re-expressed and generalised as:</span>
+<span id="cb12-462"><a href="#cb12-462"></a>$$</span>
+<span id="cb12-463"><a href="#cb12-463"></a>y_i\sim{}Dist(\mu_i, ...)<span class="sc">\\</span></span>
+<span id="cb12-464"><a href="#cb12-464"></a>g(\mu_i) = \beta_0+ \beta_1 x_i</span>
+<span id="cb12-465"><a href="#cb12-465"></a>$$</span>
+<span id="cb12-466"><a href="#cb12-466"></a></span>
+<span id="cb12-467"><a href="#cb12-467"></a>where:</span>
+<span id="cb12-468"><a href="#cb12-468"></a></span>
+<span id="cb12-469"><a href="#cb12-469"></a><span class="ss">- </span>$Dist$ represents a distribution from the exponential family (such</span>
+<span id="cb12-470"><a href="#cb12-470"></a>  as Gaussian, Poisson, Binomial, etc)</span>
+<span id="cb12-471"><a href="#cb12-471"></a><span class="ss">- </span>$...$ represents additional parameters relevant to the nominated</span>
+<span id="cb12-472"><a href="#cb12-472"></a>  distribution (such as $\sigma^2$: Gaussian, $n$: Binomial and</span>
+<span id="cb12-473"><a href="#cb12-473"></a>  $\phi$: Negative Binomial, etc)</span>
+<span id="cb12-474"><a href="#cb12-474"></a><span class="ss">- </span>$g()$ represents the link function (e.g. log: Poisson, logit:</span>
+<span id="cb12-475"><a href="#cb12-475"></a>  Binomial, etc)</span>
+<span id="cb12-476"><a href="#cb12-476"></a></span>
+<span id="cb12-477"><a href="#cb12-477"></a>The reliability of any model depends on the degree to which the data</span>
+<span id="cb12-478"><a href="#cb12-478"></a>adheres to the model assumptions. Hence, as with frequentist models,</span>
+<span id="cb12-479"><a href="#cb12-479"></a>exploratory data analysis (EDA) is a vital component of Bayesian</span>
+<span id="cb12-480"><a href="#cb12-480"></a>modelling and since the model structures are similar between</span>
+<span id="cb12-481"><a href="#cb12-481"></a>frequentist and Bayesian approaches, so too is EDA.</span>
+<span id="cb12-482"><a href="#cb12-482"></a></span>
+<span id="cb12-483"><a href="#cb12-483"></a><span class="fu"># Bayesian (generalised) linear models</span></span>
+<span id="cb12-484"><a href="#cb12-484"></a></span>
+<span id="cb12-485"><a href="#cb12-485"></a>For the purpose of introduction, we will start by exploring a Gaussian</span>
+<span id="cb12-486"><a href="#cb12-486"></a>model with a very simple fabricated data set representing the</span>
+<span id="cb12-487"><a href="#cb12-487"></a>relationship between a response ($y$) and a continuous predictor ($x =</span>
+<span id="cb12-488"><a href="#cb12-488"></a><span class="co">[</span><span class="ot">1,2,3,4,5,6,7,8,9,10</span><span class="co">]</span>$. The fabricated data set will comprise 10</span>
+<span id="cb12-489"><a href="#cb12-489"></a>observations each drawn from normal distributions with a set standard</span>
+<span id="cb12-490"><a href="#cb12-490"></a>deviation of 4. The means of the 10 populations will be determined by</span>
+<span id="cb12-491"><a href="#cb12-491"></a>the following equation: </span>
+<span id="cb12-492"><a href="#cb12-492"></a></span>
+<span id="cb12-493"><a href="#cb12-493"></a>$$ \mu_i = 2 + 5\times x_i $$</span>
+<span id="cb12-494"><a href="#cb12-494"></a></span>
+<span id="cb12-495"><a href="#cb12-495"></a>Let generate these data.</span>
+<span id="cb12-496"><a href="#cb12-496"></a></span>
+<span id="cb12-499"><a href="#cb12-499"></a><span class="in">```{r}</span></span>
+<span id="cb12-500"><a href="#cb12-500"></a><span class="co">#| label: sim1</span></span>
+<span id="cb12-501"><a href="#cb12-501"></a><span class="co">#| eval: true</span></span>
+<span id="cb12-502"><a href="#cb12-502"></a><span class="co">#| echo: true</span></span>
+<span id="cb12-503"><a href="#cb12-503"></a><span class="co">#| fig-height: 3</span></span>
+<span id="cb12-504"><a href="#cb12-504"></a><span class="co">#| fig-width: 3</span></span>
+<span id="cb12-505"><a href="#cb12-505"></a><span class="co">#| warning: false</span></span>
+<span id="cb12-506"><a href="#cb12-506"></a><span class="fu">set.seed</span>(<span class="dv">234</span>)</span>
+<span id="cb12-507"><a href="#cb12-507"></a>dat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-508"><a href="#cb12-508"></a>    <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">round</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">mean =</span> <span class="dv">2</span> <span class="sc">+</span> (<span class="dv">5</span> <span class="sc">*</span> x), <span class="at">sd =</span> <span class="dv">4</span>), <span class="at">digits =</span> <span class="dv">2</span>))</span>
+<span id="cb12-509"><a href="#cb12-509"></a>dat</span>
+<span id="cb12-510"><a href="#cb12-510"></a><span class="in">```</span></span>
+<span id="cb12-511"><a href="#cb12-511"></a></span>
+<span id="cb12-512"><a href="#cb12-512"></a></span>
+<span id="cb12-513"><a href="#cb12-513"></a></span>
+<span id="cb12-514"><a href="#cb12-514"></a>The model will will be fitting will be:</span>
+<span id="cb12-515"><a href="#cb12-515"></a></span>
+<span id="cb12-516"><a href="#cb12-516"></a>$$</span>
+<span id="cb12-517"><a href="#cb12-517"></a>\begin{align}</span>
+<span id="cb12-518"><a href="#cb12-518"></a>y_i&amp;\sim{}N(\mu_i, \sigma^2)<span class="sc">\\</span></span>
+<span id="cb12-519"><a href="#cb12-519"></a>\mu_i &amp;= \beta_0+ \beta_1 x_i</span>
+<span id="cb12-520"><a href="#cb12-520"></a>\end{align}</span>
+<span id="cb12-521"><a href="#cb12-521"></a>$$</span>
+<span id="cb12-522"><a href="#cb12-522"></a></span>
+<span id="cb12-523"><a href="#cb12-523"></a>The parameters that we are going to attempt to estimate are the</span>
+<span id="cb12-524"><a href="#cb12-524"></a>y-intercept ($\beta_0$), the slope ($\beta_1$) and the underlying</span>
+<span id="cb12-525"><a href="#cb12-525"></a>variance ($\sigma^2$). Recall (from tutorials on [statistical</span>
+<span id="cb12-526"><a href="#cb12-526"></a>philosophies](21_statistical_philosophies.html) and</span>
+<span id="cb12-527"><a href="#cb12-527"></a><span class="co">[</span><span class="ot">estimation</span><span class="co">](22_estimation.html)</span>)) that Bayesian models calculate</span>
+<span id="cb12-528"><a href="#cb12-528"></a>**posterior** predictions ($P(H|D)$) from likelihood ($P(D|H)$) and</span>
+<span id="cb12-529"><a href="#cb12-529"></a>**prior** expectations ($P(H)$). Therefore, in preparation for fitting</span>
+<span id="cb12-530"><a href="#cb12-530"></a>a Bayesian model, we must consider what our prior expectations are for</span>
+<span id="cb12-531"><a href="#cb12-531"></a>_all_ parameters.</span>
+<span id="cb12-532"><a href="#cb12-532"></a></span>
+<span id="cb12-533"><a href="#cb12-533"></a>The individual responses ($y_i$, observed yields) are each expected to</span>
+<span id="cb12-534"><a href="#cb12-534"></a>have been **independently** drawn from normal (**Gaussian**)</span>
+<span id="cb12-535"><a href="#cb12-535"></a>distributions ($\mathcal{N}$). These distributions represent all the</span>
+<span id="cb12-536"><a href="#cb12-536"></a>possible values of $y$ we could have obtained at the specific ($i^{th}$)</span>
+<span id="cb12-537"><a href="#cb12-537"></a>level of $x$. Hence the $i^{th}$ $y$ observation is expected</span>
+<span id="cb12-538"><a href="#cb12-538"></a>to have been drawn from a normal distribution with a mean of $\mu_i$.</span>
+<span id="cb12-539"><a href="#cb12-539"></a></span>
+<span id="cb12-540"><a href="#cb12-540"></a>Although each distribution is expected to come from populations that</span>
+<span id="cb12-541"><a href="#cb12-541"></a>differ in their means, we assume that all of these distributions have</span>
+<span id="cb12-542"><a href="#cb12-542"></a>the **same variance** ($\sigma^2$).</span>
+<span id="cb12-543"><a href="#cb12-543"></a></span>
+<span id="cb12-544"><a href="#cb12-544"></a><span class="fu">## Priors</span></span>
+<span id="cb12-545"><a href="#cb12-545"></a></span>
+<span id="cb12-546"><a href="#cb12-546"></a>We need to supply priors for each of the parameters to be estimated</span>
+<span id="cb12-547"><a href="#cb12-547"></a>($\beta_0$, $\beta_1$ and $\sigma$). Whilst we want these priors to be</span>
+<span id="cb12-548"><a href="#cb12-548"></a>sufficiently vague as to not influence the outcomes of the analysis</span>
+<span id="cb12-549"><a href="#cb12-549"></a>(and thus be equivalent to the frequentist analysis), we do not want</span>
+<span id="cb12-550"><a href="#cb12-550"></a>the priors to be so vague (wide) that they permit the MCMC sampler to</span>
+<span id="cb12-551"><a href="#cb12-551"></a>drift off into parameter space that is both illogical as well as</span>
+<span id="cb12-552"><a href="#cb12-552"></a>numerically awkward.</span>
+<span id="cb12-553"><a href="#cb12-553"></a></span>
+<span id="cb12-554"><a href="#cb12-554"></a>Proffering sensible priors is one of the most difficult aspects of</span>
+<span id="cb12-555"><a href="#cb12-555"></a>performing Bayesian analyses. For instances where there are some</span>
+<span id="cb12-556"><a href="#cb12-556"></a>previous knowledge available and a desire to incorporate those data,</span>
+<span id="cb12-557"><a href="#cb12-557"></a>the difficulty is in how to ensure that the information is</span>
+<span id="cb12-558"><a href="#cb12-558"></a>incorporated correctly. However, for instances where there are no</span>
+<span id="cb12-559"><a href="#cb12-559"></a>previous relevant information and so a desire to have the posteriors</span>
+<span id="cb12-560"><a href="#cb12-560"></a>driven entirely by the new data, the difficulty is in how to define</span>
+<span id="cb12-561"><a href="#cb12-561"></a>priors that are both vague enough (not bias results in their</span>
+<span id="cb12-562"><a href="#cb12-562"></a>direction) and yet not so vague as to allow the MCMC sampler to drift</span>
+<span id="cb12-563"><a href="#cb12-563"></a>off into unsupported regions (and thus get stuck and yield spurious</span>
+<span id="cb12-564"><a href="#cb12-564"></a>estimates).</span>
+<span id="cb12-565"><a href="#cb12-565"></a></span>
+<span id="cb12-566"><a href="#cb12-566"></a>For early implementations of MCMC sampling routines (such as</span>
+<span id="cb12-567"><a href="#cb12-567"></a>Metropolis Hasting and Gibbs), it was fairly common to see very vague</span>
+<span id="cb12-568"><a href="#cb12-568"></a>priors being defined.  For example, the priors on effects, were</span>
+<span id="cb12-569"><a href="#cb12-569"></a>typically normal priors with mean of 0 and variance of <span class="in">`1e+06`</span></span>
+<span id="cb12-570"><a href="#cb12-570"></a>(1,00,000).  These are very vague priors.  Yet for some samplers</span>
+<span id="cb12-571"><a href="#cb12-571"></a>(e.g. NUTS), such vague priors can encourage poor behaviour of the</span>
+<span id="cb12-572"><a href="#cb12-572"></a>sampler - particularly if the posterior is complex. It is now</span>
+<span id="cb12-573"><a href="#cb12-573"></a>generally advised that priors should (where possible) be somewhat</span>
+<span id="cb12-574"><a href="#cb12-574"></a>**weakly informative** and to some extent, represent the bounds of</span>
+<span id="cb12-575"><a href="#cb12-575"></a>what are feasible and sensible estimates.</span>
+<span id="cb12-576"><a href="#cb12-576"></a></span>
+<span id="cb12-577"><a href="#cb12-577"></a>The degree to which priors __influence__ an outcome (whether by having</span>
+<span id="cb12-578"><a href="#cb12-578"></a>a pulling effect on the estimates or by encouraging the sampler to</span>
+<span id="cb12-579"><a href="#cb12-579"></a>drift off into unsupported regions of the posterior) is dependent on:</span>
+<span id="cb12-580"><a href="#cb12-580"></a></span>
+<span id="cb12-581"><a href="#cb12-581"></a><span class="ss">- </span>the relative sparsity of the data - the larger the data, the less</span>
+<span id="cb12-582"><a href="#cb12-582"></a>  weight the priors have and thus less influence they exert.</span>
+<span id="cb12-583"><a href="#cb12-583"></a><span class="ss">- </span>the complexity of the model (and thus posterior) - the more</span>
+<span id="cb12-584"><a href="#cb12-584"></a>  parameters, the more sensitive the sampler is to the priors.</span>
+<span id="cb12-585"><a href="#cb12-585"></a></span>
+<span id="cb12-586"><a href="#cb12-586"></a>The sampled posterior is the product of both the likelihood and the</span>
+<span id="cb12-587"><a href="#cb12-587"></a>prior - all of which are multidimensional.  For most applications, it</span>
+<span id="cb12-588"><a href="#cb12-588"></a>would be vertically impossible to define a sensible multidimensional</span>
+<span id="cb12-589"><a href="#cb12-589"></a>prior.  Hence, our only option is to define priors on individual</span>
+<span id="cb12-590"><a href="#cb12-590"></a>parameters (e.g. the intercept, slope(s), variance etc) and to hope</span>
+<span id="cb12-591"><a href="#cb12-591"></a>that if they are individually sensible, they will remain collectively</span>
+<span id="cb12-592"><a href="#cb12-592"></a>sensible.</span>
+<span id="cb12-593"><a href="#cb12-593"></a></span>
+<span id="cb12-594"><a href="#cb12-594"></a>So having (hopefully) impressed upon the notion that priors are an</span>
+<span id="cb12-595"><a href="#cb12-595"></a>important consideration, I will now attempt to synthesise some of the</span>
+<span id="cb12-596"><a href="#cb12-596"></a>approaches that can be employed to arrive at weakly informative priors</span>
+<span id="cb12-597"><a href="#cb12-597"></a>that have been gleaned from various sources.  Largely, this advice has</span>
+<span id="cb12-598"><a href="#cb12-598"></a>come from the following resources:</span>
+<span id="cb12-599"><a href="#cb12-599"></a></span>
+<span id="cb12-600"><a href="#cb12-600"></a><span class="ss">- </span>https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations</span>
+<span id="cb12-601"><a href="#cb12-601"></a><span class="ss">- </span>http://svmiller.com/blog/2021/02/thinking-about-your-priors-bayesian-analysis/</span>
+<span id="cb12-602"><a href="#cb12-602"></a></span>
+<span id="cb12-603"><a href="#cb12-603"></a>I will outline some of the current main recommendations before</span>
+<span id="cb12-604"><a href="#cb12-604"></a>summarising some approaches in a table.</span>
+<span id="cb12-605"><a href="#cb12-605"></a></span>
+<span id="cb12-606"><a href="#cb12-606"></a><span class="ss">- </span>weakly informative priors should contain enough information so as to</span>
+<span id="cb12-607"><a href="#cb12-607"></a>  regularise (discourage unreasonable parameter estimates whilst</span>
+<span id="cb12-608"><a href="#cb12-608"></a>  allowing all reasonable estimates).</span>
+<span id="cb12-609"><a href="#cb12-609"></a><span class="ss">- </span>for effects parameters on scaled (standardised) data, an argument</span>
+<span id="cb12-610"><a href="#cb12-610"></a>  could be made for a normal distribution with a standard deviation of</span>
+<span id="cb12-611"><a href="#cb12-611"></a>  1 (e.g. <span class="in">`normal(0,1)`</span>), although some prefer a _t_ distribution with</span>
+<span id="cb12-612"><a href="#cb12-612"></a>  3 degrees of freedom and standard deviation of 1 (e.g.</span>
+<span id="cb12-613"><a href="#cb12-613"></a>  <span class="in">`student_t(3,0,1)`</span>) - apparently a flatter _t_ is a more robust</span>
+<span id="cb12-614"><a href="#cb12-614"></a>  prior than a normal as an uninformative prior...</span>
+<span id="cb12-615"><a href="#cb12-615"></a><span class="ss">- </span>for un-scaled data, the above priors can be scaled by using the</span>
+<span id="cb12-616"><a href="#cb12-616"></a>  standard deviation of the data as the prior standard deviation</span>
+<span id="cb12-617"><a href="#cb12-617"></a>  (e.g. <span class="in">`student_t(3,0,sd(y))`</span>, or <span class="in">`sudent_t(3,0,sd(y)/sd(x))`</span>)</span>
+<span id="cb12-618"><a href="#cb12-618"></a><span class="ss">- </span>for priors of hierachical standard deviations, priors should</span>
+<span id="cb12-619"><a href="#cb12-619"></a>  encourage shrinkage towards 0 (particularly if the number of groups</span>
+<span id="cb12-620"><a href="#cb12-620"></a>  is small, since otherwise, the sampler will tend to be more</span>
+<span id="cb12-621"><a href="#cb12-621"></a>  responsive to &quot;noise&quot;).</span>
+<span id="cb12-622"><a href="#cb12-622"></a></span>
+<span id="cb12-623"><a href="#cb12-623"></a>In this tutorial series, we will perform Bayesian analysis in the STAN</span>
+<span id="cb12-624"><a href="#cb12-624"></a>language via an R interface. Two popular interfaces that greatly</span>
+<span id="cb12-625"><a href="#cb12-625"></a>simplify the specification of Bayesian models are</span>
+<span id="cb12-626"><a href="#cb12-626"></a><span class="co">[</span><span class="ot">brms</span><span class="co">](https://paul-buerkner.github.io/brms/)</span> and</span>
+<span id="cb12-627"><a href="#cb12-627"></a><span class="co">[</span><span class="ot">rstanarm</span><span class="co">](https://mc-stan.org/rstanarm/)</span>. We will exclusively focus</span>
+<span id="cb12-628"><a href="#cb12-628"></a>on the former as it is far more flexible.</span>
+<span id="cb12-629"><a href="#cb12-629"></a></span>
+<span id="cb12-630"><a href="#cb12-630"></a><span class="pp">|</span> Family            <span class="pp">|</span> Parameter                            <span class="pp">|</span> brms                            <span class="pp">|</span> rstanarm                    <span class="pp">|</span></span>
+<span id="cb12-631"><a href="#cb12-631"></a><span class="pp">|-------------------|--------------------------------------|---------------------------------|-----------------------------|</span></span>
+<span id="cb12-632"><a href="#cb12-632"></a><span class="pp">|</span> Gaussian          <span class="pp">|</span> Intercept                            <span class="pp">|</span> <span class="in">`student_t(3,median(y),mad(y))`</span> <span class="pp">|</span> <span class="in">`normal(mean(y),2.5*sd(y))`</span> <span class="pp">|</span></span>
+<span id="cb12-633"><a href="#cb12-633"></a><span class="pp">|</span>                   <span class="pp">|</span> &#39;Population effects&#39; (slopes, betas) <span class="pp">|</span> flat, improper priors           <span class="pp">|</span> <span class="in">`normal(0,2.5*sd(y)/sd(x))`</span> <span class="pp">|</span></span>
+<span id="cb12-634"><a href="#cb12-634"></a><span class="pp">|</span>                   <span class="pp">|</span> Sigma                                <span class="pp">|</span> <span class="in">`student_t(3,0,mad(y))`</span>         <span class="pp">|</span> <span class="in">`exponential(1/sd(y))`</span>      <span class="pp">|</span></span>
+<span id="cb12-635"><a href="#cb12-635"></a><span class="pp">|</span>                   <span class="pp">|</span> &#39;Group-level effects&#39;                <span class="pp">|</span> <span class="in">`student_t(3,0,mad(y))`</span>         <span class="pp">|</span> <span class="in">`decov(1,1,1,1)`</span>            <span class="pp">|</span></span>
+<span id="cb12-636"><a href="#cb12-636"></a><span class="pp">|</span>                   <span class="pp">|</span> Correlation on group-level effects   <span class="pp">|</span> <span class="in">`ljk_corr_cholesky(1)`</span>          <span class="pp">|</span>                             <span class="pp">|</span></span>
+<span id="cb12-637"><a href="#cb12-637"></a><span class="pp">|</span> Poisson           <span class="pp">|</span> Intercept                            <span class="pp">|</span> <span class="in">`student_t(3,median(y),mad(y))`</span> <span class="pp">|</span> <span class="in">`normal(mean(y),2.5*sd(y))`</span> <span class="pp">|</span></span>
+<span id="cb12-638"><a href="#cb12-638"></a><span class="pp">|</span>                   <span class="pp">|</span> &#39;Population effects&#39; (slopes, betas) <span class="pp">|</span> flat, improper priors           <span class="pp">|</span> <span class="in">`normal(0,2.5*sd(y)/sd(x))`</span> <span class="pp">|</span></span>
+<span id="cb12-639"><a href="#cb12-639"></a><span class="pp">|</span>                   <span class="pp">|</span> &#39;Group-level effects&#39;                <span class="pp">|</span> <span class="in">`student_t(3,0,mad(y))`</span>         <span class="pp">|</span> <span class="in">`decov(1,1,1,1)`</span>            <span class="pp">|</span></span>
+<span id="cb12-640"><a href="#cb12-640"></a><span class="pp">|</span>                   <span class="pp">|</span> Correlation on group-level effects   <span class="pp">|</span> <span class="in">`ljk_corr_cholesky(1)`</span>          <span class="pp">|</span>                             <span class="pp">|</span></span>
+<span id="cb12-641"><a href="#cb12-641"></a><span class="pp">|</span> Negative binomial <span class="pp">|</span> Intercept                            <span class="pp">|</span> <span class="in">`student_t(3,median(y),mad(y))`</span> <span class="pp">|</span> <span class="in">`normal(mean(y),2.5*sd(y))`</span> <span class="pp">|</span></span>
+<span id="cb12-642"><a href="#cb12-642"></a><span class="pp">|</span>                   <span class="pp">|</span> &#39;Population effects&#39; (slopes, betas) <span class="pp">|</span> flat, improper priors           <span class="pp">|</span> <span class="in">`normal(0,2.5*sd(y)/sd(x))`</span> <span class="pp">|</span></span>
+<span id="cb12-643"><a href="#cb12-643"></a><span class="pp">|</span>                   <span class="pp">|</span> Shape                                <span class="pp">|</span> <span class="in">`gamma(0.01, 0.01)`</span>             <span class="pp">|</span> <span class="in">`exponential(1/sd(y))`</span>      <span class="pp">|</span></span>
+<span id="cb12-644"><a href="#cb12-644"></a><span class="pp">|</span>                   <span class="pp">|</span> &#39;Group-level effects&#39;                <span class="pp">|</span> <span class="in">`student_t(3,0,mad(y))`</span>         <span class="pp">|</span> <span class="in">`decov(1,1,1,1)`</span>            <span class="pp">|</span></span>
+<span id="cb12-645"><a href="#cb12-645"></a><span class="pp">|</span>                   <span class="pp">|</span> Correlation on group-level effects   <span class="pp">|</span> <span class="in">`ljk_corr_cholesky(1)`</span>          <span class="pp">|</span>                             <span class="pp">|</span></span>
+<span id="cb12-646"><a href="#cb12-646"></a></span>
+<span id="cb12-647"><a href="#cb12-647"></a>: {.primary .bordered .sm .paramsTable}</span>
+<span id="cb12-648"><a href="#cb12-648"></a></span>
+<span id="cb12-649"><a href="#cb12-649"></a>Notes:</span>
+<span id="cb12-650"><a href="#cb12-650"></a></span>
+<span id="cb12-651"><a href="#cb12-651"></a><span class="in">`brms`</span></span>
+<span id="cb12-652"><a href="#cb12-652"></a></span>
+<span id="cb12-653"><a href="#cb12-653"></a>https://github.com/paul-buerkner/brms/blob/c2b24475d727c8afd8bfc95947c18793b8ce2892/R/priors.R</span>
+<span id="cb12-654"><a href="#cb12-654"></a></span>
+<span id="cb12-655"><a href="#cb12-655"></a><span class="ss">1. </span>In the above, for non-Gaussian families, <span class="in">`y`</span> is first transformed</span>
+<span id="cb12-656"><a href="#cb12-656"></a>  according to the family link.  If the family link is <span class="in">`log`</span>, then 0.1</span>
+<span id="cb12-657"><a href="#cb12-657"></a>  is first added to 0 values.</span>
+<span id="cb12-658"><a href="#cb12-658"></a><span class="ss">2. </span>in <span class="in">`brms`</span> the minimum standard deviation for the Intercept prior is</span>
+<span id="cb12-659"><a href="#cb12-659"></a>   <span class="in">`2.5`</span></span>
+<span id="cb12-660"><a href="#cb12-660"></a><span class="ss">3. </span>in <span class="in">`brms`</span> the minimum standard deviation for group-level priors is</span>
+<span id="cb12-661"><a href="#cb12-661"></a>   <span class="in">`10`</span>.</span>
+<span id="cb12-662"><a href="#cb12-662"></a></span>
+<span id="cb12-663"><a href="#cb12-663"></a><span class="in">`rstanarm`</span></span>
+<span id="cb12-664"><a href="#cb12-664"></a></span>
+<span id="cb12-665"><a href="#cb12-665"></a>http://mc-stan.org/rstanarm/articles/priors.html</span>
+<span id="cb12-666"><a href="#cb12-666"></a></span>
+<span id="cb12-667"><a href="#cb12-667"></a><span class="ss">1. </span>in <span class="in">`rstanarm`</span> priors on standard deviation and correlation</span>
+<span id="cb12-668"><a href="#cb12-668"></a>   associated with group-level effects are packaged up into a single</span>
+<span id="cb12-669"><a href="#cb12-669"></a>   prior (<span class="in">`decov`</span> which is a decomposition of the variance and</span>
+<span id="cb12-670"><a href="#cb12-670"></a>   covariance matrix).</span>
+<span id="cb12-671"><a href="#cb12-671"></a></span>
+<span id="cb12-672"><a href="#cb12-672"></a>In my experience, I find that the above priors tend to be a little bit</span>
+<span id="cb12-673"><a href="#cb12-673"></a>too wide for many ecological applications and I often prefer to use</span>
+<span id="cb12-674"><a href="#cb12-674"></a>1.5 rather than 2.5 as the multiplier.</span>
+<span id="cb12-675"><a href="#cb12-675"></a></span>
+<span id="cb12-676"><a href="#cb12-676"></a>:::: {.callout-note}</span>
+<span id="cb12-677"><a href="#cb12-677"></a></span>
+<span id="cb12-678"><a href="#cb12-678"></a>In Bayesian models, centering of predictors offers huge numerical advantages.  So important is it to center that <span class="in">`brms`</span> automatically centers any continuous predictors for you.  However, since the user has not necessarily centered the predictors, the user might misinterpret the outputs from a <span class="in">`brms`</span> model.  Consequently, when fitting a model, <span class="in">`brms`</span> also generates y-intercept values that are consistent with un-centered values and these are the estimates returned to the user.</span>
+<span id="cb12-679"><a href="#cb12-679"></a></span>
+<span id="cb12-680"><a href="#cb12-680"></a>Nevertheless, I would recommend that you should always explicitly</span>
+<span id="cb12-681"><a href="#cb12-681"></a>center continuous predictors to provide more meaningful</span>
+<span id="cb12-682"><a href="#cb12-682"></a>interpretations of the y-intercept. I would also highly recommend</span>
+<span id="cb12-683"><a href="#cb12-683"></a>standardising continuous predictors - this will not only help speed up</span>
+<span id="cb12-684"><a href="#cb12-684"></a>and stabilise the model, it will simplify the spefication of priors -</span>
+<span id="cb12-685"><a href="#cb12-685"></a>see the specific examples later in this tutorial.</span>
+<span id="cb12-686"><a href="#cb12-686"></a></span>
+<span id="cb12-687"><a href="#cb12-687"></a>::::</span>
+<span id="cb12-688"><a href="#cb12-688"></a></span>
+<span id="cb12-689"><a href="#cb12-689"></a>Based on the above, for our fabricated data, lets assign the following</span>
+<span id="cb12-690"><a href="#cb12-690"></a>priors:</span>
+<span id="cb12-691"><a href="#cb12-691"></a></span>
+<span id="cb12-692"><a href="#cb12-692"></a><span class="ss">- </span>$\beta_0$: Normal prior centred at <span class="in">`r round(median(dat$y),2)`</span> with a</span>
+<span id="cb12-693"><a href="#cb12-693"></a>  variance of <span class="in">`r round(mad(dat$y),2)`</span></span>
+<span id="cb12-694"><a href="#cb12-694"></a><span class="ss">  - </span>mean: </span>
+<span id="cb12-695"><a href="#cb12-695"></a>    <span class="in">```{r}</span></span>
+<span id="cb12-696"><a href="#cb12-696"></a>    <span class="co">#| prior_y_mean_1a</span></span>
+<span id="cb12-697"><a href="#cb12-697"></a>    <span class="co">#| echo: true</span></span>
+<span id="cb12-698"><a href="#cb12-698"></a>    <span class="co">#| eval: true</span></span>
+<span id="cb12-699"><a href="#cb12-699"></a>    <span class="co">#| cache: false</span></span>
+<span id="cb12-700"><a href="#cb12-700"></a>    dat<span class="sc">$</span>y <span class="sc">|&gt;</span> <span class="fu">median</span>() <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span>
+<span id="cb12-701"><a href="#cb12-701"></a>    <span class="in">```</span></span>
+<span id="cb12-702"><a href="#cb12-702"></a><span class="ss">  - </span>variance: </span>
+<span id="cb12-703"><a href="#cb12-703"></a>    <span class="in">```{r}</span></span>
+<span id="cb12-704"><a href="#cb12-704"></a>    <span class="co">#| prior_y_var_1a</span></span>
+<span id="cb12-705"><a href="#cb12-705"></a>    <span class="co">#| echo: true</span></span>
+<span id="cb12-706"><a href="#cb12-706"></a>    <span class="co">#| eval: true</span></span>
+<span id="cb12-707"><a href="#cb12-707"></a>    <span class="co">#| cache: false</span></span>
+<span id="cb12-708"><a href="#cb12-708"></a>    dat<span class="sc">$</span>y <span class="sc">|&gt;</span> <span class="fu">mad</span>() <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span>
+<span id="cb12-709"><a href="#cb12-709"></a>    <span class="in">```</span></span>
+<span id="cb12-710"><a href="#cb12-710"></a><span class="ss">- </span>$\beta_1$: _t_ distribution (3 degrees of freedom) prior centred at</span>
+<span id="cb12-711"><a href="#cb12-711"></a>  0 with a variance of <span class="in">`r round(mad(dat$y)/mad(dat$x),2)`</span></span>
+<span id="cb12-712"><a href="#cb12-712"></a><span class="ss">  - </span>mean: since effects are differences and we may not want to</span>
+<span id="cb12-713"><a href="#cb12-713"></a>    pre-determine the direction (polarity) of any trends, it is</span>
+<span id="cb12-714"><a href="#cb12-714"></a>    typical to define effects priors with means of 0</span>
+<span id="cb12-715"><a href="#cb12-715"></a><span class="ss">  - </span>variance: </span>
+<span id="cb12-716"><a href="#cb12-716"></a>    <span class="in">```{r}</span></span>
+<span id="cb12-717"><a href="#cb12-717"></a>    <span class="co">#| prior_y_var1_1a</span></span>
+<span id="cb12-718"><a href="#cb12-718"></a>    <span class="co">#| echo: true</span></span>
+<span id="cb12-719"><a href="#cb12-719"></a>    <span class="co">#| eval: true</span></span>
+<span id="cb12-720"><a href="#cb12-720"></a>    <span class="co">#| cache: false</span></span>
+<span id="cb12-721"><a href="#cb12-721"></a>    <span class="fu">mad</span>(dat<span class="sc">$</span>y) <span class="sc">/</span> <span class="fu">mad</span>(dat<span class="sc">$</span>x) <span class="sc">|&gt;</span> <span class="fu">round</span>(<span class="dv">2</span>)</span>
+<span id="cb12-722"><a href="#cb12-722"></a>    <span class="in">```</span></span>
+<span id="cb12-723"><a href="#cb12-723"></a><span class="ss">- </span>$\sigma$: (half) _t_ distribution (3 degrees of freedom) centred at</span>
+<span id="cb12-724"><a href="#cb12-724"></a>  0 with a variance of <span class="in">`r round(mad(dat$y),2)`</span></span>
+<span id="cb12-725"><a href="#cb12-725"></a><span class="ss">  - </span>variance: </span>
+<span id="cb12-726"><a href="#cb12-726"></a>    <span class="in">```{r}</span></span>
+<span id="cb12-727"><a href="#cb12-727"></a>    <span class="co">#| prior_y_var_1a</span></span>
+<span id="cb12-728"><a href="#cb12-728"></a>    <span class="co">#| echo: true</span></span>
+<span id="cb12-729"><a href="#cb12-729"></a>    <span class="co">#| eval: true</span></span>
+<span id="cb12-730"><a href="#cb12-730"></a>    <span class="co">#| cache: false</span></span>
+<span id="cb12-731"><a href="#cb12-731"></a>    <span class="in">```</span></span>
+<span id="cb12-732"><a href="#cb12-732"></a></span>
+<span id="cb12-733"><a href="#cb12-733"></a>Note, again, when fitting models through either <span class="in">`rstanarm`</span> or <span class="in">`brms`</span>,</span>
+<span id="cb12-734"><a href="#cb12-734"></a>the priors assume that the predictor(s) have been centred and are to</span>
+<span id="cb12-735"><a href="#cb12-735"></a>be applied on the link scale. In this case the link scale is an</span>
+<span id="cb12-736"><a href="#cb12-736"></a>identity.</span>
+<span id="cb12-737"><a href="#cb12-737"></a></span>
+<span id="cb12-738"><a href="#cb12-738"></a></span>
+<span id="cb12-739"><a href="#cb12-739"></a></span>
+<span id="cb12-740"><a href="#cb12-740"></a>Similar logic can be applied for models that employ different</span>
+<span id="cb12-741"><a href="#cb12-741"></a>distributions. In the following sections, we will define numerous sets</span>
+<span id="cb12-742"><a href="#cb12-742"></a>of data (each of which represents different major forms of ecological</span>
+<span id="cb12-743"><a href="#cb12-743"></a>data) and see how we can set appropriate priors in each case. In</span>
+<span id="cb12-744"><a href="#cb12-744"></a>working through these example, it is worth reflecting on how much</span>
+<span id="cb12-745"><a href="#cb12-745"></a>simpler prior specification is if we use standardised predictors.</span>
+<span id="cb12-746"><a href="#cb12-746"></a></span>
+<span id="cb12-747"><a href="#cb12-747"></a></span>
+<span id="cb12-748"><a href="#cb12-748"></a><span class="fu"># Example data</span></span>
+<span id="cb12-749"><a href="#cb12-749"></a></span>
+<span id="cb12-750"><a href="#cb12-750"></a>This tutorial will blend theoretical discussions with actual</span>
+<span id="cb12-751"><a href="#cb12-751"></a>calculations and model fits. I believe that by bridging the divide</span>
+<span id="cb12-752"><a href="#cb12-752"></a>between theory and application, we all gain better understanding. The</span>
+<span id="cb12-753"><a href="#cb12-753"></a>applied components of this tutorial will be motivated by numerous</span>
+<span id="cb12-754"><a href="#cb12-754"></a>fabricated data sets. The advantage of simulated data over real data</span>
+<span id="cb12-755"><a href="#cb12-755"></a>is that with simulated data, we know the &#39;truth&#39; and can therefore</span>
+<span id="cb12-756"><a href="#cb12-756"></a>gauge the accuracy of estimates.</span>
+<span id="cb12-757"><a href="#cb12-757"></a></span>
+<span id="cb12-758"><a href="#cb12-758"></a>The motivating examples are:</span>
+<span id="cb12-759"><a href="#cb12-759"></a></span>
+<span id="cb12-760"><a href="#cb12-760"></a><span class="ss">- </span>**Example 1** - simulated samples drawn from a Gaussian (normal)</span>
+<span id="cb12-761"><a href="#cb12-761"></a>  distribution reminiscent of data collected on measurements (such as</span>
+<span id="cb12-762"><a href="#cb12-762"></a>  body mass)</span>
+<span id="cb12-763"><a href="#cb12-763"></a><span class="ss">- </span>**Example 2** - simulated Gaussian samples drawn three different</span>
+<span id="cb12-764"><a href="#cb12-764"></a>  populations representing three different treatment levels (e.g. body</span>
+<span id="cb12-765"><a href="#cb12-765"></a>  masses of three different species)</span>
+<span id="cb12-766"><a href="#cb12-766"></a><span class="ss">- </span>**Example 3** - simulated samples drawn from a Poisson distribution</span>
+<span id="cb12-767"><a href="#cb12-767"></a>  reminiscent of count data (such as number of individuals of a</span>
+<span id="cb12-768"><a href="#cb12-768"></a>  species within quadrats)</span>
+<span id="cb12-769"><a href="#cb12-769"></a><span class="ss">- </span>**Example 4** - simulated samples drawn from a Negative Binomial</span>
+<span id="cb12-770"><a href="#cb12-770"></a>  distribution reminiscent of over-dispersed count data (such as</span>
+<span id="cb12-771"><a href="#cb12-771"></a>  number of individuals of a species that tends to aggregate in</span>
+<span id="cb12-772"><a href="#cb12-772"></a>  groups)</span>
+<span id="cb12-773"><a href="#cb12-773"></a><span class="ss">- </span>**Example 5** - simulated samples drawn from a Bernoulli (binomial</span>
+<span id="cb12-774"><a href="#cb12-774"></a>  with $n = 1$) distribution reminiscent of binary data (such as the</span>
+<span id="cb12-775"><a href="#cb12-775"></a>  presence/absence of a species within sites)</span>
+<span id="cb12-776"><a href="#cb12-776"></a><span class="ss">- </span>**Example 6** - simulated samples drawn from a Binomial distribution</span>
+<span id="cb12-777"><a href="#cb12-777"></a>  reminiscent of proportional data (such as counts of a particular</span>
+<span id="cb12-778"><a href="#cb12-778"></a>  taxa out of a total number of individuals)</span>
+<span id="cb12-779"><a href="#cb12-779"></a></span>
+<span id="cb12-780"><a href="#cb12-780"></a></span>
+<span id="cb12-781"><a href="#cb12-781"></a><span class="fu"># References</span></span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
