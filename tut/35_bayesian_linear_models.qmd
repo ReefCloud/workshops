@@ -30,7 +30,26 @@ output_dir: "docs"
 
 Load the necessary libraries
 
-
+```{r}
+#| label: libraries
+#| eval: true
+#| warning: false
+#| message: false
+#| cache: false
+library(tidyverse)   #for data wrangling and plotting
+library(DHARMa)      #for simulated residuals
+library(performance) #for model diagnostics
+library(see)         #for model diagnostics
+library(brms)        #for Bayesian models
+library(tidybayes)   #for exploring Bayesian PKPDmodels
+library(rstan)       #for diagnostics plots
+library(bayesplot)   #for diagnostic plots
+library(patchwork)   #for arranging multiple plots
+library(HDInterval)  #for HPD intervals
+library(bayestestR)  #for ROPE
+library(emmeans)     #for estimated marginal means
+source("helperfunctions.R")
+```
 
 Many biologists and ecologists get a little twitchy and nervous around
 mathematical and statistical formulae and nomenclature. Whilst it is
