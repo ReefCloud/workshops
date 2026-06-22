@@ -1820,6 +1820,530 @@ modelling choices. Similarly, for subsequent tutorials in this series
 (that introduce progressively more complex models), all associated
 assumptions will be explored and detailed.
 
+::: {.panel-tabset}
+
+## Example 1 (Gaussian data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda1a
+#| fig-width: 3
+#| fig-height: 3
+dat |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- there is no strong evidence of non-normality
+- to be convincing evidence of non-normality, each segment of the
+  boxplot should get progressively larger
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda1b
+#| fig-width: 3
+#| fig-height: 3
+dat |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of values around the trendline seems fairly even (hence
+  it there is no evidence of non-homogeneity
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda1c
+#| fig-width: 3
+#| fig-height: 3
+dat |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the data seems well represented by the linear trendline.
+  Furthermore, the lowess smoother does not appear to have a
+  consistent shift trajectory.
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are no obvious violations of the linear regression model assumptions
+- we can now fit the suggested model
+- full confirmation about the model's goodness of fit should be
+  reserved until after exploring the additional diagnostics that are
+  only available after fitting the model.
+
+
+## Example 2 (categorical predictor)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda2a
+#| fig-width: 3
+#| fig-height: 3
+dat2 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_boxplot()
+```
+::::::
+:::::: {.column width="48%"}
+**Conclusions**
+
+- there is no consitent evidence of non-normality across all groups
+- even though the control group demonstrates some evidence of
+  non-normality
+:::::: 
+:::::
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda2b
+#| fig-width: 3
+#| fig-height: 3
+dat2 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise in each group seems reasonably similar
+- more importantly, there does not seem to be a relationship between
+  the mean (as approximated by the position of the boxplots along the
+  y-axis) and the variance (as approximated by the spread of the
+  boxplots).
+- that is, the size of the boxplots do not vary with the elevation of
+  the boxplots.
+
+:::::: 
+::::: 
+
+### Linearity
+
+Linearity is not an issue for categorical predictors since it is
+effectively fitting separate lines between pairs of points (and a line
+between two points can only ever be linear)....
+
+::::
+
+**Conclusions**
+
+- no evidence of non-normality
+- no evidence of non-homogeneity of variance
+
+
+## Example 3 (Poisson data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda3a
+#| fig-width: 3
+#| fig-height: 3
+dat3 |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- there is strong evidence of non-normality
+- each segment of the boxplot should get progressively larger
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda3b
+#| fig-width: 3
+#| fig-height: 3
+dat3 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise does not look random along the line of best fit.
+- homogeneity of variance is difficult to assess in the presence of
+  distributional issues (such as non-normality in this case) as they
+  can result in non-linearity (apparent here)
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda3c
+#| fig-width: 3
+#| fig-height: 3
+dat3 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the data do not appear to be linear
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are obvious violations of the linear regression model assumptions
+- we should consider a different model that does not assume normality
+
+
+## Example 4 (NB data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda4a
+#| fig-width: 3
+#| fig-height: 3
+dat4 |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- there is strong evidence of non-normality
+- each segment of the boxplot should get progressively larger
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda4b
+#| fig-width: 3
+#| fig-height: 3
+dat4 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise does not look random along the line of best fit.
+- homogeneity of variance is difficult to assess in the presence of
+  distributional issues (such as non-normality in this case) as they
+  can result in non-linearity (apparent here)
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda4c
+#| fig-width: 3
+#| fig-height: 3
+dat4 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the data do not appear to be linear
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are obvious violations of the linear regression model assumptions
+- we should consider a different model that does not assume normality
+
+## Example 5 (Binary data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda5a
+#| fig-width: 3
+#| fig-height: 3
+dat5 |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- clearly a set of 0's and 1's cant be normally distributied.
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda5b
+#| fig-width: 3
+#| fig-height: 3
+dat5 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise does not look random (or equal) along the line
+  of best fit.
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda5c
+#| fig-width: 3
+#| fig-height: 3
+dat5 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the data are clearly not linear
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are obvious violations of the linear regression model assumptions
+- we should consider a different model that does not assume normality
+
+## Example 6 (Binomial data)
+
+:::: {.panel-tabset}
+
+### Normality
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda6a
+#| fig-width: 3
+#| fig-height: 3
+dat6 |> 
+  ggplot(aes(y = y)) +
+  geom_boxplot()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- distribution is not normal and is truncated
+
+:::::: 
+::::: 
+
+### Homogeneity of variance
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda6b
+#| fig-width: 3
+#| fig-height: 3
+dat6 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- the spread of noise does not look random (or equal) along the line
+  of best fit.
+
+:::::: 
+::::: 
+
+### Linearity
+
+::::: {.columns}
+:::::: {.column width="48%"}
+
+```{r}
+#| label: eda6c
+#| fig-width: 3
+#| fig-height: 3
+dat6 |> 
+  ggplot(aes(y = y, x = x)) +
+  geom_smooth(method = "lm") +
+  geom_point()
+```
+
+:::::: 
+
+:::::: {.column width="48%"}
+**Conclusions**
+
+- although there is no evidence of non-linearity from this small data
+  set, it is worth noting that the line of best fit does extend
+  outside the logical response range [0.1] within the range of
+  observed $x$ values. That is, a simple linear model would predict
+  proportions higher than 100% at high values of $x$
+
+:::::: 
+::::: 
+::::
+
+
+**Conclusions**
+
+- there are obvious violations of the linear regression model assumptions
+- we should consider a different model that does not assume normality
+
+:::
+
 
 
 # References
