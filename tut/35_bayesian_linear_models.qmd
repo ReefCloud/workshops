@@ -525,6 +525,241 @@ Although each distribution is expected to come from populations that
 differ in their means, we assume that all of these distributions have
 the **same variance** ($\sigma^2$).
 
+## Priors
+
+We need to supply priors for each of the parameters to be estimated
+($\beta_0$, $\beta_1$ and $\sigma$). Whilst we want these priors to be
+sufficiently vague as to not influence the outcomes of the analysis
+(and thus be equivalent to the frequentist analysis), we do not want
+the priors to be so vague (wide) that they permit the MCMC sampler to
+drift off into parameter space that is both illogical as well as
+numerically awkward.
+
+Proffering sensible priors is one of the most difficult aspects of
+performing Bayesian analyses. For instances where there are some
+previous knowledge available and a desire to incorporate those data,
+the difficulty is in how to ensure that the information is
+incorporated correctly. However, for instances where there are no
+previous relevant information and so a desire to have the posteriors
+driven entirely by the new data, the difficulty is in how to define
+priors that are both vague enough (not bias results in their
+direction) and yet not so vague as to allow the MCMC sampler to drift
+off into unsupported regions (and thus get stuck and yield spurious
+estimates).
+
+For early implementations of MCMC sampling routines (such as
+Metropolis Hasting and Gibbs), it was fairly common to see very vague
+priors being defined.  For example, the priors on effects, were
+typically normal priors with mean of 0 and variance of `1e+06`
+(1,00,000).  These are very vague priors.  Yet for some samplers
+(e.g. NUTS), such vague priors can encourage poor behaviour of the
+sampler - particularly if the posterior is complex. It is now
+generally advised that priors should (where possible) be somewhat
+**weakly informative** and to some extent, represent the bounds of
+what are feasible and sensible estimates.
+
+The degree to which priors __influence__ an outcome (whether by having
+a pulling effect on the estimates or by encouraging the sampler to
+drift off into unsupported regions of the posterior) is dependent on:
+
+- the relative sparsity of the data - the larger the data, the less
+  weight the priors have and thus less influence they exert.
+- the complexity of the model (and thus posterior) - the more
+  parameters, the more sensitive the sampler is to the priors.
+
+The sampled posterior is the product of both the likelihood and the
+prior - all of which are multidimensional.  For most applications, it
+would be vertically impossible to define a sensible multidimensional
+prior.  Hence, our only option is to define priors on individual
+parameters (e.g. the intercept, slope(s), variance etc) and to hope
+that if they are individually sensible, they will remain collectively
+sensible.
+
+So having (hopefully) impressed upon the notion that priors are an
+important consideration, I will now attempt to synthesise some of the
+approaches that can be employed to arrive at weakly informative priors
+that have been gleaned from various sources.  Largely, this advice has
+come from the following resources:
+
+- https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations
+- http://svmiller.com/blog/2021/02/thinking-about-your-priors-bayesian-analysis/
+
+I will outline some of the current main recommendations before
+summarising some approaches in a table.
+
+- weakly informative priors should contain enough information so as to
+  regularise (discourage unreasonable parameter estimates whilst
+  allowing all reasonable estimates).
+- for effects parameters on scaled (standardised) data, an argument
+  could be made for a normal distribution with a standard deviation of
+  1 (e.g. `normal(0,1)`), although some prefer a _t_ distribution with
+  3 degrees of freedom and standard deviation of 1 (e.g.
+  `student_t(3,0,1)`) - apparently a flatter _t_ is a more robust
+  prior than a normal as an uninformative prior...
+- for un-scaled data, the above priors can be scaled by using the
+  standard deviation of the data as the prior standard deviation
+  (e.g. `student_t(3,0,sd(y))`, or `sudent_t(3,0,sd(y)/sd(x))`)
+- for priors of hierachical standard deviations, priors should
+  encourage shrinkage towards 0 (particularly if the number of groups
+  is small, since otherwise, the sampler will tend to be more
+  responsive to "noise").
+
+In this tutorial series, we will perform Bayesian analysis in the STAN
+language via an R interface. Two popular interfaces that greatly
+simplify the specification of Bayesian models are
+[brms](https://paul-buerkner.github.io/brms/) and
+[rstanarm](https://mc-stan.org/rstanarm/). We will exclusively focus
+on the former as it is far more flexible.
+
+| Family            | Parameter                            | brms                            | rstanarm                    |
+|-------------------|--------------------------------------|---------------------------------|-----------------------------|
+| Gaussian          | Intercept                            | `student_t(3,median(y),mad(y))` | `normal(mean(y),2.5*sd(y))` |
+|                   | 'Population effects' (slopes, betas) | flat, improper priors           | `normal(0,2.5*sd(y)/sd(x))` |
+|                   | Sigma                                | `student_t(3,0,mad(y))`         | `exponential(1/sd(y))`      |
+|                   | 'Group-level effects'                | `student_t(3,0,mad(y))`         | `decov(1,1,1,1)`            |
+|                   | Correlation on group-level effects   | `ljk_corr_cholesky(1)`          |                             |
+| Poisson           | Intercept                            | `student_t(3,median(y),mad(y))` | `normal(mean(y),2.5*sd(y))` |
+|                   | 'Population effects' (slopes, betas) | flat, improper priors           | `normal(0,2.5*sd(y)/sd(x))` |
+|                   | 'Group-level effects'                | `student_t(3,0,mad(y))`         | `decov(1,1,1,1)`            |
+|                   | Correlation on group-level effects   | `ljk_corr_cholesky(1)`          |                             |
+| Negative binomial | Intercept                            | `student_t(3,median(y),mad(y))` | `normal(mean(y),2.5*sd(y))` |
+|                   | 'Population effects' (slopes, betas) | flat, improper priors           | `normal(0,2.5*sd(y)/sd(x))` |
+|                   | Shape                                | `gamma(0.01, 0.01)`             | `exponential(1/sd(y))`      |
+|                   | 'Group-level effects'                | `student_t(3,0,mad(y))`         | `decov(1,1,1,1)`            |
+|                   | Correlation on group-level effects   | `ljk_corr_cholesky(1)`          |                             |
+
+: {.primary .bordered .sm .paramsTable}
+
+Notes:
+
+`brms`
+
+https://github.com/paul-buerkner/brms/blob/c2b24475d727c8afd8bfc95947c18793b8ce2892/R/priors.R
+
+1. In the above, for non-Gaussian families, `y` is first transformed
+  according to the family link.  If the family link is `log`, then 0.1
+  is first added to 0 values.
+2. in `brms` the minimum standard deviation for the Intercept prior is
+   `2.5`
+3. in `brms` the minimum standard deviation for group-level priors is
+   `10`.
+
+`rstanarm`
+
+http://mc-stan.org/rstanarm/articles/priors.html
+
+1. in `rstanarm` priors on standard deviation and correlation
+   associated with group-level effects are packaged up into a single
+   prior (`decov` which is a decomposition of the variance and
+   covariance matrix).
+
+In my experience, I find that the above priors tend to be a little bit
+too wide for many ecological applications and I often prefer to use
+1.5 rather than 2.5 as the multiplier.
+
+:::: {.callout-note}
+
+In Bayesian models, centering of predictors offers huge numerical advantages.  So important is it to center that `brms` automatically centers any continuous predictors for you.  However, since the user has not necessarily centered the predictors, the user might misinterpret the outputs from a `brms` model.  Consequently, when fitting a model, `brms` also generates y-intercept values that are consistent with un-centered values and these are the estimates returned to the user.
+
+Nevertheless, I would recommend that you should always explicitly
+center continuous predictors to provide more meaningful
+interpretations of the y-intercept. I would also highly recommend
+standardising continuous predictors - this will not only help speed up
+and stabilise the model, it will simplify the spefication of priors -
+see the specific examples later in this tutorial.
+
+::::
+
+Based on the above, for our fabricated data, lets assign the following
+priors:
+
+- $\beta_0$: Normal prior centred at `r round(median(dat$y),2)` with a
+  variance of `r round(mad(dat$y),2)`
+  - mean: 
+    ```{r}
+    #| prior_y_mean_1a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat$y |> median() |> round(2)
+    ```
+  - variance: 
+    ```{r}
+    #| prior_y_var_1a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    dat$y |> mad() |> round(2)
+    ```
+- $\beta_1$: _t_ distribution (3 degrees of freedom) prior centred at
+  0 with a variance of `r round(mad(dat$y)/mad(dat$x),2)`
+  - mean: since effects are differences and we may not want to
+    pre-determine the direction (polarity) of any trends, it is
+    typical to define effects priors with means of 0
+  - variance: 
+    ```{r}
+    #| prior_y_var1_1a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    mad(dat$y) / mad(dat$x) |> round(2)
+    ```
+- $\sigma$: (half) _t_ distribution (3 degrees of freedom) centred at
+  0 with a variance of `r round(mad(dat$y),2)`
+  - variance: 
+    ```{r}
+    #| prior_y_var_1a
+    #| echo: true
+    #| eval: true
+    #| cache: false
+    ```
+
+Note, again, when fitting models through either `rstanarm` or `brms`,
+the priors assume that the predictor(s) have been centred and are to
+be applied on the link scale. In this case the link scale is an
+identity.
+
+
+
+Similar logic can be applied for models that employ different
+distributions. In the following sections, we will define numerous sets
+of data (each of which represents different major forms of ecological
+data) and see how we can set appropriate priors in each case. In
+working through these example, it is worth reflecting on how much
+simpler prior specification is if we use standardised predictors.
+
+
+# Example data
+
+This tutorial will blend theoretical discussions with actual
+calculations and model fits. I believe that by bridging the divide
+between theory and application, we all gain better understanding. The
+applied components of this tutorial will be motivated by numerous
+fabricated data sets. The advantage of simulated data over real data
+is that with simulated data, we know the 'truth' and can therefore
+gauge the accuracy of estimates.
+
+The motivating examples are:
+
+- **Example 1** - simulated samples drawn from a Gaussian (normal)
+  distribution reminiscent of data collected on measurements (such as
+  body mass)
+- **Example 2** - simulated Gaussian samples drawn three different
+  populations representing three different treatment levels (e.g. body
+  masses of three different species)
+- **Example 3** - simulated samples drawn from a Poisson distribution
+  reminiscent of count data (such as number of individuals of a
+  species within quadrats)
+- **Example 4** - simulated samples drawn from a Negative Binomial
+  distribution reminiscent of over-dispersed count data (such as
+  number of individuals of a species that tends to aggregate in
+  groups)
+- **Example 5** - simulated samples drawn from a Bernoulli (binomial
+  with $n = 1$) distribution reminiscent of binary data (such as the
+  presence/absence of a species within sites)
+- **Example 6** - simulated samples drawn from a Binomial distribution
+  reminiscent of proportional data (such as counts of a particular
+  taxa out of a total number of individuals)
 
 
 # References
