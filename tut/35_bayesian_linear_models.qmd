@@ -1176,6 +1176,651 @@ assumptions:
 
 ::::
 
+:::: {.column width="35%"}
+
+```{r}
+#| label: assumptions,
+#| eval: true
+#| echo: false
+#| fig-height: 3
+#| fig-width: 3
+#| warning: false
+set.seed(234)
+x=1:10
+y=2+5*x
+y1=2+5*x + rnorm(10,0,4) 
+lm1 <- lm(y1 ~ x)
+cc <- coef(lm1)
+r <- resid(lm1)
+#print(r)
+ff <- fitted(lm1)
+#print(ff)
+boxx <- data.frame(x = x, middle = ff, lower = ff - 2.7, upper = ff + 2.7, ymin = ff -11, ymax = ff + 11)
+g2=ggplot(data=NULL, aes(y=y1, x=x)) +
+    geom_blank(aes(x = factor(x))) +
+    ##geom_segment(data = NULL, aes(y = ff, x = x, yend = y1, xend = x), colour = "red") +
+    geom_boxplot(data = boxx, aes(group = x, x = x, ymin = ymin, ymax = ymax, lower = lower, upper = upper, middle = middle), stat = "identity", inherit.aes = FALSE, color = "grey") +
+    geom_point() +
+    geom_abline(slope = cc[2], intercept = cc[1], colour = "blue") +
+    scale_y_continuous('y') +
+    theme_classic() #+
+    #theme(axis.text = element_blank(), axis.ticks = element_blank())
+g2
+```
+
+::::
+
+:::
+
+
+::: {.callout-note collapse="true"}
+### Notes on the data depicted above
+The data depicted above where generated using the following R codes:
+
+```{r}
+#| label: assumptions1,
+#| eval: true
+#| echo: true
+#| warning: false
+set.seed(234)
+x <- 1:10
+y <- 2 + (5*x) + rnorm(10,0,4)
+```
+
+The observations represent
+
+- single observations drawn from 10 normal populations
+- each population had a standard deviation of 4
+- the mean of each population varied linearly according to the value of x ($2 + 5x$)
+:::
+
+- **normality**: the residuals (and thus observations) must be drawn
+  from populations that are normal distribution. _The right hand figure
+  underlays the ficticious normally distributed populations from which
+  the observed values have been sampled_.
+  
+:::: {.indented}
+
+::: {.callout-note collapse="true"}
+### More information about assessing normality
+
+Estimation and inference testing in linear regression assumes that the
+response is normally distributed in each of the populations. In this
+case, the populations are all possible measurements that could be
+collected at each level of $x$ - hence there are 16 populations.
+Typically however, we only collect a single observation from each
+population (as is also the case here). How then can be evaluate
+whether each of these populations are likely to have been normal?
+
+::::: {.columns}
+
+:::::: {.column width="45%"}
+
+```{r}
+#| label: assumptions1a
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 4
+#| fig-height: 3
+set.seed(1)
+n <- 16
+rep<-200
+a <- 40  #intercept
+b <- seq(0,15,l=16)  #slope
+sigma2 <- 4  #residual variance (sd=2)
+x <- gl(n,rep,n*rep,lab=0:16)  #values of the year covariate
+
+eps <- rnorm(n*rep, mean = 0, sd = sqrt(sigma2))  #residuals
+y <- (model.matrix(~x) %*% c(a,b))+eps
+nc <- matrix(c(1,1,1,2,1,1,1,2),nrow=2,ncol=4,byrow=T)
+lay <- layout(nc)
+par(mar=c(3,3,0,0))
+plot(y~x, las=1, axes=FALSE, ann=FALSE)
+abline(lm(y~as.numeric(x)), col="grey40")
+box(bty="l")
+par(mar=c(3,3,0,0))
+boxplot(y, axes=F, ann=FALSE)
+```
+
+::::::
+
+:::::: {.column width="45%"}
+
+```{r}
+#| label: assumptions1b
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 4
+#| fig-height: 3
+set.seed(1)
+n <- 16
+rep<-200
+a <- 40  #intercept
+b <- seq(0,15,l=16)  #slope
+sigma2 <- 3  #residual variance (sd=2)
+x <- gl(n,rep,n*rep,lab=0:16)  #values of the year covariate
+
+eps <- (rnorm(n*rep, mean = 0, sd = sqrt(sigma2)))^{-1/3}  #residuals
+y <- (model.matrix(~x) %*% c(a,b))+eps
+nc <- matrix(c(1,1,1,2,1,1,1,2),nrow=2,ncol=4,byrow=T)
+lay <- layout(nc)
+par(mar=c(3,3,0,0))
+plot(y~x, las=1, axes=FALSE, ann=FALSE)
+abline(lm(y~as.numeric(x)), col="grey40")
+box(bty="l")
+par(mar=c(3,3,0,0))
+boxplot(y, axes=F, ann=FALSE)
+```
+
+::::::
+:::::
+
+For a given response, the population distributions should follow much
+the same distribution shapes. Therefore provided the single samples
+from each population are unbiased representations of those
+populations, a boxplot of all observations should reflect the
+population distributions.
+
+The two figures above show the relationships between the individual
+population distributions and the overall distribution. The left hand
+figure shows a distribution drawn from single representatives of each
+of the 16 populations. Since the 16 individual populations were
+normally distributed, the distribution of the 16 observations is also
+normal.
+
+By contrast, the right hand figure shows 16 log-normally distributed
+populations and the resulting distribution of 16 single observations
+drawn from these populations. The overall boxplot mirrors each of the
+individual population distributions.
+
+Whilst traditionally, non-normal data would typically be
+**normalised** via a scale transformation (such as a logarithmic
+transformation), these days it is arguably more appropriate to attempt
+to match the data to a more suitable distribution (see later in this
+tutorial).
+
+You may have noticed that we have only explored the distribution of
+the response (y-axis). What about the distribution of the predictor
+(independent, x-axis) variable, does it matter? The distribution
+assumption applies to the residuals (which as purely in the direction
+of the y-axis). Indeed technically, it is assumed that there is no
+uncertainty associated with the predictor variable. They are assumed
+to be set and thus there is no error associated with the values
+observed. Whilst this might not always be reasonable, it is an
+assumption.
+
+Given that the predictor values are expected to be _set_ rather than
+_measured_, we actually assume that they are **uniformly**
+distributed. In practice, the exact distribution of predictor values
+is not that important provided it is reasonably symmetrical and no
+outliers (unusually small or large values) are created as a result of
+the distribution.
+
+As with exploring the distribution of the response variable, boxplots,
+histograms and density plots can be useful means of exploring the
+distribution of predictor variable(s). When such diagnostics reveal
+distributional issues, scale transformations (such as logarithmic
+transformations) are appropriate.
+
+:::
+
+::::
+
+
+
+- **homogeneity of variance**: the residuals (and thus observations)
+  must be drawn from populations that are equally varied. The model as
+  shown only estimates a single variance ($\sigma^2$) parameter - it is
+  assumed that this is a good overall representation of all underlying
+  populations. _The right hand figure underlays the ficticious normally
+  distributed and equally varied populations from which the
+  observations have been sampled_.
+  
+  Moreover, since the expected values (obtained by solving the
+  deterministic component of the model) and the variance must be
+  estimated from the same data, they need to be independent (not
+  related one another)
+
+:::: {.indented}
+
+::: {.callout-note collapse="true"}
+### More information about assessing homogeneity of variance
+
+Simple linear regression also assumes that each of the populations are
+equally varied. Actually, it is the prospect of a relationship between
+the mean and variance of y-values across x-values that is of the
+greatest concern. Strictly the assumption is that the distribution of
+y values at each x value are equally varied and that there is no
+relationship between mean and variance.
+
+However, as we only have a single y-value for each x-value, it is
+difficult to directly determine whether the assumption of homogeneity
+of variance is likely to have been violated (mean of one value is
+meaningless and variability can't be assessed from a single value).
+The figure below depicts the ideal (and almost never realistic)
+situation in which (left hand figure) the populations are all equally
+varied. The middle figure simulates drawing a single observation from
+each of the populations. When the populations are equally varied, the
+spread of observed values around the trend line is fairly even - that
+is, there is no trend in the spread of values along the line.
+
+If we then plot the residuals (difference between observed values and
+those predicted by the trendline) against the predict values, there is
+a definite lack of pattern. This lack of pattern is indicative of a
+lack of issues with homogeneity of variance.
+
+::::: {.columns}
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2a
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+set.seed(1)
+n <- 16
+rep<-200
+a <- 40  #intercept
+b <- seq(0,15,l=16)  #slope
+sigma2 <- 4  #residual variance (sd=2)
+x <- gl(n,rep,n*rep,lab=0:16)  #values of the year covariate
+
+eps <- rnorm(n*rep, mean = 0, sd = sqrt(sigma2))  #residuals
+y <- (model.matrix(~x) %*% c(a,b))+eps
+par(mar=c(3,3,0,0))
+plot(y~x, las=1, axes=FALSE, ann=FALSE)
+abline(lm(y~as.numeric(x)), col="grey40")
+mtext("X",1,line=1, cex=1.5)
+mtext("Y",2,line=1, cex=1.5, las=2)
+box(bty="l")
+```
+
+::::::
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2b
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+set.seed(1)
+n <- 16
+rep<-1
+a <- 40  #intercept
+b <- 15  #slope
+sigma2 <- 1000  #residual variance (sd=5)
+x<-1:16
+
+eps <- rnorm(n*rep, mean = 0, sd = sqrt(sigma2))  #residuals
+y <- (model.matrix(~x) %*% c(a,b))+eps
+par(mar=c(3,3,0,0))
+plot(y~x, las=1, axes=FALSE, ann=FALSE)
+abline(lm(y~as.numeric(x)), col="grey40")
+segments(x,y,x,fitted(lm(y~x)))
+mtext("x",1,line=1, cex=1.5)
+mtext("y",2,line=1, cex=1.5, las=2)
+box(bty="l")
+```
+
+::::::
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2c
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+res <- y-fitted(lm(y~x))
+exp <- fitted(lm(y~x))
+par(mar=c(3,3,0,0))
+plot(exp,res, xlab="Predicted x", type="p", pch=16, axes=F)
+mtext("Predicted x",1,line=1, cex=1.5)
+mtext("Residuals",2,line=1, cex=1.5)
+abline(h=0)
+box(bty="l")
+```
+
+::::::
+:::::
+
+If we now contrast the above to a situation where the population
+variance is related to the mean (unequal variance), we see that the
+observations drawn from these populations are not evenly distributed
+along the trendline (they get more spread out as the mean predicted
+value increase). This pattern is emphasized in the residual plot which
+displays a characteristic "wedge"-shape pattern.
+
+::::: {.columns}
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2d
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+set.seed(1)
+n <- 16
+rep<-200
+a <- 40  #intercept
+b <- seq(0,15,l=16)  #slope
+sigma2 <- rep(seq(1,200,l=16),each=rep)  #residual variance (sd=2)
+x <- gl(n,rep,n*rep,lab=0:16)  #values of the year covariate
+
+eps <- rnorm(n*rep, mean = 0, sd = sqrt(sigma2))  #residuals
+y <- (model.matrix(~x) %*% c(a,b))+eps
+par(mar=c(3,3,0,0))
+plot(y~x, las=1, axes=FALSE, ann=FALSE)
+abline(lm(y~as.numeric(x)), col="grey40")
+mtext("X",1,line=1, cex=1.5)
+mtext("Y",2,line=1, cex=1.5, las=2)
+box(bty="l")
+```
+
+::::::
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2e
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+set.seed(7)
+n <- 16
+rep<-1
+a <- 40  #intercept
+b <- 15  #slope
+sigma2 <- seq(1,2000,l=16)  #residual variance (sd=5)
+x<-1:16
+
+eps <- x*10#+rnorm(n,0,(1:16)*7)
+eps[(1:16 %%2)==1] <- -1*eps[(1:16 %%2)==1]
+#rnorm(n*rep, mean = 0, sd = sqrt(sigma2))  #residuals
+y <- (model.matrix(~x) %*% c(a,b))+eps
+par(mar=c(3,3,0,0))
+plot(y~x, las=1, axes=FALSE, ann=FALSE)
+abline(lm(y~as.numeric(x)), col="grey40")
+segments(x,y,x,fitted(lm(y~x)))
+mtext("x",1,line=1, cex=1.5)
+mtext("y",2,line=1, cex=1.5, las=2)
+box(bty="l")
+```
+
+::::::
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2f
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+res <- y-fitted(lm(y~x))
+exp <- fitted(lm(y~x))
+par(mar=c(3,3,0,0))
+plot(exp,res, xlab="Predicted x", type="p", pch=16, axes=F)
+mtext("Predicted x",1,line=1, cex=1.5)
+mtext("Residuals",2,line=1, cex=1.5)
+abline(h=0)
+box(bty="l")
+```
+
+::::::
+:::::
+
+Hence looking at the spread of values around a trendline on a
+scatterplot of $y$ against $x$ is a useful way of identifying gross
+violations of homogeneity of variance. Residual plots provide an even
+better diagnostic. The presence of a wedge shape is indicative that
+the population mean and variance are related.
+:::
+
+::::
+
+- **linearity**: the underlying relationships must be simple linear
+  trends, since the line of best fit through the data (of which the
+  slope is estimated) is linear. _The right hand figure depicts a
+  linear trend through the underlying populations_.
+
+:::: {.indented}
+
+::: {.callout-note collapse="true"}
+### More information about assessing linearity
+
+It is important to disclose the meaning of the word "linear" in the
+term "linear regression". Technically, it refers to a _linear_
+combination of regression coefficients. For example, the following are
+examples of linear models:
+
+- $y_i = \beta_0 + \beta_1 x_i$
+- $y_i = \beta_0 + \beta_1 x_i + \beta_2 z_i$
+- $y_i = \beta_0 + \beta_1 x_i + \beta_2 x^2_i$
+
+All the coefficients ($\beta_0$, $\beta_1$, $\beta_2$) are linear
+terms. Note that the last of the above examples, is a linear model,
+however it describes a non-linear trend. Contrast the above models
+with the following non-linear model:
+
+- $y_i = \beta_0 + x_i^{\beta_1}$
+
+In that case, the coefficients are not linear combinations (one of
+them is a power term).
+
+
+That said, a simple linear regression usually fits a straight (linear)
+line through the data. Therefore, prior to fitting such a model, it is
+necessary to establish whether this really is the most sensible way of
+describing the relationship. That is, does the relationship appear to
+be linearly related or could some other non-linear function describe
+the relationship better. Scatterplots and residual plots are useful
+diagnostics.
+
+To see how a residual plot could be useful, consider the following.
+The first row of figures illustrate the residuals resulting from data
+drawn from a linear trend. The residuals are effectively random noise.
+By contrast, the second row show the residuals resulting from data
+drawn from a non-normal relationship that have nevertheless been
+modelled as a linear trend. There is still a clear pattern remaining
+in the residuals.
+
+::::: {.columns}
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2a
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+```
+
+::::::
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2b
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+```
+
+::::::
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2c
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+```
+
+::::::
+:::::
+
+::::: {.columns}
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2a2
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+set.seed(1)
+n <- 16
+rep<-200
+a <- 40  #intercept
+b <-c(50, 100)
+sigma2 <- 4  #residual variance (sd=2)
+x <- gl(n,rep,n*rep,lab=0:16)  #values of the year covariate
+
+eps <- rnorm(n*rep, mean = 0, sd = sqrt(sigma2))  #residuals
+y <- (model.matrix(~poly(x, 2)) %*% c(a, b))+eps
+par(mar=c(3,3,0,0))
+plot(y~x, las=1, axes=FALSE, ann=FALSE)
+abline(lm(y~as.numeric(x)), col="grey40")
+mtext("X",1,line=1, cex=1.5)
+mtext("Y",2,line=1, cex=1.5, las=2)
+box(bty="l")
+```
+
+::::::
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2b2
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+set.seed(1)
+n <- 16
+rep<-1
+a <- 40  #intercept
+b <-c(50, 100)
+sigma2 <- 4  #residual variance (sd=2)
+x <- 1:16 #gl(n,rep,n*rep,lab=0:16)  #values of the year covariate
+
+eps <- rnorm(n*rep, mean = 0, sd = sqrt(sigma2))  #residuals
+y <- (model.matrix(~poly(x, 2)) %*% c(a, b))+eps
+par(mar=c(3,3,0,0))
+plot(y~x, las=1, axes=FALSE, ann=FALSE)
+abline(lm(y~as.numeric(x)), col="grey40")
+segments(x,y,x,fitted(lm(y~x)))
+mtext("x",1,line=1, cex=1.5)
+mtext("y",2,line=1, cex=1.5, las=2)
+box(bty="l")
+```
+
+::::::
+
+:::::: {.column width="32%"}
+
+```{r}
+#| label: assumptions2c2
+#| eval: true
+#| echo: false
+#| warning: false
+#| fig-width: 2.5
+#| fig-height: 2
+res <- y-fitted(lm(y~x))
+exp <- fitted(lm(y~x))
+par(mar=c(3,3,0,0))
+plot(exp,res, xlab="Predicted x", type="p", pch=16, axes=F)
+mtext("Predicted x",1,line=1, cex=1.5)
+mtext("Residuals",2,line=1, cex=1.5)
+abline(h=0)
+box(bty="l")
+```
+
+::::::
+:::::
+
+The above might be an obvious and somewhat overly contrived example,
+yet it does illustrate the point - that a pattern in the residuals
+could point to a mis-specified model.
+
+If non-linearity does exist (as in the second case above) , then
+fitting a straight line through what is obviously not a straight
+relationship is likely to poorly represent the true nature of the
+relationship. There are numerous causes of non-linearity:
+
+1. underlying distributional issues can result in non-linearity. For
+   example, if we are assuming a gaussian distribution and the data
+   are non-normal, often the relationships will appear non-linear.
+   Addressing the distributional issues can therefore resolve the
+   linearity issues
+2. the underlying relationship might truly be non-linear in which case
+   this should be reflected in some way by the model formula. If the
+   model formula fails to describe the non-linear trend, then problems
+   will persist.
+3. the model proposed is missing an important covariate that might
+   help standardise the data in a way that results in linearity
+
+
+:::
+
+::::
+
+- **independence**: the residuals (and thus observations) must be
+  independently drawn from the populations. That is, the correlation
+  between all the observations is assumed to be 0 (off-diagonals in
+  the covariance matrix). More practically, there should be no
+  pattern to the correlations between observations.
+
+  Random sampling and random treatment assignment are experimental
+  design elements that are intended to mitigate many types of sampling
+  biases that cause dependencies between observations. Nevertheless,
+  there are aspects of sampling designs that are either logistically
+  difficult to randomise or in some cases not logically possible. For
+  example, the residuals from observations sampled closer together in
+  space and time will likely be more similar to one another than those
+  of observations more spaced apart. Since neither space nor time can
+  be randomised, data collected from sampling designs that involve
+  sampling over space and/or time need to be assess for spatial and
+  temporal dependencies. These concepts will be explored in the
+  context of introducing susceptible designs in a later tutorial.
+
+The above is only a very brief overview of the model assumptions that
+apply to just one specific model (simple linear gaussian regression).
+For the remainder of this section, we will graphically explore the two
+motivating example data sets so as gain insights into what
+distributional assumptions might be most valid, and thus help guide
+modelling choices. Similarly, for subsequent tutorials in this series
+(that introduce progressively more complex models), all associated
+assumptions will be explored and detailed.
+
+
 
 # References
 
