@@ -4453,7 +4453,7 @@ priors <- prior(normal(0, 1), class = "Intercept") +
 #| eval: true
 #| echo: true
 #| cache: true
-dat5c.form <- bf(y ~ scale(x), family = binomial(link = "logit"))
+dat5c.form <- bf(y ~ scale(x), family = bernoulli(link = "logit"))
 dat5c.brm <- brm(dat5c.form,
                 data=dat5,
                 prior=priors,
