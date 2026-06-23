@@ -4522,7 +4522,7 @@ dat5c.brm2 <- update(dat5c.brm,
 
 ```{r}
 #| label: brms_conditional_effects2_5c
-#| eval: true
+#| eval: false
 #| echo: true
 #| cache: true
 #| fig-width: 4
