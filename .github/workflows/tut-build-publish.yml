@@ -156,8 +156,11 @@ jobs:
             any::pak
 
       - name: Install yet other R packages
-        run: |
-          pak::pkg_install(c('jmgirard/standist'))
+        uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          cache-version: 2
+          packages:
+            pak::pkg_install(c('jmgirard/standist'))
             
       # Checkout the gh-pages branch into the docs folder    
       - name: Retrieve previous compiled pages
