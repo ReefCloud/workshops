@@ -4575,20 +4575,6 @@ was applied to an intercept that is associated with centred
 continuous predictors (predictors are centred behind the scenes).
 Since we did not centre the predictor, the intercept returned is as if
 uncentred.  Hence, the prior and posterior are on different scales.
- 
-```{r fitModel5c, results='markdown', eval=FALSE, mhidden=TRUE, fig.width = 8, fig.height = 4}
-#dat5c.brm2 |> tidybayes::get_variables() 
-#dat5c.brm2 |> SUYR_prior_and_posterior()
-```
-
-**Conclusions:**
-
-- each of the priors are substantially wider than the posteriors
-- the posteriors are definitely distinct from their respective priors
-  and thus we can conclude that the priors and not driving the
-  posteriors (e.g. they are not influencing the outcomes)
-- the priors are simply regularising the parameters such that they are
-  only sampled from plausible regions
 
 :::
 
