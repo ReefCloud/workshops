@@ -153,10 +153,11 @@ jobs:
             any::rstan
             any::HDInterval
             any::emmeans
+            any::pak
 
       - name: Install yet other R packages
         run: |
-          Rscript -e "remotes::install_github('jmgirard/standist', dep=TRUE)"
+          pak::pkg_install(c('jmgirard/standist'))
             
       # Checkout the gh-pages branch into the docs folder    
       - name: Retrieve previous compiled pages
