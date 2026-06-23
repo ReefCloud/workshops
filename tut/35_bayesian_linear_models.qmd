@@ -4578,7 +4578,7 @@ uncentred.  Hence, the prior and posterior are on different scales.
  
 ```{r fitModel5c, results='markdown', eval=TRUE, mhidden=TRUE, fig.width = 8, fig.height = 4}
 dat5c.brm2 |> tidybayes::get_variables() 
-dat5c.brm2 |> SUYR_prior_and_posterior()
+#dat5c.brm2 |> SUYR_prior_and_posterior()
 ```
 
 **Conclusions:**
