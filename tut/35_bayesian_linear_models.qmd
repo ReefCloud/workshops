@@ -2703,7 +2703,7 @@ dat1b.brm <- brm(bf(y ~ scale(x, scale = FALSE)),
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0)
 ```
 
@@ -2928,7 +2928,7 @@ dat1c.brm <- brm(bf(y ~ scale(x)),
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0)
 ```
 
@@ -3191,7 +3191,7 @@ dat2a.brm <- brm(bf(y ~ x),
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0) 
 ```
 
@@ -3413,7 +3413,7 @@ dat2b.brm <- brm(bf(y ~ -1 + x),
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0) 
 ```
 
@@ -3638,7 +3638,7 @@ dat3a.brm <- brm(dat3a.form,
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0)
 ```
 :::
@@ -3859,7 +3859,7 @@ dat3b.brm <- brm(dat3b.form,
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0)
 ```
 :::
@@ -4077,7 +4077,7 @@ dat3c.brm <- brm(dat3c.form,
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0)
 ```
 :::
@@ -4276,7 +4276,7 @@ dat5a.brm <- brm(dat5a.form,
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0)
 ```
 :::
@@ -4462,7 +4462,7 @@ dat5c.brm <- brm(dat5c.form,
                 warmup = 1000,
                 chains = 3, cores = 3,
                 thin = 5,
-                backend = 'cmdstan',
+                #backend = 'cmdstan',
                 refresh = 0)
 ```
 :::
