@@ -4597,6 +4597,1008 @@ dat5c.brm2 |> SUYR_prior_and_posterior()
 :::::::
 
 ::::
+# MCMC sampling diagnostics
+    
+```{r}
+#| label: mcmcsampling
+#| echo: false
+mcmcsim <- function(n=500,start.x=0.5, start.y=0.5,tex=FALSE, lns=FALSE, fls=FALSE) {
+		   library(mvtnorm)
+		   xv <- seq(-3,3,by=0.1)
+		   yv <- seq(0,10,by=0.1)
+		   #Create the three dimensional plot
+		   pmat <- persp(xv,yv,outer(xv,yv, function(x,y) dmvnorm(cbind(x,y), mean=c(0,5), sigma=diag(2)*c(1,2))),
+				   zlab="density",xlab="parameter a",ylab="parameter b",phi=30,theta=0,ticktype="detailed",shade=0.9,lphi=30,ltheta=0)
+		   #Calculate the z-score for the starting coordinates
+		   z <- outer(start.x,start.y, function(x,y) dmvnorm(cbind(x,y), mean=c(0,5), sigma=diag(2)*c(1,2)))
+           #plot the starting point
+		   points(trans3d(start.x,start.y,z,pmat), col="red",pch=16)
+		   #Label the point
+           if (tex) text(trans3d(start.x,start.y,z,pmat),labels=paste(1),pos=4, font=2, col="red")
+		   #iteratively move through the Markov chain
+		   if (n >1) {
+           for (i in 2:n) {
+				#Get a new candidate location by a random point around the current point
+				newLoc <- rmvnorm(1,mean=c(0,0),sigma=diag(2)*0.5)
+				new.x=start.x+newLoc[1]
+				new.y=start.y+newLoc[2]
+				#plot this new point
+				if (fls) points(trans3d(new.x,new.y,outer(new.x,new.y, function(x,y) dmvnorm(cbind(x,y), mean=c(0,5), sigma=diag(2)*c(1,2))),pmat), col="blue",pch=16)
+				z1 <- outer(new.x,new.y, function(x,y) dmvnorm(cbind(x,y), mean=c(0,5), sigma=diag(2)*c(1,2)))
+				#Calculate the ratio of probability of the new point to the previous point
+				rRatio <- dmvnorm(c(new.x,new.y), mean=c(0,5), sigma=diag(2)*c(1,2))/dmvnorm(c(start.x,start.y), mean=c(0,5), sigma=diag(2)*c(1,2))
+				#Get a random number between 0 and 1
+			    rCompRatio<-runif(1)
+				old.x=start.x
+				old.y=start.y
+				#If the calculated ratio is greater than the random number, accept this new location for sampling
+				if (rRatio>rCompRatio) { #accept current position
+					start.x=new.x
+					start.y=new.y
+					z <- outer(old.x,old.y, function(x,y) dmvnorm(cbind(x,y), mean=c(0,5), sigma=diag(2)*c(1,2)))
+				} #otherwise stay were you are
+				#points(trans3d(start.x,start.y,outer(start.x,start.y, function(x,y) dmvnorm(cbind(x,y), mean=c(0,5), sigma=diag(2)*c(1,2))),pmat), col="red",pch=16)
+				z2<-outer(start.x,start.y, function(x,y) dmvnorm(cbind(x,y), mean=c(0,5), sigma=diag(2)*c(1,2)))
+				points(trans3d(start.x,start.y,z2,pmat), col="red",pch=16)
+				if (rRatio>rCompRatio) {
+					lab<-paste(i)
+					if (tex) text(trans3d(start.x,start.y,z2,pmat),labels=paste(i),pos=4, font=2, col="red")
+					}else {
+						lab <- paste(lab,"&", i)
+						if(tex) text(trans3d(start.x,start.y,z2,pmat),labels=lab,pos=4, font=2, col="red")
+						if(tex)text(trans3d(new.x,new.y,z1,pmat),labels=i,pos=4, font=2,col="blue")
+					}
+					if(lns)lines(trans3d(c(old.x,start.x),c(old.y,start.y),c(z,z2),pmat), col="blue",lwd=2)
+				    z<-z2
+				}
+        }
+}
+mcmcsim1 <- function(n=500,start.x=0.5, start.y=0.5,tex=FALSE, lns=FALSE, fls=FALSE, thin=1,burnin=0) {
+			library(mvtnorm)
+			xv <- seq(-3,3,by=0.1)
+			yv <- seq(0,10,by=0.1)
+	        cmat<-contour(xv,yv,outer(xv,yv, function(x,y) dmvnorm(cbind(x,y), mean=c(0,5), sigma=diag(2)*c(1,2))),xlab="Parameter a",ylab="Parameter b",col="lightblue")		
+			points(start.x,start.y, col="red",pch=16)
+			nn <- 0
+			ii<-0
+			params <- c(start.x,start.y)
+			if (tex) text(start.x,start.y,labels=paste(1),pos=4, font=2, col="red")
+			if(n>1) {
+				 for (i in 2:n) {
+					if (i>burnin) ii <- i-burnin
+					newLoc <- rmvnorm(1,mean=c(0,0),sigma=diag(2)*0.5)
+					new.x=start.x+newLoc[1]
+					new.y=start.y+newLoc[2]
+					if (fls) points(new.x,new.y, col="blue",pch=16)
+					rRatio <- dmvnorm(c(new.x,new.y), mean=c(0,5), sigma=diag(2)*c(1,2))/dmvnorm(c(start.x,start.y), mean=c(0,5), sigma=diag(2)*c(1,2))
+					rCompRatio<-runif(1)
+					old.x=start.x
+					old.y=start.y
+					if (rRatio>rCompRatio) { #accept current position
+						start.x=new.x
+						start.y=new.y
+					}
+					points(start.x,start.y, col="red",pch=16)
+					if (rRatio>rCompRatio) {
+						lab=paste(i)
+						if (tex) text(start.x,start.y,labels=paste(i),pos=4, font=2, col="red")
+					}else {
+					    lab =paste(lab,"&", i)
+						if(tex) text(start.x,start.y,labels=lab,pos=4, font=2, col="red")
+						if(tex & fls) text(new.x,new.y,labels=i,pos=4, font=2,col="blue")
+						if(lns) lines(c(new.x,start.x),c(new.y,start.y), col="blue",lwd=1, lty=2)
+					}
+					if(lns) lines(c(old.x,start.x),c(old.y,start.y), col="blue",lwd=2)
+					if ((ii %% thin)==0 & ii>0) {
+                      nn <- nn+1
+							  params<- rbind(params,c(start.x,start.y))		   
+					}
+			}
+		}
+params
+}
+```
+
+```{r}
+#| label: sim6a
+#| echo: false
+#| fig-height: 5
+#| fig-width: 9
+#| cache: true
+#| warning: false
+#| include: false
+#| results: hide
+set.seed(9) 
+par(mfrow=c(1,2), mar=c(1,1,0,0))
+mcmcsim(n=10000, start.x=0.5, start.y=3,tex=FALSE, lns=FALSE, fls=FALSE)
+set.seed(9)
+par(mar=c(4,4,1,1))
+params<-mcmcsim1(n=10000, start.x=0.5, start.y=3,tex=FALSE,lns=FALSE,fls=FALSE)
+```
+
+
+**MCMC sampling behaviour**
+
+Since the purpose of the MCMC sampling is to estimate the posterior of
+an unknown joint likelihood, it is important that we explore a range
+of diagnostics designed to help identify when the resulting likelihood
+might not be accurate.
+
+- **traceplots** - plots of the individual draws in sequence.  Traces
+  that resemble noise suggest that all likelihood features are likely
+  to have be traversed. Obvious steps or blocks of noise are likely to
+  represent distinct features and could imply that there are yet other
+  features that have not yet been traversed - necessitating additional
+  iterations.  Furthermore, each chain should be indistinguishable
+  from the others
+
+::: {.indented}
+
+```{r}
+#| label: sim7
+#| echo: false
+#| fig-height: 4
+#| fig-width: 9
+#| cache: true
+#| warning: false
+par(mfrow=c(1,3))
+a <- rnorm(10000,10.1,3)
+plot(a, type="l",main="Good mixing")
+aa <- params[1:100,1]+10
+a <- NULL
+for (i in 1:length(aa)) {
+  a <- c(a,replicate(10,aa[i]+rnorm(1,0,0.25)))
+}
+plot(a, type="l", main="Bad mixing")
+a <- c(rnorm(4000,10.1,1),seq(10,6,l=1000)+rnorm(1000,0,0.2),rnorm(4000,6.1,1),seq(6,7,l=1000)+rnorm(1000,0,0.2),rnorm(2000,7.1,1))
+plot(a, type="l",main="Bad mixing")
+```
+  
+:::
+
+- **autocorrelation function** - plots of the degree of correlation
+  between pairs of draws for a range of lags (distance along the
+  chains). High levels of correlation (after a lag of 0, which is
+  correlating each draw with itself) suggests a lack of independence
+  between the draws and that therefore, summaries such as mean and
+  median will be biased estimates. Ideally, all non-zero lag
+  correlations should be less than 0.2. The left hand figure below
+  demonstrates a clear pattern of autocorrelation, whereas the right
+  hand figure shows no autocorrelation.
+
+::: {.indented}
+
+:::: {.columns}
+
+::::: {.column width="45%"}
+
+```{r}
+#| label: sim8
+#| echo: false
+#| fig-height: 4
+#| fig-width: 4
+#| cache: true
+#| warning: false
+library(coda)
+set.seed(9)
+#par(mfrow=c(1,2),mar=c(4,4,2,1))
+#params<-mcmcsim1(n=1000, start.x=0.5, start.y=3,tex=FALSE,lns=FALSE,fls=FALSE,thin=1)
+#points(params[,1],params[,2], col="black",bg="red",pch=21)
+acf(params[,1], main = "")
+#autocorr(as.mcmc(params[,1]))
+```
+
+:::::
+
+::::: {.column width="45%"}
+
+```{r}
+#| label: sim8b1
+#| echo: false
+#| fig-height: 5
+#| fig-width: 9
+#| cache: true
+#| warning: false
+#| include: false
+#| results: hide
+library(coda)
+set.seed(9)
+params<-mcmcsim1(n=1000, start.x=0.5, start.y=3,tex=FALSE,lns=FALSE,fls=FALSE,thin=10)
+```
+```{r}
+#| label: sim8b2
+#| echo: false
+#| fig-height: 4
+#| fig-width: 4
+#| cache: true
+#| warning: false
+library(coda)
+set.seed(9)
+acf(params[,1],main="")
+```
+:::::
+
+::::
+
+:::
+
+- **convergence diagnostics** - there are a range of diagnostics aimed
+  at exploring whether the multiple chains are likely to have
+  converged upon similar posteriors
+  - **R hat** - this metric compares between and within chain model
+    parameter estimates, with the expectation that if the chains have
+    converged, the between and within rank normalised estimates should
+    be very similar (and Rhat should be close to 1).  The more one
+    chains deviates from the others, the higher the Rhat value.
+    Values less than 1.05 are considered evidence of convergence.
+  - **Bulk ESS** - this is a measure of the effective sample size
+    from the whole (bulk) of the posterior and is a good measure of
+    the sampling efficiency of draws across the entire posterior
+  - **Tail ESS** - this is a measure of the effective sample size from
+    the 5% and 95% quantiles (tails) of the posterior and is a good
+    measure of the sampling efficiency of draws from the tail (areas
+    of the posterior with least support and where samplers can get
+    stuck).
+
+There are numerous packages in R that support MCMC diagnostics.  Popular packages include:
+
+- `bayesplot`
+- `rstan`
+- `ggmcmcm`
+
+Some of the most useful diagnostics are presented in the following table.
+
+| Package   | Description       | function               | rstanarm                         | brms                               |
+|-----------|-------------------|------------------------|----------------------------------|------------------------------------|
+| bayesplot | Traceplot         | `mcmc_trace`           | `plot(mod, plotfun='trace')`     | `mcmc_plot(mod, type='trace')`     |
+|           | Density plot      | `mcmc_dens`            | `plot(mod, plotfun='dens')`      | `mcmc_plot(mod, type='dens')`      |
+|           | Density & Trace   | `mcmc_combo`           | `plot(mod, plotfun='combo')`     | `mcmc_plot(mod, type='combo')`     |
+|           | ACF               | `mcmc_acf_bar`         | `plot(mod, plotfun='acf_bar')`   | `mcmc_plot(mod, type='acf_bar')`   |
+|           | Rhat hist         | `mcmc_rhat_hist`       | `plot(mod, plotfun='rhat_hist')` | `mcmc_plot(mod, type='rhat_hist')` |
+|           | No. Effective     | `mcmc_neff_hist`       | `plot(mod, plotfun='neff_hist')` | `mcmc_plot(mod, type='neff_hist')` |
+| rstan     | Traceplot         | `stan_trace`           | `stan_trace(mod)`                | `stan_trace(mod)`                  |
+|           | ACF               | `stan_ac`              | `stan_ac(mod)`                   | `stan_ac(mod)`                     |
+|           | Rhat              | `stan_rhat`            | `stan_rhat(mod)`                 | `stan_rhat(mod)`                   |
+|           | No. Effective     | `stan_ess`             | `stan_ess(mod)`                  | `stan_ess(mod)`                    |
+|           | Density plot      | `stan_dens`            | `stan_dens(mod)`                 | `stan_dens(mod)`                   |
+| ggmcmc    | Traceplot         | `ggs_traceplot`        | `ggs_traceplot(ggs(mod))`        | `ggs_traceplot(ggs(mod))`          |
+|           | ACF               | `ggs_autocorrelation`  | `ggs_autocorrelation(ggs(mod))`  | `ggs_autocorrelation(ggs(mod))`    |
+|           | Rhat              | `ggs_Rhat`             | `ggs_Rhat(ggs(mod))`             | `ggs_Rhat(ggs(mod))`               |
+|           | No. Effective     | `ggs_effective`        | `ggs_effective(ggs(mod))`        | `ggs_effective(ggs(mod))`          |
+|           | Cross correlation | `ggs_crosscorrelation` | `ggs_crosscorrelation(ggs(mod))` | `ggs_crosscorrelation(ggs(mod))`   |
+|           | Scale reduction   | `ggs_grb`              | `ggs_grb(ggs(mod))`              | `ggs_grb(ggs(mod))`                |
+|           |                   |                        |                                  |                                    |
+
+: {.primary .bordered .sm .paramsTable tbl-colwidths="[10,10, 20, 30, 30]"}
+
+
+I personally prefer the `rstan` version of plots and thus these are
+the ones I will showcase.
+
+
+:::: {.panel-tabset}
+
+
+### Example 1 (Gaussian data)
+
+::: {.callout-note}
+
+Bayesian samplers involve many calls to randomisation functions. As a
+result, the estimates will vary slightly each time the routines are
+run. You should expect that the outputs that you obtain will differ
+slightly from those that I am displaying. Nevertheless, the main
+conclusions should remain robust across subsequent runs.
+
+:::
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Traceplots
+
+Plots of the estimates of each parameter over the post-warmup length
+of each MCMC chain. Each chain is plotted in a different colour, with
+each parameter in its own facet. Ideally, each **trace** should just
+look like noise without any discernible drift and each of the traces
+for a specific parameter should look the same (i.e, should not be
+displaced above or below any other trace for that parameter).
+
+```{r}
+#| label: modelValidation_traceplots1a
+#| fig-width: 6
+#| fig-height: 4
+dat1a.brm2$fit |> stan_trace()
+dat1a.brm2$fit |> stan_trace(inc_warmup = TRUE)
+```
+
+**Conclusions**:
+
+    - the chains appear well mixed and very similar
+   
+##### Autocorrelation plots
+
+```{r}
+#| label: modelValidation_acf1a
+#| fig-width: 6
+#| fig-height: 4
+dat1a.brm2$fit |> stan_ac()
+```
+
+**Conclusions**:
+
+- there is no evidence of autocorrelation in the MCMC samples
+
+##### Rhat
+
+Rhat is a **scale reduction factor** measure of convergence between
+the chains. The closer the values are to 1, the more the chains have
+converged. Values greater than 1.05 indicate a lack of convergence.
+There will be an Rhat value for each parameter estimated.
+
+```{r}
+#| label: modelValidation_rhat1a
+#| fig-width: 6
+#| fig-height: 4
+dat1a.brm2$fit |> stan_rhat()
+```
+
+**Conclusions**:
+
+- all Rhat values are below 1.05, suggesting the chains have converged. 
+
+##### Effective sample sizes
+
+The number of effective samples - the ratio of the number of effective
+samples (those not rejected by the sampler) to the number of samples
+provides an indication of the effectiveness (and efficiency) of the
+MCMC sampler. Ratios that are less than 0.5 for a parameter suggest
+that the sampler spent considerable time in difficult areas of the
+sampling domain and rejected more than half of the samples (replacing
+them with the previous effective sample).
+  
+If the ratios are low, tightening the priors may help.
+
+```{r}
+#| label: modelValidation_ess1a
+#| fig-width: 6
+#| fig-height: 4
+dat1a.brm2$fit |> stan_ess()
+```
+
+**Conclusions**:
+
+- ratios are all very high
+
+:::::
+
+**Conclusions**:
+
+- all the diagnostics appear reasonable
+- we can conclude that the chains are all well mixed and have
+  converged on a stable posterior.
+
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Traceplots
+
+Plots of the estimates of each parameter over the post-warmup length
+of each MCMC chain. Each chain is plotted in a different colour, with
+each parameter in its own facet. Ideally, each **trace** should just
+look like noise without any discernible drift and each of the traces
+for a specific parameter should look the same (i.e, should not be
+displaced above or below any other trace for that parameter).
+
+```{r}
+#| label: modelValidation_traceplots1b
+#| fig-width: 6
+#| fig-height: 4
+dat1b.brm2$fit |> stan_trace()
+dat1b.brm2$fit |> stan_trace(inc_warmup = TRUE)
+```
+
+**Conclusions**:
+
+    - the chains appear well mixed and very similar
+   
+##### Autocorrelation plots
+
+```{r}
+#| label: modelValidation_acf1b
+#| fig-width: 6
+#| fig-height: 4
+dat1b.brm2$fit |> stan_ac()
+```
+
+**Conclusions**:
+
+- there is no evidence of autocorrelation in the MCMC samples
+
+##### Rhat
+
+Rhat is a **scale reduction factor** measure of convergence between
+the chains. The closer the values are to 1, the more the chains have
+converged. Values greater than 1.05 indicate a lack of convergence.
+There will be an Rhat value for each parameter estimated.
+
+```{r}
+#| label: modelValidation_rhat1b
+#| fig-width: 6
+#| fig-height: 4
+dat1b.brm2$fit |> stan_rhat()
+```
+
+**Conclusions**:
+
+- all Rhat values are below 1.05, suggesting the chains have converged. 
+
+##### Effective sample sizes
+
+The number of effective samples - the ratio of the number of effective
+samples (those not rejected by the sampler) to the number of samples
+provides an indication of the effectiveness (and efficiency) of the
+MCMC sampler. Ratios that are less than 0.5 for a parameter suggest
+that the sampler spent considerable time in difficult areas of the
+sampling domain and rejected more than half of the samples (replacing
+them with the previous effective sample).
+  
+If the ratios are low, tightening the priors may help.
+
+```{r}
+#| label: modelValidation_ess1b
+#| fig-width: 6
+#| fig-height: 4
+dat1b.brm2$fit |> stan_ess()
+```
+
+**Conclusions**:
+
+- ratios are all very high
+
+:::::
+
+**Conclusions**:
+
+- all the diagnostics appear reasonable
+- we can conclude that the chains are all well mixed and have
+  converged on a stable posterior.
+  
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Traceplots
+
+Plots of the estimates of each parameter over the post-warmup length
+of each MCMC chain. Each chain is plotted in a different colour, with
+each parameter in its own facet. Ideally, each **trace** should just
+look like noise without any discernible drift and each of the traces
+for a specific parameter should look the same (i.e, should not be
+displaced above or below any other trace for that parameter).
+
+```{r}
+#| label: modelValidation_traceplots1c
+#| fig-width: 6
+#| fig-height: 4
+dat1c.brm2$fit |> stan_trace()
+dat1c.brm2$fit |> stan_trace(inc_warmup = TRUE)
+```
+
+**Conclusions**:
+
+    - the chains appear well mixed and very similar
+   
+##### Autocorrelation plots
+
+```{r}
+#| label: modelValidation_acf1c
+#| fig-width: 6
+#| fig-height: 4
+dat1c.brm2$fit |> stan_ac()
+```
+
+**Conclusions**:
+
+- there is no evidence of autocorrelation in the MCMC samples
+
+##### Rhat
+
+Rhat is a **scale reduction factor** measure of convergence between
+the chains. The closer the values are to 1, the more the chains have
+converged. Values greater than 1.05 indicate a lack of convergence.
+There will be an Rhat value for each parameter estimated.
+
+```{r}
+#| label: modelValidation_rhat1c
+#| fig-width: 6
+#| fig-height: 4
+dat1c.brm2$fit |> stan_rhat()
+```
+
+**Conclusions**:
+
+- all Rhat values are below 1.05, suggesting the chains have converged. 
+
+##### Effective sample sizes
+
+The number of effective samples - the ratio of the number of effective
+samples (those not rejected by the sampler) to the number of samples
+provides an indication of the effectiveness (and efficiency) of the
+MCMC sampler. Ratios that are less than 0.5 for a parameter suggest
+that the sampler spent considerable time in difficult areas of the
+sampling domain and rejected more than half of the samples (replacing
+them with the previous effective sample).
+  
+If the ratios are low, tightening the priors may help.
+
+```{r}
+#| label: modelValidation_ess1c
+#| fig-width: 6
+#| fig-height: 4
+dat1c.brm2$fit |> stan_ess()
+```
+
+**Conclusions**:
+
+- ratios are all very high
+
+:::::
+
+**Conclusions**:
+
+- all the diagnostics appear reasonable
+- we can conclude that the chains are all well mixed and have
+  converged on a stable posterior.
+  
+:::::::
+ 
+### Example 2 (categorical predictor)
+
+::::::: {.panel-tabset}
+#### Treatment contrasts
+::::: {.panel-tabset}
+
+##### Traceplots
+
+Plots of the estimates of each parameter over the post-warmup length
+of each MCMC chain. Each chain is plotted in a different colour, with
+each parameter in its own facet. Ideally, each **trace** should just
+look like noise without any discernible drift and each of the traces
+for a specific parameter should look the same (i.e, should not be
+displaced above or below any other trace for that parameter).
+
+```{r}
+#| label: modelValidation_traceplots2a
+#| fig-width: 6
+#| fig-height: 4
+dat2a.brm2$fit |> stan_trace()
+dat2a.brm2$fit |> stan_trace(inc_warmup = TRUE)
+```
+
+**Conclusions**:
+
+    - the chains appear well mixed and very similar
+   
+##### Autocorrelation plots
+
+```{r}
+#| label: modelValidation_acf2a
+#| fig-width: 6
+#| fig-height: 4
+dat2a.brm2$fit |> stan_ac()
+```
+
+**Conclusions**:
+
+- there is no evidence of autocorrelation in the MCMC samples
+
+##### Rhat
+
+Rhat is a **scale reduction factor** measure of convergence between
+the chains. The closer the values are to 1, the more the chains have
+converged. Values greater than 1.05 indicate a lack of convergence.
+There will be an Rhat value for each parameter estimated.
+
+```{r}
+#| label: modelValidation_rhat2a
+#| fig-width: 6
+#| fig-height: 4
+dat2a.brm2$fit |> stan_rhat()
+```
+
+**Conclusions**:
+
+- all Rhat values are below 1.05, suggesting the chains have converged. 
+
+##### Effective sample sizes
+
+The number of effective samples - the ratio of the number of effective
+samples (those not rejected by the sampler) to the number of samples
+provides an indication of the effectiveness (and efficiency) of the
+MCMC sampler. Ratios that are less than 0.5 for a parameter suggest
+that the sampler spent considerable time in difficult areas of the
+sampling domain and rejected more than half of the samples (replacing
+them with the previous effective sample).
+  
+If the ratios are low, tightening the priors may help.
+
+```{r}
+#| label: modelValidation_ess2a
+#| fig-width: 6
+#| fig-height: 4
+dat2a.brm2$fit |> stan_ess()
+```
+
+**Conclusions**:
+
+- ratios are all very high
+
+:::::
+
+**Conclusions**:
+
+- all the diagnostics appear reasonable
+- we can conclude that the chains are all well mixed and have
+  converged on a stable posterior.
+
+#### Means parameterisation
+
+::::: {.panel-tabset}
+
+##### Traceplots
+
+Plots of the estimates of each parameter over the post-warmup length
+of each MCMC chain. Each chain is plotted in a different colour, with
+each parameter in its own facet. Ideally, each **trace** should just
+look like noise without any discernible drift and each of the traces
+for a specific parameter should look the same (i.e, should not be
+displaced above or below any other trace for that parameter).
+
+```{r}
+#| label: modelValidation_traceplots2b
+#| fig-width: 6
+#| fig-height: 4
+dat2b.brm2$fit |> stan_trace()
+dat2b.brm2$fit |> stan_trace(inc_warmup = TRUE)
+```
+
+**Conclusions**:
+
+    - the chains appear well mixed and very similar
+   
+##### Autocorrelation plots
+
+```{r}
+#| label: modelValidation_acf2b
+#| fig-width: 6
+#| fig-height: 4
+dat2b.brm2$fit |> stan_ac()
+```
+
+**Conclusions**:
+
+- there is no evidence of autocorrelation in the MCMC samples
+
+##### Rhat
+
+Rhat is a **scale reduction factor** measure of convergence between
+the chains. The closer the values are to 1, the more the chains have
+converged. Values greater than 1.05 indicate a lack of convergence.
+There will be an Rhat value for each parameter estimated.
+
+```{r}
+#| label: modelValidation_rhat2b
+#| fig-width: 6
+#| fig-height: 4
+dat2b.brm2$fit |> stan_rhat()
+```
+
+**Conclusions**:
+
+- all Rhat values are below 1.05, suggesting the chains have converged. 
+
+##### Effective sample sizes
+
+The number of effective samples - the ratio of the number of effective
+samples (those not rejected by the sampler) to the number of samples
+provides an indication of the effectiveness (and efficiency) of the
+MCMC sampler. Ratios that are less than 0.5 for a parameter suggest
+that the sampler spent considerable time in difficult areas of the
+sampling domain and rejected more than half of the samples (replacing
+them with the previous effective sample).
+  
+If the ratios are low, tightening the priors may help.
+
+```{r}
+#| label: modelValidation_ess2b
+#| fig-width: 6
+#| fig-height: 4
+dat2b.brm2$fit |> stan_ess()
+```
+
+**Conclusions**:
+
+- ratios are all very high
+
+:::::
+
+**Conclusions**:
+
+- all the diagnostics appear reasonable
+- we can conclude that the chains are all well mixed and have
+  converged on a stable posterior.
+
+::::::: 
+
+### Example 3 (Poisson data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+
+::::: {.panel-tabset}
+##### Traceplots
+
+Plots of the estimates of each parameter over the post-warmup length
+of each MCMC chain. Each chain is plotted in a different colour, with
+each parameter in its own facet. Ideally, each **trace** should just
+look like noise without any discernible drift and each of the traces
+for a specific parameter should look the same (i.e, should not be
+displaced above or below any other trace for that parameter).
+
+```{r}
+#| label: modelValidation_traceplots3a
+#| fig-width: 6
+#| fig-height: 4
+dat3a.brm2$fit |> stan_trace()
+dat3a.brm2$fit |> stan_trace(inc_warmup = TRUE)
+```
+
+**Conclusions**:
+
+    - the chains appear well mixed and very similar
+
+##### Autocorrelation plots
+
+```{r}
+#| label: modelValidation_acf3a
+#| fig-width: 6
+#| fig-height: 4
+dat3a.brm2$fit |> stan_ac()
+```
+
+**Conclusions**:
+
+- there is no evidence of autocorrelation in the MCMC samples
+
+##### Rhat
+
+Rhat is a **scale reduction factor** measure of convergence between
+the chains. The closer the values are to 1, the more the chains have
+converged. Values greater than 1.05 indicate a lack of convergence.
+There will be an Rhat value for each parameter estimated.
+
+```{r}
+#| label: modelValidation_rhat3a
+#| fig-width: 6
+#| fig-height: 4
+dat3a.brm2$fit |> stan_rhat()
+```
+
+**Conclusions**:
+
+- all Rhat values are below 1.05, suggesting the chains have converged. 
+
+##### Effective sample sizes
+
+The number of effective samples - the ratio of the number of effective
+samples (those not rejected by the sampler) to the number of samples
+provides an indication of the effectiveness (and efficiency) of the
+MCMC sampler. Ratios that are less than 0.5 for a parameter suggest
+that the sampler spent considerable time in difficult areas of the
+sampling domain and rejected more than half of the samples (replacing
+them with the previous effective sample).
+  
+If the ratios are low, tightening the priors may help.
+
+```{r}
+#| label: modelValidation_ess3a
+#| fig-width: 6
+#| fig-height: 4
+dat3a.brm2$fit |> stan_ess()
+```
+
+**Conclusions**:
+
+- ratios are all very high
+
+:::::
+
+**Conclusions**:
+
+- all the diagnostics appear reasonable
+- we can conclude that the chains are all well mixed and have
+  converged on a stable posterior.
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+##### Traceplots
+
+Plots of the estimates of each parameter over the post-warmup length
+of each MCMC chain. Each chain is plotted in a different colour, with
+each parameter in its own facet. Ideally, each **trace** should just
+look like noise without any discernible drift and each of the traces
+for a specific parameter should look the same (i.e, should not be
+displaced above or below any other trace for that parameter).
+
+```{r}
+#| label: modelValidation_traceplots3b
+#| fig-width: 6
+#| fig-height: 4
+dat3b.brm2$fit |> stan_trace()
+dat3b.brm2$fit |> stan_trace(inc_warmup = TRUE)
+```
+
+**Conclusions**:
+
+    - the chains appear well mixed and very similar
+
+##### Autocorrelation plots
+
+```{r}
+#| label: modelValidation_acf3b
+#| fig-width: 6
+#| fig-height: 4
+dat3b.brm2$fit |> stan_ac()
+```
+
+**Conclusions**:
+
+- there is no evidence of autocorrelation in the MCMC samples
+
+##### Rhat
+
+Rhat is a **scale reduction factor** measure of convergence between
+the chains. The closer the values are to 1, the more the chains have
+converged. Values greater than 1.05 indicate a lack of convergence.
+There will be an Rhat value for each parameter estimated.
+
+```{r}
+#| label: modelValidation_rhat3b
+#| fig-width: 6
+#| fig-height: 4
+dat3b.brm2$fit |> stan_rhat()
+```
+
+**Conclusions**:
+
+- all Rhat values are below 1.05, suggesting the chains have converged. 
+
+##### Effective sample sizes
+
+The number of effective samples - the ratio of the number of effective
+samples (those not rejected by the sampler) to the number of samples
+provides an indication of the effectiveness (and efficiency) of the
+MCMC sampler. Ratios that are less than 0.5 for a parameter suggest
+that the sampler spent considerable time in difficult areas of the
+sampling domain and rejected more than half of the samples (replacing
+them with the previous effective sample).
+  
+If the ratios are low, tightening the priors may help.
+
+```{r}
+#| label: modelValidation_ess3b
+#| fig-width: 6
+#| fig-height: 4
+dat3b.brm2$fit |> stan_ess()
+```
+
+**Conclusions**:
+
+- ratios are all very high
+
+:::::
+
+**Conclusions**:
+
+- all the diagnostics appear reasonable
+- we can conclude that the chains are all well mixed and have
+  converged on a stable posterior.
+
+#### Standardised predictor
+
+::::: {.panel-tabset}
+##### Traceplots
+
+Plots of the estimates of each parameter over the post-warmup length
+of each MCMC chain. Each chain is plotted in a different colour, with
+each parameter in its own facet. Ideally, each **trace** should just
+look like noise without any discernible drift and each of the traces
+for a specific parameter should look the same (i.e, should not be
+displaced above or below any other trace for that parameter).
+
+```{r}
+#| label: modelValidation_traceplots3c
+#| fig-width: 6
+#| fig-height: 4
+dat3c.brm2$fit |> stan_trace()
+dat3c.brm2$fit |> stan_trace(inc_warmup = TRUE)
+```
+
+**Conclusions**:
+
+    - the chains appear well mixed and very similar
+
+##### Autocorrelation plots
+
+```{r}
+#| label: modelValidation_acf3c
+#| fig-width: 6
+#| fig-height: 4
+dat3c.brm2$fit |> stan_ac()
+```
+
+**Conclusions**:
+
+- there is no evidence of autocorrelation in the MCMC samples
+
+##### Rhat
+
+Rhat is a **scale reduction factor** measure of convergence between
+the chains. The closer the values are to 1, the more the chains have
+converged. Values greater than 1.05 indicate a lack of convergence.
+There will be an Rhat value for each parameter estimated.
+
+```{r}
+#| label: modelValidation_rhat3c
+#| fig-width: 6
+#| fig-height: 4
+dat3c.brm2$fit |> stan_rhat()
+```
+
+**Conclusions**:
+
+- all Rhat values are below 1.05, suggesting the chains have converged. 
+
+##### Effective sample sizes
+
+The number of effective samples - the ratio of the number of effective
+samples (those not rejected by the sampler) to the number of samples
+provides an indication of the effectiveness (and efficiency) of the
+MCMC sampler. Ratios that are less than 0.5 for a parameter suggest
+that the sampler spent considerable time in difficult areas of the
+sampling domain and rejected more than half of the samples (replacing
+them with the previous effective sample).
+  
+If the ratios are low, tightening the priors may help.
+
+```{r}
+#| label: modelValidation_ess3c
+#| fig-width: 6
+#| fig-height: 4
+dat3c.brm2$fit |> stan_ess()
+```
+
+**Conclusions**:
+
+- ratios are all very high
+
+:::::
+
+**Conclusions**:
+
+- all the diagnostics appear reasonable
+- we can conclude that the chains are all well mixed and have
+  converged on a stable posterior.
+
+
+:::::::
+
+::::
+
 
 # References
 
