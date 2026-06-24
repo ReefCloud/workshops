@@ -5671,11 +5671,66 @@ data.
 
 ## More PPC modules (functions) available
 
-```{r modelValidation_5a, results='markdown', eval=TRUE, mhidden=TRUE, fig.width=6, fig.height=4}
+
+::: {.cell mhidden='true'}
+
+```{.r .cell-code}
 available_ppc()
 ```
 
+::: {.cell-output .cell-output-stdout}
+```
+bayesplot PPC module:
+  ppc_bars
+  ppc_bars_grouped
+  ppc_boxplot
+  ppc_dens
+  ppc_dens_overlay
+  ppc_dens_overlay_grouped
+  ppc_ecdf_overlay
+  ppc_ecdf_overlay_grouped
+  ppc_error_binned
+  ppc_error_hist
+  ppc_error_hist_grouped
+  ppc_error_scatter
+  ppc_error_scatter_avg
+  ppc_error_scatter_avg_grouped
+  ppc_error_scatter_avg_vs_x
+  ppc_freqpoly
+  ppc_freqpoly_grouped
+  ppc_hist
+  ppc_intervals
+  ppc_intervals_grouped
+  ppc_km_overlay
+  ppc_km_overlay_grouped
+  ppc_loo_intervals
+  ppc_loo_pit
+  ppc_loo_pit_overlay
+  ppc_loo_pit_qq
+  ppc_loo_ribbon
+  ppc_pit_ecdf
+  ppc_pit_ecdf_grouped
+  ppc_ribbon
+  ppc_ribbon_grouped
+  ppc_rootogram
+  ppc_scatter
+  ppc_scatter_avg
+  ppc_scatter_avg_grouped
+  ppc_stat
+  ppc_stat_2d
+  ppc_stat_freqpoly
+  ppc_stat_freqpoly_grouped
+  ppc_stat_grouped
+  ppc_violin_grouped
+```
+:::
+:::
+
+
 ::::
+
+
+:::: {.panel-tabset}
 
 ### Example 1 (Gaussian data)
 
@@ -5695,28 +5750,40 @@ conclusions should remain robust across subsequent runs.
 
 ##### Simple residual plots
 
-```{r}
-#| label: modelValidation_resid1a
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat1a.brm2)[, "Estimate"]
 fit <- fitted(dat1a.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = fit))
 ```
 
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid1a-1.png){width=384}
+:::
+:::
+
+
 We should also plot the residuals against each of the predictor
 variables (as well as any other important unmodelled predictors -
 particularly time and space if relevant and available).
 
-```{r}
-#| label: modelValidation_resid21a
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat1a.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = dat$x))
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid21a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5736,12 +5803,18 @@ These are plots of the density distribution of the observed data
 from draws from the model (light blue). Ideally, the 50 realisations
 should be roughly consistent with the observed data.
 
-```{r}
-#| label: modelValidation_ppdensity1a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1a.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppdensity1a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5753,12 +5826,24 @@ These are plots of the observed values against the average residuals.
 Similar to a residual plot, we do not want to see any patterns in this
 plot.
 
-```{r}
-#| label: modelValidation_pperror1a
-#| fig-width: 3
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1a.brm2 |> pp_check(type = 'error_scatter_avg')
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'error_scatter_avg' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_pperror1a-1.png){width=288}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5770,12 +5855,24 @@ These are plots of the observed data overlayed on top of posterior
 predictions associated with each level of the predictor. Ideally, the
 observed data should all fall within the predictive intervals.
 
-```{r}
-#| label: modelValidation_ppintervals1a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1a.brm2 |> pp_check(type = 'intervals', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'intervals' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppintervals1a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5786,12 +5883,24 @@ dat1a.brm2 |> pp_check(type = 'intervals', x = "x")
 
 These are just an alternative way of expressing the interval plot.
 
-```{r}
-#| label: modelValidation_ppribbon1a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1a.brm2 |> pp_check(type = 'ribbon', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'ribbon' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppribbon1a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5805,10 +5914,15 @@ dat1a.brm2 |> pp_check(type = 'ribbon', x = "x")
 The `shinystan` package allows the full suite of MCMC diagnostics and posterior
 predictive checks to be accessed via a web interface.
 
-```{r modelValidation5g, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+
+::: {.cell mhidden='true'}
+
+```{.r .cell-code}
 library(shinystan)
 launch_shinystan(dat1a.brm2)
 ```
+:::
+
 
 ::::
 
@@ -5827,18 +5941,22 @@ We need to supply:
 - fitted (predicted) responses (averaged) associated with each
   observation
 
-```{r}
-#| label: modelValidation_DHARMa1a
-#| fig-width: 15
-#| fig-height: 5
-#| out-width: 8in
-#| cache: true
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/modelValidation_DHARMa1a_4f586bc08b24c7a64a0a1e3cd1f38a18'}
+
+```{.r .cell-code}
 dat1a.resids <- make_brms_dharma_res(dat1a.brm2, integerResponse = FALSE)
 wrap_elements(~ testUniformity(dat1a.resids)) +
     wrap_elements(~ plotResiduals(dat1a.resids)) +
     wrap_elements(~ testDispersion(dat1a.resids)) +
     plot_layout(nrow = 1)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_DHARMa1a-1.png){width=8in}
+:::
+:::
+
 
 :::: {.callout-note}
 
@@ -5880,28 +5998,40 @@ To address this, you can either:
 
 ##### Simple residual plots
 
-```{r}
-#| label: modelValidation_resid1b
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat1b.brm2)[, "Estimate"]
 fit <- fitted(dat1b.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = fit))
 ```
 
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid1b-1.png){width=384}
+:::
+:::
+
+
 We should also plot the residuals against each of the predictor
 variables (as well as any other important unmodelled predictors -
 particularly time and space if relevant and available).
 
-```{r}
-#| label: modelValidation_resid21b
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat1b.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = dat$x))
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid21b-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5921,12 +6051,18 @@ These are plots of the density distribution of the observed data
 from draws from the model (light blue). Ideally, the 50 realisations
 should be roughly consistent with the observed data.
 
-```{r}
-#| label: modelValidation_ppdensity1b
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1b.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppdensity1b-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5938,12 +6074,24 @@ These are plots of the observed values against the average residuals.
 Similar to a residual plot, we do not want to see any patterns in this
 plot.
 
-```{r}
-#| label: modelValidation_pperror1b
-#| fig-width: 3
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1b.brm2 |> pp_check(type = 'error_scatter_avg')
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'error_scatter_avg' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_pperror1b-1.png){width=288}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5955,12 +6103,24 @@ These are plots of the observed data overlayed on top of posterior
 predictions associated with each level of the predictor. Ideally, the
 observed data should all fall within the predictive intervals.
 
-```{r}
-#| label: modelValidation_ppintervals1b
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1b.brm2 |> pp_check(type = 'intervals', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'intervals' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppintervals1b-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5971,12 +6131,24 @@ dat1b.brm2 |> pp_check(type = 'intervals', x = "x")
 
 These are just an alternative way of expressing the interval plot.
 
-```{r}
-#| label: modelValidation_ppribbon1b
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1b.brm2 |> pp_check(type = 'ribbon', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'ribbon' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppribbon1b-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -5990,10 +6162,15 @@ dat1b.brm2 |> pp_check(type = 'ribbon', x = "x")
 The `shinystan` package allows the full suite of MCMC diagnostics and posterior
 predictive checks to be accessed via a web interface.
 
-```{r modelValidation5g1b, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+
+::: {.cell mhidden='true'}
+
+```{.r .cell-code}
 library(shinystan)
 launch_shinystan(dat1b.brm2)
 ```
+:::
+
 
 ::::
 
@@ -6012,12 +6189,10 @@ We need to supply:
 - fitted (predicted) responses (averaged) associated with each
   observation
 
-```{r}
-#| label: modelValidation_DHARMa1b
-#| fig-width: 15
-#| fig-height: 5
-#| out-width: 8in
-#| cache: true
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/modelValidation_DHARMa1b_4831dec450c4b7a27a05277fba75ec20'}
+
+```{.r .cell-code}
 dat1b.resids <- make_brms_dharma_res(dat1b.brm2, integerResponse = FALSE)
 wrap_elements(~ testUniformity(dat1b.resids)) +
     wrap_elements(~ plotResiduals(dat1b.resids)) +
@@ -6025,189 +6200,11 @@ wrap_elements(~ testUniformity(dat1b.resids)) +
     plot_layout(nrow = 1)
 ```
 
-:::: {.callout-note}
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_DHARMa1b-1.png){width=8in}
+:::
+:::
 
-If you are using Rstudio (particularly with a quarto document), the above code may produce a graphic that is too large for the currently available device.  The document should still render without problems, it is just the live display within Rstudio that cannot accommodate the figure.
-
-To address this, you can either:
-
-- break the multi-panel figure up into four separate figures by
-  removing the outer `wrap_elements()` and `plot_layout()` functions.
-- copy the above code into the console and view in a larger graphics
-  device
-::::
-
-**Conclusions**:
-
-- the Q-Q plot looks reasonable (points broadly follow the angled
-  line)
-- there are no flagged issues with the
-  - KS test: conformity to the nominated distribution (family)
-  - Dispersion test: would not normally expect this to be an issue for
-    a Gaussian family unless there are other issues with the residuals
-  - Outlier test: the influence of each observation
-- there does not appear to be any patterns in the residuals - each of
-  the three quantile trends are considered flat and centered around
-  1/3, 1/2 and 2/3
-- the observed dispersion is well within the simulated range
-  indicating that there is no issue with dispersion (again this is
-  expected for a Gaussian model)
-
-:::::
-
-**Conclusions**:
-- there is no evidence of a lack of fit
-- the model is likely to be reliable
-#### Standardised predictor
-
-::::: {.panel-tabset}
-
-##### Simple residual plots
-
-```{r}
-#| label: modelValidation_resid1c
-#| fig-width: 4
-#| fig-height: 4
-resid <- resid(dat1c.brm2)[, "Estimate"]
-fit <- fitted(dat1c.brm2)[, "Estimate"]
-ggplot() +
-  geom_point(data = NULL, aes(y = resid, x = fit))
-```
-
-We should also plot the residuals against each of the predictor
-variables (as well as any other important unmodelled predictors -
-particularly time and space if relevant and available).
-
-```{r}
-#| label: modelValidation_resid21c
-#| fig-width: 4
-#| fig-height: 4
-resid <- resid(dat1c.brm2)[, "Estimate"]
-ggplot() +
-  geom_point(data = NULL, aes(y = resid, x = dat$x))
-```
-
-**Conclusions**:
-
-- there does not appear to be any pattern in the residuals
-
-##### Posterior probability checks
-
-Post predictive checks provide additional diagnostics about the fit of
-the model. Specifically, they provide a comparison between predictions
-drawn from the model and the observed data used to train the model.
-
-
-**Density overlay**
-
-These are plots of the density distribution of the observed data
-(black line) overlayed on top of 50 density distributions generated
-from draws from the model (light blue). Ideally, the 50 realisations
-should be roughly consistent with the observed data.
-
-```{r}
-#| label: modelValidation_ppdensity1c
-#| fig-width: 4
-#| fig-height: 3
-dat1c.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
-```
-
-**Conclusions**:
-
-- the model draws appear to be consistent with the observed data
-
-**Error scatter**
-
-These are plots of the observed values against the average residuals.
-Similar to a residual plot, we do not want to see any patterns in this
-plot.
-
-```{r}
-#| label: modelValidation_pperror1c
-#| fig-width: 3
-#| fig-height: 3
-dat1c.brm2 |> pp_check(type = 'error_scatter_avg')
-```
-
-**Conclusions**:
-
-- there is no obvious pattern in the residuals.
-
-**Intervals**
-
-These are plots of the observed data overlayed on top of posterior
-predictions associated with each level of the predictor. Ideally, the
-observed data should all fall within the predictive intervals.
-
-```{r}
-#| label: modelValidation_ppintervals1c
-#| fig-width: 4
-#| fig-height: 3
-dat1c.brm2 |> pp_check(type = 'intervals', x = "x")
-```
-
-**Conclusions**:
-
-- the posterior predictions are not inconsistent with the observed
-  data
-
-**Ribbon**
-
-These are just an alternative way of expressing the interval plot.
-
-```{r}
-#| label: modelValidation_ppribbon1c
-#| fig-width: 4
-#| fig-height: 3
-dat1c.brm2 |> pp_check(type = 'ribbon', x = "x")
-```
-
-**Conclusions**:
-
-- the posterior predictions are not inconsistent with the observed
-  data
-
-:::: {.callout-tip collapse="true"}
-
-###### Using `shiny` to explore a wide range of MCMC and validation diagnostics
-
-The `shinystan` package allows the full suite of MCMC diagnostics and posterior
-predictive checks to be accessed via a web interface.
-
-```{r modelValidation5g1c, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
-library(shinystan)
-launch_shinystan(dat1c.brm2)
-```
-
-::::
-
-##### DHARMa (simulated) residuals
-
-DHARMa residuals provide very useful diagnostics. Unfortunately, we
-cannot directly use the `simulateResiduals()` function to generate the
-simulated residuals. However, if we are willing to calculate some of
-the components yourself, we can still obtain the simulated residuals
-from the fitted stan model.
-
-We need to supply:
-
-- simulated (predicted) responses associated with each observation.
-- observed values
-- fitted (predicted) responses (averaged) associated with each
-  observation
-
-```{r}
-#| label: modelValidation_DHARMa1c
-#| fig-width: 15
-#| fig-height: 5
-#| out-width: 8in
-#| cache: true
-dat1c.resids <- make_brms_dharma_res(dat1c.brm2, integerResponse = FALSE)
-wrap_elements(~ testUniformity(dat1c.resids)) +
-    wrap_elements(~ plotResiduals(dat1c.resids)) +
-    wrap_elements(~ testDispersion(dat1c.resids)) +
-    plot_layout(nrow = 1)
-```
 
 :::: {.callout-note}
 
@@ -6243,36 +6240,46 @@ To address this, you can either:
 - there is no evidence of a lack of fit
 - the model is likely to be reliable
 
-:::::::
-
 #### Standardised predictor
 
 ::::: {.panel-tabset}
 
 ##### Simple residual plots
 
-```{r}
-#| label: modelValidation_resid1c
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat1c.brm2)[, "Estimate"]
 fit <- fitted(dat1c.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = fit))
 ```
 
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid1c-1.png){width=384}
+:::
+:::
+
+
 We should also plot the residuals against each of the predictor
 variables (as well as any other important unmodelled predictors -
 particularly time and space if relevant and available).
 
-```{r}
-#| label: modelValidation_resid21c
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat1c.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = dat$x))
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid21c-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6292,12 +6299,18 @@ These are plots of the density distribution of the observed data
 from draws from the model (light blue). Ideally, the 50 realisations
 should be roughly consistent with the observed data.
 
-```{r}
-#| label: modelValidation_ppdensity1c
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1c.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppdensity1c-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6309,12 +6322,24 @@ These are plots of the observed values against the average residuals.
 Similar to a residual plot, we do not want to see any patterns in this
 plot.
 
-```{r}
-#| label: modelValidation_pperror1c
-#| fig-width: 3
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1c.brm2 |> pp_check(type = 'error_scatter_avg')
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'error_scatter_avg' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_pperror1c-1.png){width=288}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6326,12 +6351,24 @@ These are plots of the observed data overlayed on top of posterior
 predictions associated with each level of the predictor. Ideally, the
 observed data should all fall within the predictive intervals.
 
-```{r}
-#| label: modelValidation_ppintervals1c
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1c.brm2 |> pp_check(type = 'intervals', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'intervals' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppintervals1c-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6342,12 +6379,24 @@ dat1c.brm2 |> pp_check(type = 'intervals', x = "x")
 
 These are just an alternative way of expressing the interval plot.
 
-```{r}
-#| label: modelValidation_ppribbon1c
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat1c.brm2 |> pp_check(type = 'ribbon', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'ribbon' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppribbon1c-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6361,10 +6410,15 @@ dat1c.brm2 |> pp_check(type = 'ribbon', x = "x")
 The `shinystan` package allows the full suite of MCMC diagnostics and posterior
 predictive checks to be accessed via a web interface.
 
-```{r modelValidation5g1c, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+
+::: {.cell mhidden='true'}
+
+```{.r .cell-code}
 library(shinystan)
 launch_shinystan(dat1c.brm2)
 ```
+:::
+
 
 ::::
 
@@ -6383,18 +6437,22 @@ We need to supply:
 - fitted (predicted) responses (averaged) associated with each
   observation
 
-```{r}
-#| label: modelValidation_DHARMa1c
-#| fig-width: 15
-#| fig-height: 5
-#| out-width: 8in
-#| cache: true
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/modelValidation_DHARMa1c_4304a3a60c2dfc379c9d71ce964b7470'}
+
+```{.r .cell-code}
 dat1c.resids <- make_brms_dharma_res(dat1c.brm2, integerResponse = FALSE)
 wrap_elements(~ testUniformity(dat1c.resids)) +
     wrap_elements(~ plotResiduals(dat1c.resids)) +
     wrap_elements(~ testDispersion(dat1c.resids)) +
     plot_layout(nrow = 1)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_DHARMa1c-1.png){width=8in}
+:::
+:::
+
 
 :::: {.callout-note}
 
@@ -6442,28 +6500,40 @@ To address this, you can either:
 
 ##### Simple residual plots
 
-```{r}
-#| label: modelValidation_resid2a
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat2a.brm2)[, "Estimate"]
 fit <- fitted(dat2a.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = fit))
 ```
 
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid2a-1.png){width=384}
+:::
+:::
+
+
 We should also plot the residuals against each of the predictor
 variables (as well as any other important unmodelled predictors -
 particularly time and space if relevant and available).
 
-```{r}
-#| label: modelValidation_resid22a
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat2a.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = dat2$x))
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid22a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6483,12 +6553,18 @@ These are plots of the density distribution of the observed data
 from draws from the model (light blue). Ideally, the 50 realisations
 should be roughly consistent with the observed data.
 
-```{r}
-#| label: modelValidation_ppdensity2a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat2a.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppdensity2a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6500,12 +6576,24 @@ These are plots of the observed values against the average residuals.
 Similar to a residual plot, we do not want to see any patterns in this
 plot.
 
-```{r}
-#| label: modelValidation_pperror2a
-#| fig-width: 3
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat2a.brm2 |> pp_check(type = 'error_scatter_avg')
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'error_scatter_avg' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_pperror2a-1.png){width=288}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6519,10 +6607,15 @@ dat2a.brm2 |> pp_check(type = 'error_scatter_avg')
 The `shinystan` package allows the full suite of MCMC diagnostics and posterior
 predictive checks to be accessed via a web interface.
 
-```{r modelValidation2a, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+
+::: {.cell mhidden='true'}
+
+```{.r .cell-code}
 library(shinystan)
 launch_shinystan(dat2a.brm2)
 ```
+:::
+
 
 ::::
 
@@ -6541,18 +6634,22 @@ We need to supply:
 - fitted (predicted) responses (averaged) associated with each
   observation
 
-```{r}
-#| label: modelValidation_DHARMa2a
-#| fig-width: 15
-#| fig-height: 5
-#| out-width: 8in
-#| cache: true
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/modelValidation_DHARMa2a_d9ab39a06effc6d874f08366aeda6b36'}
+
+```{.r .cell-code}
 dat2a.resids <- make_brms_dharma_res(dat2a.brm2, integerResponse = FALSE)
 wrap_elements(~ testUniformity(dat2a.resids)) +
     wrap_elements(~ plotResiduals(dat2a.resids)) +
     wrap_elements(~ testDispersion(dat2a.resids)) +
     plot_layout(nrow = 1)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_DHARMa2a-1.png){width=8in}
+:::
+:::
+
 
 :::: {.callout-note}
 
@@ -6594,28 +6691,40 @@ To address this, you can either:
 
 ##### Simple residual plots
 
-```{r}
-#| label: modelValidation_resid2b
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat2b.brm2)[, "Estimate"]
 fit <- fitted(dat2b.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = fit))
 ```
 
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid2b-1.png){width=384}
+:::
+:::
+
+
 We should also plot the residuals against each of the predictor
 variables (as well as any other important unmodelled predictors -
 particularly time and space if relevant and available).
 
-```{r}
-#| label: modelValidation_resid22b
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat2b.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = dat2$x))
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_resid22b-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6635,12 +6744,18 @@ These are plots of the density distribution of the observed data
 from draws from the model (light blue). Ideally, the 50 realisations
 should be roughly consistent with the observed data.
 
-```{r}
-#| label: modelValidation_ppdensity2b
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat2b.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppdensity2b-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6652,12 +6767,24 @@ These are plots of the observed values against the average residuals.
 Similar to a residual plot, we do not want to see any patterns in this
 plot.
 
-```{r}
-#| label: modelValidation_pperror2b
-#| fig-width: 3
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat2b.brm2 |> pp_check(type = 'error_scatter_avg')
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'error_scatter_avg' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_pperror2b-1.png){width=288}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6671,10 +6798,15 @@ dat2b.brm2 |> pp_check(type = 'error_scatter_avg')
 The `shinystan` package allows the full suite of MCMC diagnostics and posterior
 predictive checks to be accessed via a web interface.
 
-```{r modelValidation2b, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+
+::: {.cell mhidden='true'}
+
+```{.r .cell-code}
 library(shinystan)
 launch_shinystan(dat2b.brm2)
 ```
+:::
+
 
 ::::
 
@@ -6693,18 +6825,22 @@ We need to supply:
 - fitted (predicted) responses (averaged) associated with each
   observation
 
-```{r}
-#| label: modelValidation_DHARMa2b
-#| fig-width: 15
-#| fig-height: 5
-#| out-width: 8in
-#| cache: true
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/modelValidation_DHARMa2b_909ae6d89d464beef107578c122193ce'}
+
+```{.r .cell-code}
 dat2b.resids <- make_brms_dharma_res(dat2b.brm2, integerResponse = FALSE)
 wrap_elements(~ testUniformity(dat2b.resids)) +
     wrap_elements(~ plotResiduals(dat2b.resids)) +
     wrap_elements(~ testDispersion(dat2b.resids)) +
     plot_layout(nrow = 1)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_DHARMa2b-1.png){width=8in}
+:::
+:::
+
 
 :::: {.callout-note}
 
@@ -6752,28 +6888,40 @@ To address this, you can either:
 
 ##### Simple residual plots
 
-```{r}
-#| label: modelvalidation_resid3a
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat3a.brm2)[, "Estimate"]
 fit <- fitted(dat3a.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = fit))
 ```
 
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelvalidation_resid3a-1.png){width=384}
+:::
+:::
+
+
 We should also plot the residuals against each of the predictor
 variables (as well as any other important unmodelled predictors -
 particularly time and space if relevant and available).
 
-```{r}
-#| label: modelvalidation_resid23a
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat3a.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = dat3$x))
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelvalidation_resid23a-1.png){width=384}
+:::
+:::
+
 
 **conclusions**:
 
@@ -6783,12 +6931,18 @@ ggplot() +
 
 **density overlay**
 
-```{r}
-#| label: modelvalidation_ppdensity3a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat3a.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelvalidation_ppdensity3a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6800,12 +6954,24 @@ These are plots of the observed values against the average residuals.
 Similar to a residual plot, we do not want to see any patterns in this
 plot.
 
-```{r}
-#| label: modelValidation_pperror3a
-#| fig-width: 3
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat3a.brm2 |> pp_check(type = 'error_scatter_avg')
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'error_scatter_avg' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_pperror3a-1.png){width=288}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6817,12 +6983,24 @@ These are plots of the observed data overlayed on top of posterior
 predictions associated with each level of the predictor. Ideally, the
 observed data should all fall within the predictive intervals.
 
-```{r}
-#| label: modelValidation_ppintervals3a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat3a.brm2 |> pp_check(type = 'intervals', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'intervals' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppintervals3a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6833,12 +7011,24 @@ dat3a.brm2 |> pp_check(type = 'intervals', x = "x")
 
 These are just an alternative way of expressing the interval plot.
 
-```{r}
-#| label: modelValidation_ppribbon3a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat3a.brm2 |> pp_check(type = 'ribbon', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'ribbon' by default.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppribbon3a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6852,10 +7042,15 @@ dat3a.brm2 |> pp_check(type = 'ribbon', x = "x")
 The `shinystan` package allows the full suite of MCMC diagnostics and posterior
 predictive checks to be accessed via a web interface.
 
-```{r modelValidation3a, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+
+::: {.cell mhidden='true'}
+
+```{.r .cell-code}
 library(shinystan)
 launch_shinystan(dat3a.brm2)
 ```
+:::
+
 
 ::::
 
@@ -6875,18 +7070,22 @@ We need to supply:
 - fitted (predicted) responses (averaged) associated with each
   observation
 
-```{r}
-#| label: modelValidation_DHARMa3a
-#| fig-width: 15
-#| fig-height: 5
-#| out-width: 8in
-#| cache: true
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/modelValidation_DHARMa3a_73453e53d6e05ae887e6d33c43931449'}
+
+```{.r .cell-code}
 dat3a.resids <- make_brms_dharma_res(dat3a.brm2, integerResponse = FALSE)
 wrap_elements(~ testUniformity(dat3a.resids)) +
     wrap_elements(~ plotResiduals(dat3a.resids)) +
     wrap_elements(~ testDispersion(dat3a.resids)) +
     plot_layout(nrow = 1)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_DHARMa3a-1.png){width=8in}
+:::
+:::
+
 
 :::: {.callout-note}
 
@@ -6934,28 +7133,114 @@ To address this, you can either:
 
 ##### Simple residual plots
 
-```{r}
-#| label: modelvalidation_resid5a
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat5a.brm2)[, "Estimate"]
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+```{.r .cell-code}
 fit <- fitted(dat5a.brm2)[, "Estimate"]
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+```{.r .cell-code}
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = fit))
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelvalidation_resid5a-1.png){width=384}
+:::
+:::
+
 
 We should also plot the residuals against each of the predictor
 variables (as well as any other important unmodelled predictors -
 particularly time and space if relevant and available).
 
-```{r}
-#| label: modelvalidation_resid25a
-#| fig-width: 4
-#| fig-height: 4
+
+::: {.cell}
+
+```{.r .cell-code}
 resid <- resid(dat5a.brm2)[, "Estimate"]
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+```{.r .cell-code}
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = dat3$x))
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelvalidation_resid25a-1.png){width=384}
+:::
+:::
+
 
 **conclusions**:
 
@@ -6968,12 +7253,44 @@ ggplot() +
 
 **density overlay**
 
-```{r}
-#| label: modelvalidation_ppdensity5a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat5a.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelvalidation_ppdensity5a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -6987,12 +7304,50 @@ These are plots of the observed values against the average residuals.
 Similar to a residual plot, we do not want to see any patterns in this
 plot.
 
-```{r}
-#| label: modelValidation_pperror5a
-#| fig-width: 3
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat5a.brm2 |> pp_check(type = 'error_scatter_avg')
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'error_scatter_avg' by default.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_pperror5a-1.png){width=288}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -7005,12 +7360,50 @@ These are plots of the observed data overlayed on top of posterior
 predictions associated with each level of the predictor. Ideally, the
 observed data should all fall within the predictive intervals.
 
-```{r}
-#| label: modelValidation_ppintervals5a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat5a.brm2 |> pp_check(type = 'intervals', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'intervals' by default.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppintervals5a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -7022,12 +7415,50 @@ dat5a.brm2 |> pp_check(type = 'intervals', x = "x")
 
 These are just an alternative way of expressing the interval plot.
 
-```{r}
-#| label: modelValidation_ppribbon5a
-#| fig-width: 4
-#| fig-height: 3
+
+::: {.cell}
+
+```{.r .cell-code}
 dat5a.brm2 |> pp_check(type = 'ribbon', x = "x")
 ```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using all posterior draws for ppc type 'ribbon' by default.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_ppribbon5a-1.png){width=384}
+:::
+:::
+
 
 **Conclusions**:
 
@@ -7042,10 +7473,15 @@ dat5a.brm2 |> pp_check(type = 'ribbon', x = "x")
 The `shinystan` package allows the full suite of MCMC diagnostics and posterior
 predictive checks to be accessed via a web interface.
 
-```{r modelValidation5a, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+
+::: {.cell mhidden='true'}
+
+```{.r .cell-code}
 library(shinystan)
 launch_shinystan(dat5a.brm2)
 ```
+:::
+
 
 ::::
 
@@ -7068,18 +7504,65 @@ We need to supply:
 In the code below, I have instructed the residual plot to not apply
 quantile regression to the residuals due to a lack of unique data
 
-```{r}
-#| label: modelValidation_DHARMa5a
-#| fig-width: 15
-#| fig-height: 5
-#| out-width: 8in
-#| cache: true
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/modelValidation_DHARMa5a_b3cd3c40592e044aebad00e81337d5f9'}
+
+```{.r .cell-code}
 dat5a.resids <- make_brms_dharma_res(dat5a.brm2, integerResponse = FALSE)
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Only 2 levels detected so that family 'bernoulli' might be a more efficient choice.
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Using the maximum response value as the number of trials.
+```
+:::
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Using 'binomial' families without specifying 'trials' on the left-hand
+side of the model formula is deprecated.
+```
+:::
+
+```{.r .cell-code}
 wrap_elements(~ testUniformity(dat5a.resids)) +
     wrap_elements(~ plotResiduals(dat5a.resids, quantreg = FALSE)) +
     wrap_elements(~ testDispersion(dat5a.resids)) +
     plot_layout(nrow = 1)
 ```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/modelValidation_DHARMa5a-1.png){width=8in}
+:::
+:::
+
 
 :::: {.callout-note}
 
@@ -7118,11 +7601,4688 @@ To address this, you can either:
 ::::
 
 
+# Partial effects plots
+
+Prior to exploring the modelled numerical estimates, it is worth
+reviewing simple plots of the predicted trends associated with each
+predictor. Importantly, they typically express the trends on the scale
+of the response, although for some, it is possible to force the trends
+to be expressed on the link scale. Such plots provides a final visual
+check of whether the model has yielded sensible outcomes. Furthermore,
+they usually assist in the interpretation of the major estimated
+parameters.
+
+:::: {.panel-tabset}
+
+### Example 1 (Gaussian data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Conditional effects
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+  conditional_effects() |>
+  plot(points = TRUE)
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots1a-1.png){width=384}
+:::
+
+```{.r .cell-code}
+#OR
+dat1a.brm2 |>
+    conditional_effects(spaghetti = TRUE, ndraws = 200) |>
+    plot(points = TRUE) 
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots1a-2.png){width=384}
+:::
+:::
+
+
+:::::
+
+#### Centered predictor
+::::: {.panel-tabset}
+
+##### Conditional effects
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+  conditional_effects() |>
+  plot(points = TRUE)
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots1b-1.png){width=384}
+:::
+
+```{.r .cell-code}
+#OR
+dat1b.brm2 |>
+    conditional_effects(spaghetti = TRUE, ndraws = 200) |>
+    plot(points = TRUE) 
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots1b-2.png){width=384}
+:::
+:::
+
+
+Notice that although we had centered the predictor, because we did so
+in the model formula, `conditional_effects` is able to backtransform
+$x$ onto the original scale when producing the partial plot.
+
+:::::
+
+#### Standardised predictor
+::::: {.panel-tabset}
+
+##### Conditional effects
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+  conditional_effects() |>
+  plot(points = TRUE)
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots1c-1.png){width=384}
+:::
+
+```{.r .cell-code}
+#OR
+dat1c.brm2 |>
+    conditional_effects(spaghetti = TRUE, ndraws = 200) |>
+    plot(points = TRUE) 
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots1c-2.png){width=384}
+:::
+:::
+
+
+Notice that although we had centered the predictor, because we did so
+in the model formula, `conditional_effects` is able to backtransform
+$x$ onto the original scale when producing the partial plot.
+
+:::::
+
+:::::::
+
+### Example 2 (categorical predictor)
+
+::::::: {.panel-tabset}
+
+#### Treatment contrasts
+
+::::: {.panel-tabset}
+
+##### Conditional effects
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+  conditional_effects() |>
+  plot(points = TRUE)
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots2a-1.png){width=384}
+:::
+
+```{.r .cell-code}
+#OR
+dat2a.brm2 |>
+    conditional_effects(spaghetti = TRUE, ndraws = 200) |>
+    plot(points = TRUE) 
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots2a-2.png){width=384}
+:::
+:::
+
+
+:::::
+
+#### Means parameterisation
+
+::::: {.panel-tabset}
+
+##### Conditional effects
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2b.brm2 |>
+  conditional_effects() |>
+  plot(points = TRUE)
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots2b-1.png){width=384}
+:::
+
+```{.r .cell-code}
+#OR
+dat2b.brm2 |>
+    conditional_effects(spaghetti = TRUE, ndraws = 200) |>
+    plot(points = TRUE) 
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/partial_plots2b-2.png){width=384}
+:::
+:::
+
+
+:::::
+
+:::::::
+
+::::
+
+# Model investigation
+
+Rather than simply return point estimates of each of the model
+parameters, Bayesian analyses capture the full posterior of each
+parameter. These are typically stored within the `list` structure of
+the output object.
+
+As with most statistical routines, the overloaded `summary()` function
+provides an overall summary of the model parameters. Typically, the
+summaries will include the means / medians along with credibility
+intervals and perhaps convergence diagnostics (such as R hat).
+However, more thorough investigation and analysis of the parameter
+posteriors requires access to the full posteriors.
+
+There is currently a plethora of functions for extracting the full
+posteriors from models. In part, this is a reflection of a rapidly
+evolving space with numerous packages providing near equivalent
+functionality (it should also be noted, that over time, many of the
+functions have been deprecated due to inconsistencies in their names).
+Broadly speaking, the functions focus on draws from the posterior of
+either the parameters (intercept, slope, standard deviation etc),
+**linear predictor**, **expected values** or **predicted values**. The
+distinction between the latter three are highlighted in the following
+table.
+
+| Property          | Description                                                                                  |
+|-------------------|----------------------------------------------------------------------------------------------|
+| linear predictors | values predicted on the link scale                                                           |
+| expected values   | predictions (on response scale) without residual error (predicting expected mean outcome(s)) |
+| predicted values  | predictions (on response scale) that incorporate residual error                              |
+| fitted values     | predictions on the response scale                                                            |
+
+: {.primary .bordered .sm .paramsTable tbl-colwidths="[30, 70]"}
+
+
+:::: {.panel-tabset}
+
+### Example 1 (Gaussian data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Summary
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |> summary()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ Family: gaussian 
+  Links: mu = identity; sigma = identity 
+Formula: y ~ x 
+   Data: dat (Number of observations: 10) 
+  Draws: 3 chains, each with iter = 5000; warmup = 1000; thin = 5;
+         total post-warmup draws = 2400
+
+Population-Level Effects: 
+          Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept     3.77      5.11    -5.87    14.86 1.00     2041     2145
+x             4.38      0.82     2.60     5.95 1.00     1903     2366
+
+Family Specific Parameters: 
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma     7.22      2.12     4.42    12.40 1.00     2056     2251
+
+Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `Intercept`: when $x=0$, the expected value of $y$ is 
+  3.766 and we are 95% confident that the true
+  value is between -5.87 and 
+  14.862. Since $x=0$ is outside the observed
+  range of $x$, this y-intercept is of very limited value.
+- `x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. So for every one unit change in $x$, $y$ increases by (on
+  average) 4.383 units and we are 95%
+  confident that this change is between 2.597
+  and 5.951
+- sigma is estimated to be 7.22
+
+**Note, the estimates are means and quantiles.**
+
+##### Summarise draws
+
+As an alternative to the regular summary (which is designed to
+resemble that traditionally provided by frequentist analyses - and
+thus be instantly familiar), it is possible to define exactly how each
+of the parameters are summarised.
+
+In the following, I am nominating that I want to summarise each
+parameter posterior by:
+
+- the median
+- the 95% highest probability density interval (credibility interval)
+- Rhat
+- total number of draws
+- bulk and tail effective sample sizes
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+  posterior::summarise_draws(
+    median,
+    HDInterval::hdi,
+    rhat,
+    length,
+    ess_bulk, ess_tail
+)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 8 × 8
+  variable          median    lower  upper  rhat length ess_bulk ess_tail
+  <chr>              <num>    <num>  <num> <num>  <num>    <num>    <num>
+1 b_Intercept       3.56    -6.07    14.3  1.00    2400    2040.    2145.
+2 b_x               4.42     2.70     6.04 1.00    2400    1902.    2366.
+3 sigma             6.81     4.06    11.5  1.00    2400    2055.    2251.
+4 prior_Intercept  30.8      1.30    59.4  1.00    2400    2168.    1923.
+5 prior_b           0.0477 -12.6     13.1  0.999   2400    2578.    1967.
+6 prior_sigma      11.3      0.0436  47.0  1.00    2400    2217.    2160.
+7 lprior           -9.90   -10.3     -9.50 1.00    2400    2052.    2410.
+8 lp__            -40.8    -44.0    -39.5  1.00    2400    2095.    1802.
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `b_Intercept`: when $x=0$, the expected value of $y$ is 
+  3.56 and we are 95% confident that the true
+  value is between -6.075 and 
+  14.329. Since $x=0$ is outside the observed
+  range of $x$, this y-intercept is of very limited value.
+- `b_x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. So for every one unit change in $x$, $y$ increases by (on
+  average) 4.416 units and we are 95%
+  confident that this change is between 2.704
+  and 6.044
+- sigma is estimated to be 6.81
+
+##### As draws
+
+As yet a more flexible alternative, if we first extract the full
+posterior draws (with `as_draws_df()`), we can then use the various
+`tidyverse` functions to focus on just the most ecologically
+interpretable parameters before summarising.
+
+In the following, I will use `select()` with a regex (regular
+expression) to match only the columns that:
+
+- start with (`^`) "b_" followed by any amount of (`*`) any character
+  (`.`)
+- start with (`^`) "sigma"
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    brms::as_draws_df() |>
+    dplyr::select(matches("^b_.*|^sigma")) |>
+    posterior::summarise_draws(
+        median,
+        HDInterval::hdi,
+        rhat,
+        length,
+        ess_bulk, ess_tail
+    )
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Dropping 'draws_df' class as required metadata was removed.
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 8
+  variable    median lower upper  rhat length ess_bulk ess_tail
+  <chr>        <num> <num> <num> <num>  <num>    <num>    <num>
+1 b_Intercept   3.56 -6.07 14.3   1.00   2400    2021.    2126.
+2 b_x           4.42  2.70  6.04  1.00   2400    1886.    2360.
+3 sigma         6.81  4.06 11.5   1.00   2400    2041.    2205.
+```
+:::
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `b_Intercept`: when $x=0$, the expected value of $y$ is 
+  3.56 and we are 95% confident that the true
+  value is between -6.075 and 
+  14.329. Since $x=0$ is outside the observed
+  range of $x$, this y-intercept is of very limited value.
+- `b_x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. So for every one unit change in $x$, $y$ increases by (on
+  average) 4.416 units and we are 95%
+  confident that this change is between 2.704
+  and 6.044
+- sigma is estimated to be 6.81
+
+##### Density plots (via `gather_draws`)
+
+The `gather_draws()` function performs the equivalent of an
+`as_draws_df()` followed by a `pivot_longer()` in order to return the
+full posteriors in long format where they are more suitable for
+graphing.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    gather_draws(b_Intercept, b_x, sigma) |>
+    ggplot() +
+    geom_histogram(aes(x = .value)) +
+    facet_wrap(~.variable, scales = "free")
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws1a-1.png){width=768}
+:::
+:::
+
+
+Alternatively, there are various other representations supported by
+the `ggdist` package.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+  gather_draws(b_Intercept, b_x, sigma) |>
+  ggplot() +
+  stat_halfeye(aes(x = .value, y = .variable))
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws1a2-1.png){width=480}
+:::
+:::
+
+
+##### R²
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    bayes_R2(summary = FALSE) |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+          y      ymin      ymax .width .point .interval
+1 0.8387852 0.5919782 0.8689179   0.95 median      hdci
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- 83.879% of the total variability in $y$ can be
+  explained by its relationship to $x$
+- we are 95% confident that the strength of this relationship is
+  between 59.198% and 86.892%
+  
+:::::
+
+#### Centered predictor
+::::: {.panel-tabset}
+
+##### Summary
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |> summary()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ Family: gaussian 
+  Links: mu = identity; sigma = identity 
+Formula: y ~ scale(x, scale = FALSE) 
+   Data: dat (Number of observations: 10) 
+  Draws: 3 chains, each with iter = 5000; warmup = 1000; thin = 5;
+         total post-warmup draws = 2400
+
+Population-Level Effects: 
+                   Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept             27.85      2.35    23.20    32.63 1.00     2204     2289
+scalexscaleEQFALSE     4.39      0.83     2.67     5.99 1.00     2283     2237
+
+Family Specific Parameters: 
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma     7.22      2.17     4.28    12.71 1.00     2356     2364
+
+Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `Intercept`: when $x=0$ (its average since it is centered), the expected value of $y$ is 
+  27.846 and we are 95% confident that the true
+  value is between 23.201 and 
+  32.626. So $y$ is expected to be 
+  27.846 at the average $x$.
+- `x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. So for every one unit change in $x$, $y$ increases by (on
+  average) 4.389 units and we are 95%
+  confident that this change is between 2.669
+  and 5.993
+- sigma is estimated to be 7.22
+
+**Note, the estimates are means and quantiles.**
+
+##### Summarise draws
+
+As an alternative to the regular summary (which is designed to
+resemble that traditionally provided by frequentist analyses - and
+thus be instantly familiar), it is possible to define exactly how each
+of the parameters are summarised.
+
+In the following, I am nominating that I want to summarise each
+parameter posterior by:
+
+- the median
+- the 95% highest probability density interval (credibility interval)
+- Rhat
+- total number of draws
+- bulk and tail effective sample sizes
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+  posterior::summarise_draws(
+    median,
+    HDInterval::hdi,
+    rhat,
+    length,
+    ess_bulk, ess_tail
+)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 8 × 8
+  variable                median    lower  upper  rhat length ess_bulk ess_tail
+  <chr>                    <num>    <num>  <num> <num>  <num>    <num>    <num>
+1 b_Intercept           27.9      23.0     32.3  1.00    2400    2204.    2289.
+2 b_scalexscaleEQFALSE   4.43      2.85     6.14 1.00    2400    2283.    2237.
+3 sigma                  6.79      3.98    11.8  1.00    2400    2356.    2364.
+4 prior_Intercept       31.1       2.33    61.1  0.999   2400    2343.    2235.
+5 prior_b               -0.00910 -11.9     13.1  1.00    2400    2492.    2304.
+6 prior_sigma           11.5       0.0255  47.7  1.00    2400    2323.    2285.
+7 lprior                -9.90    -10.4     -9.54 1.00    2400    2216.    2263.
+8 lp__                 -40.9     -44.1    -39.5  0.999   2400    2232.    2371.
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `b_Intercept`: when $x=0$ (its average since it is centered), the expected value of $y$ is 
+  27.856 and we are 95% confident that the true
+  value is between 23.04 and 
+  32.306. So $y$ is expected to be 
+  27.846 at the average $x$.
+- `b_x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. So for every one unit change in $x$, $y$ increases by (on
+  average) 4.432 units and we are 95%
+  confident that this change is between 2.853
+  and 6.139
+- sigma is estimated to be 6.79
+
+##### As draws
+
+As yet a more flexible alternative, if we first extract the full
+posterior draws (with `as_draws_df()`), we can then use the various
+`tidyverse` functions to focus on just the most ecologically
+interpretable parameters before summarising.
+
+In the following, I will use `select()` with a regex (regular
+expression) to match only the columns that:
+
+- start with (`^`) "b_" followed by any amount of (`*`) any character
+  (`.`)
+- start with (`^`) "sigma"
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+    brms::as_draws_df() |>
+    dplyr::select(matches("^b_.*|^sigma")) |>
+    posterior::summarise_draws(
+        median,
+        HDInterval::hdi,
+        rhat,
+        length,
+        ess_bulk, ess_tail
+    )
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Dropping 'draws_df' class as required metadata was removed.
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 8
+  variable             median lower upper  rhat length ess_bulk ess_tail
+  <chr>                 <num> <num> <num> <num>  <num>    <num>    <num>
+1 b_Intercept           27.9  23.0  32.3   1.00   2400    2176.    2281.
+2 b_scalexscaleEQFALSE   4.43  2.85  6.14  1.00   2400    2273.    2194.
+3 sigma                  6.79  3.98 11.8   1.00   2400    2352.    2362.
+```
+:::
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `b_Intercept`: when $x=0$ (its average since it is centered), the expected value of $y$ is 
+  27.856 and we are 95% confident that the true
+  value is between 23.04 and 
+  32.306. So $y$ is expected to be 
+  27.846 at the average $x$.
+- `b_x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. So for every one unit change in $x$, $y$ increases by (on
+  average) 4.432 units and we are 95%
+  confident that this change is between 2.853
+  and 6.139
+- sigma is estimated to be 6.79
+
+##### Density plots (via `gather_draws`)
+
+The `gather_draws()` function performs the equivalent of an
+`as_draws_df()` followed by a `pivot_longer()` in order to return the
+full posteriors in long format where they are more suitable for
+graphing. Note, that the name of the slope parameter gets very awkward
+when $x$ is centered, so it is more convenient to refer to this
+parameter via a regular expression.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |> get_variables()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ [1] "b_Intercept"          "b_scalexscaleEQFALSE" "sigma"               
+ [4] "prior_Intercept"      "prior_b"              "prior_sigma"         
+ [7] "lprior"               "lp__"                 "accept_stat__"       
+[10] "treedepth__"          "stepsize__"           "divergent__"         
+[13] "n_leapfrog__"         "energy__"            
+```
+:::
+
+```{.r .cell-code}
+dat1b.brm2 |>
+  gather_draws(`b_Intercept`,`b_.*x.*`, `sigma`, regex = TRUE) |> 
+  ggplot() +
+  geom_histogram(aes(x = .value)) +
+  facet_wrap(~.variable, scales = "free")
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws1b-1.png){width=768}
+:::
+:::
+
+
+Alternatively, there are various other representations supported by
+the `ggdist` package.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+  gather_draws(`b_Intercept`,`b_.*x.*`, `sigma`, regex = TRUE) |> 
+  ggplot() +
+  stat_halfeye(aes(x = .value, y = .variable))
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws1b2-1.png){width=480}
+:::
+:::
+
+
+##### R²
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+    bayes_R2(summary = FALSE) |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+          y      ymin      ymax .width .point .interval
+1 0.8399405 0.6017641 0.8689182   0.95 median      hdci
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- 83.994% of the total variability in $y$ can be
+  explained by its relationship to $x$
+- we are 95% confident that the strength of this relationship is
+  between 60.176% and 86.892%
+  
+:::::
+
+#### Standardised predictor
+::::: {.panel-tabset}
+
+##### Summary
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |> summary()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ Family: gaussian 
+  Links: mu = identity; sigma = identity 
+Formula: y ~ scale(x) 
+   Data: dat (Number of observations: 10) 
+  Draws: 3 chains, each with iter = 5000; warmup = 1000; thin = 5;
+         total post-warmup draws = 2400
+
+Population-Level Effects: 
+          Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept    27.97      2.29    23.54    32.62 1.00     2285     2185
+scalex       13.49      2.50     8.46    18.42 1.00     2181     2245
+
+Family Specific Parameters: 
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma     7.20      2.18     4.31    12.81 1.00     2159     2262
+
+Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `Intercept`: when $x=0$ (its average since it is standardised), the expected value of $y$ is 
+  27.97 and we are 95% confident that the true
+  value is between 23.537 and 
+  32.618. Since $x=0$ is outside the observed
+  range of $x$, this y-intercept is of very limited value.
+- `x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. Recall that since $x$ is standardised, 1 unit representes a span of 1 standard deviation of $x$. So for every one standard deviation unit change in $x$, $y$ increases by (on
+  average) 13.493 units and we are 95%
+  confident that this change is between 8.461
+  and 18.422
+- sigma is estimated to be 7.2
+
+**Note, the estimates are means and quantiles.**
+
+##### Summarise draws
+
+As an alternative to the regular summary (which is designed to
+resemble that traditionally provided by frequentist analyses - and
+thus be instantly familiar), it is possible to define exactly how each
+of the parameters are summarised.
+
+In the following, I am nominating that I want to summarise each
+parameter posterior by:
+
+- the median
+- the 95% highest probability density interval (credibility interval)
+- Rhat
+- total number of draws
+- bulk and tail effective sample sizes
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+  posterior::summarise_draws(
+    median,
+    HDInterval::hdi,
+    rhat,
+    length,
+    ess_bulk, ess_tail
+)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 8 × 8
+  variable          median    lower upper  rhat length ess_bulk ess_tail
+  <chr>              <num>    <num> <num> <num>  <num>    <num>    <num>
+1 b_Intercept      27.9     23.6     32.7  1.00   2400    2285.    2185.
+2 b_scalex         13.5      8.73    18.6  1.00   2400    2182.    2245.
+3 sigma             6.73     3.83    11.5  1.00   2400    2158.    2262.
+4 prior_Intercept  31.0      3.88    62.9  1.00   2400    2464.    2411.
+5 prior_b          -0.0685 -50.8     46.4  1.00   2400    2461.    2370.
+6 prior_sigma      11.4      0.0273  50.2  1.00   2400    2276.    2255.
+7 lprior          -11.0    -11.4    -10.8  1.00   2400    1993.    2149.
+8 lp__            -41.9    -45.0    -40.6  1.00   2400    2201.    2094.
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `b_Intercept`: when $x=0$ (its average since it is standardised), the expected value of $y$ is 
+  27.923 and we are 95% confident that the true
+  value is between 23.616 and 
+  32.67. Since $x=0$ is outside the observed
+  range of $x$, this y-intercept is of very limited value.
+- `b_x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. Recall that since $x$ is standardised, 1 unit representes a span of 1 standard deviation of $x$. So for every one standard deviation unit change in $x$, $y$ increases by (on
+  average)13.521 units and we are 95%
+  confident that this change is between 8.73
+  and 18.616
+- sigma is estimated to be 6.73
+
+##### As draws
+
+As yet a more flexible alternative, if we first extract the full
+posterior draws (with `as_draws_df()`), we can then use the various
+`tidyverse` functions to focus on just the most ecologically
+interpretable parameters before summarising.
+
+In the following, I will use `select()` with a regex (regular
+expression) to match only the columns that:
+
+- start with (`^`) "b_" followed by any amount of (`*`) any character
+  (`.`)
+- start with (`^`) "sigma"
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+    brms::as_draws_df() |>
+    dplyr::select(matches("^b_.*|^sigma")) |>
+    posterior::summarise_draws(
+        median,
+        HDInterval::hdi,
+        rhat,
+        length,
+        ess_bulk, ess_tail
+    )
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Dropping 'draws_df' class as required metadata was removed.
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 8
+  variable    median lower upper  rhat length ess_bulk ess_tail
+  <chr>        <num> <num> <num> <num>  <num>    <num>    <num>
+1 b_Intercept  27.9  23.6   32.7  1.00   2400    2307.    2182.
+2 b_scalex     13.5   8.73  18.6  1.00   2400    2160.    2190.
+3 sigma         6.73  3.83  11.5  1.00   2400    2137.    2251.
+```
+:::
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `b_Intercept`: when $x=0$ (its average since it is standardised), the expected value of $y$ is 
+  27.923 and we are 95% confident that the true
+  value is between 23.616 and 
+  32.67. Since $x=0$ is outside the observed
+  range of $x$, this y-intercept is of very limited value.
+- `b_x`: (the slope) - the rate of change in $y$ per unit (=1) change in
+  $x$. Recall that since $x$ is standardised, 1 unit representes a span of 1 standard deviation of $x$. So for every one standard deviation unit change in $x$, $y$ increases by (on
+  average) 13.521 units and we are 95%
+  confident that this change is between 8.73
+  and 18.616
+- sigma is estimated to be 6.73
+
+##### Density plots (via `gather_draws`)
+
+The `gather_draws()` function performs the equivalent of an
+`as_draws_df()` followed by a `pivot_longer()` in order to return the
+full posteriors in long format where they are more suitable for
+graphing. Note, that the name of the slope parameter gets very awkward
+when $x$ is centered, so it is more convenient to refer to this
+parameter via a regular expression.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |> get_variables()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ [1] "b_Intercept"     "b_scalex"        "sigma"           "prior_Intercept"
+ [5] "prior_b"         "prior_sigma"     "lprior"          "lp__"           
+ [9] "accept_stat__"   "treedepth__"     "stepsize__"      "divergent__"    
+[13] "n_leapfrog__"    "energy__"       
+```
+:::
+
+```{.r .cell-code}
+dat1c.brm2 |>
+  gather_draws(`b_Intercept`,`b_.*x`, `sigma`, regex = TRUE) |> 
+  ggplot() +
+  geom_histogram(aes(x = .value)) +
+  facet_wrap(~.variable, scales = "free")
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws1c-1.png){width=768}
+:::
+:::
+
+
+Alternatively, there are various other representations supported by
+the `ggdist` package.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+  gather_draws(`b_Intercept`,`b_.*x`, `sigma`, regex = TRUE) |> 
+  ggplot() +
+  stat_halfeye(aes(x = .value, y = .variable))
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws1c2-1.png){width=480}
+:::
+:::
+
+
+##### R²
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+    bayes_R2(summary = FALSE) |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+          y      ymin      ymax .width .point .interval
+1 0.8418207 0.6364392 0.8689182   0.95 median      hdci
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- 84.182% of the total variability in $y$ can be
+  explained by its relationship to $x$
+- we are 95% confident that the strength of this relationship is
+  between 63.644% and 86.892%
+  
+:::::
+
+:::::::
+
+### Example 2 (categorical predictor)
+
+::::::: {.panel-tabset}
+#### Treatment contrasts
+::::: {.panel-tabset}
+
+##### Summary
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |> summary()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ Family: gaussian 
+  Links: mu = identity; sigma = identity 
+Formula: y ~ x 
+   Data: dat2 (Number of observations: 12) 
+  Draws: 3 chains, each with iter = 5000; warmup = 1000; thin = 5;
+         total post-warmup draws = 2400
+
+Population-Level Effects: 
+          Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept    20.85      1.92    17.06    24.70 1.00     2364     2369
+xmedium      -0.75      2.83    -6.08     4.96 1.00     2423     2330
+xhigh        -8.66      3.04   -14.48    -2.24 1.00     2226     2261
+
+Family Specific Parameters: 
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma     4.49      1.15     2.85     7.29 1.00     2271     2372
+
+Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `Intercept`: when $x$ is "control", the expected value of $y$ is 
+  20.851 and we are 95% confident that the true
+  value is between 17.061 and 
+  24.697.
+- `x*`: (the slopes) - the change (effect) in $y$ between the first (control) group unit (=1) and each other $x$ level. 
+  - `xmedium`: $y$ is (on
+  average) 0.747 units (95%
+  confident that this change is between -6.08
+  and 4.957 less in the "medium" group compared to the "control" group.
+  - `xhigh`: $y$ is (on
+  average) 8.655 units and we are 95%
+  confident that this change is between -14.484
+  and -2.238 less in the "high" group compared to the "control" group.
+- sigma is estimated to be 4.49
+
+**Note, the estimates are means and quantiles.**
+
+##### Summarise draws
+
+As an alternative to the regular summary (which is designed to
+resemble that traditionally provided by frequentist analyses - and
+thus be instantly familiar), it is possible to define exactly how each
+of the parameters are summarised.
+
+In the following, I am nominating that I want to summarise each
+parameter posterior by:
+
+- the median
+- the 95% highest probability density interval (credibility interval)
+- Rhat
+- total number of draws
+- bulk and tail effective sample sizes
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+  posterior::summarise_draws(
+    median,
+    HDInterval::hdi,
+    rhat,
+    length,
+    ess_bulk, ess_tail
+)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 9 × 8
+  variable            median     lower  upper  rhat length ess_bulk ess_tail
+  <chr>                <num>     <num>  <num> <num>  <num>    <num>    <num>
+1 b_Intercept      20.8       17.3      24.8   1.00   2400    2363.    2369.
+2 b_xmedium        -0.823     -6.08      4.96  1.00   2400    2423.    2330.
+3 b_xhigh          -8.75     -14.9      -3.00  1.00   2400    2225.    2261.
+4 sigma             4.30       2.59      6.71  1.00   2400    2270.    2372.
+5 prior_Intercept  19.7       16.4      23.5   1.00   2400    2459.    2109.
+6 prior_b          -0.000654 -20.1      20.6   1.00   2400    2375.    2367.
+7 prior_sigma       3.75       0.00101  15.8   1.00   2400    2253.    1945.
+8 lprior          -11.4      -13.0      -9.98  1.00   2400    2471.    2364.
+9 lp__            -44.4      -47.7     -42.6   1.00   2400    2227.    2453.
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `Intercept`: when $x$ is "control", the expected value of $y$ is 
+  20.83 and we are 95% confident that the true
+  value is between 17.29 and 
+  24.836.
+- `x*`: (the slopes) - the change (effect) in $y$ between the first (control) group unit (=1) and each other $x$ level. 
+  - `xmedium`: $y$ is (on
+  average) 0.823 units (95%
+  confident that this change is between -6.079
+  and 4.961 less in the "medium" group compared to the "control" group.
+  - `xhigh`: $y$ is (on
+  average) 8.753 units and we are 95%
+  confident that this change is between -14.946
+  and -2.999 less in the "high" group compared to the "control" group.
+- sigma is estimated to be 4.49
+
+##### As draws
+
+As yet a more flexible alternative, if we first extract the full
+posterior draws (with `as_draws_df()`), we can then use the various
+`tidyverse` functions to focus on just the most ecologically
+interpretable parameters before summarising.
+
+In the following, I will use `select()` with a regex (regular
+expression) to match only the columns that:
+
+- start with (`^`) "b_" followed by any amount of (`*`) any character
+  (`.`)
+- start with (`^`) "sigma"
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    brms::as_draws_df() |>
+    dplyr::select(matches("^b_.*|^sigma")) |>
+    posterior::summarise_draws(
+        median,
+        HDInterval::hdi,
+        rhat,
+        length,
+        ess_bulk, ess_tail
+    )
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Dropping 'draws_df' class as required metadata was removed.
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 4 × 8
+  variable    median  lower upper  rhat length ess_bulk ess_tail
+  <chr>        <num>  <num> <num> <num>  <num>    <num>    <num>
+1 b_Intercept 20.8    17.3  24.8   1.00   2400    2360.    2363.
+2 b_xmedium   -0.823  -6.08  4.96  1.00   2400    2418.    2322.
+3 b_xhigh     -8.75  -14.9  -3.00  1.00   2400    2213.    2228.
+4 sigma        4.30    2.59  6.71  1.00   2400    2135.    2365.
+```
+:::
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `Intercept`: when $x$ is "control", the expected value of $y$ is 
+  20.83 and we are 95% confident that the true
+  value is between 17.29 and 
+  24.836.
+- `x*`: (the slopes) - the change (effect) in $y$ between the first (control) group unit (=1) and each other $x$ level. 
+  - `xmedium`: $y$ is (on
+  average) 0.823 units (95%
+  confident that this change is between -6.079
+  and 4.961 less in the "medium" group compared to the "control" group.
+  - `xhigh`: $y$ is (on
+  average) 8.753 units and we are 95%
+  confident that this change is between -14.946
+  and -2.999 less in the "high" group compared to the "control" group.
+- sigma is estimated to be 4.49
+
+##### Density plots (via `gather_draws`)
+
+The `gather_draws()` function performs the equivalent of an
+`as_draws_df()` followed by a `pivot_longer()` in order to return the
+full posteriors in long format where they are more suitable for
+graphing.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |> get_variables()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ [1] "b_Intercept"     "b_xmedium"       "b_xhigh"         "sigma"          
+ [5] "prior_Intercept" "prior_b"         "prior_sigma"     "lprior"         
+ [9] "lp__"            "accept_stat__"   "treedepth__"     "stepsize__"     
+[13] "divergent__"     "n_leapfrog__"    "energy__"       
+```
+:::
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    gather_draws(`b_Intercept`, `b_x.*`, `sigma`, regex = TRUE) |>
+    ggplot() +
+    geom_histogram(aes(x = .value)) +
+    facet_wrap(~.variable, scales = "free")
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws2a-1.png){width=768}
+:::
+:::
+
+
+Alternatively, there are various other representations supported by
+the `ggdist` package.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+  gather_draws(`b_x.*`, regex = TRUE) |>
+  ggplot() +
+  stat_halfeye(aes(x = .value, y = .variable))
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws2a2-1.png){width=480}
+:::
+:::
+
+
+##### R²
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    bayes_R2(summary = FALSE) |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+          y      ymin      ymax .width .point .interval
+1 0.5447844 0.1667523 0.7233573   0.95 median      hdci
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- 54.478% of the total variability in $y$ can be
+  explained by its relationship to $x$
+- we are 95% confident that the strength of this relationship is
+  between 16.675% and 72.336%
+ 
+
+:::::
+
+#### Means parameterisation
+::::: {.panel-tabset}
+
+##### Summary
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2b.brm2 |> summary()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ Family: gaussian 
+  Links: mu = identity; sigma = identity 
+Formula: y ~ -1 + x 
+   Data: dat2 (Number of observations: 12) 
+  Draws: 3 chains, each with iter = 5000; warmup = 1000; thin = 5;
+         total post-warmup draws = 2400
+
+Population-Level Effects: 
+         Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+xcontrol    20.31      2.18    15.68    24.57 1.00     2580     2328
+xmedium     18.68      2.17    14.26    23.03 1.00     2321     2411
+xhigh       11.12      2.11     7.06    15.50 1.00     2066     2232
+
+Family Specific Parameters: 
+      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sigma     4.41      1.12     2.84     7.12 1.00     2306     2241
+
+Draws were sampled using sample(hmc). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `x*`: (the group means). 
+  - `xcontrol`: the expected value of $y$ in the "control" group is 
+    2.176 (95% credibility interval is
+    between 15.677 and 
+    24.571)
+  - `xmedium`: the expected value of $y$ in the "control" group is 
+    2.17 (95% credibility interval is
+    between 14.265 and 
+    23.032)
+  - `xhigh`: the expected value of $y$ in the "control" group is 
+    2.114 (95% credibility interval is
+    between 7.057 and 
+    15.503)
+- sigma is estimated to be 4.41
+
+**Note, the estimates are means and quantiles.**
+
+##### Summarise draws
+
+As an alternative to the regular summary (which is designed to
+resemble that traditionally provided by frequentist analyses - and
+thus be instantly familiar), it is possible to define exactly how each
+of the parameters are summarised.
+
+In the following, I am nominating that I want to summarise each
+parameter posterior by:
+
+- the median
+- the 95% highest probability density interval (credibility interval)
+- Rhat
+- total number of draws
+- bulk and tail effective sample sizes
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2b.brm2 |>
+  posterior::summarise_draws(
+    median,
+    HDInterval::hdi,
+    rhat,
+    length,
+    ess_bulk, ess_tail
+)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 8 × 8
+  variable    median      lower  upper  rhat length ess_bulk ess_tail
+  <chr>        <num>      <num>  <num> <num>  <num>    <num>    <num>
+1 b_xcontrol   20.4   15.3       24.2  1.00    2400    2580.    2328.
+2 b_xmedium    18.7   14.4       23.1  1.00    2400    2321.    2411.
+3 b_xhigh      11.1    7.04      15.4  0.999   2400    2067.    2232.
+4 sigma         4.19   2.57       6.66 1.00    2400    2306.    2241.
+5 prior_b      15.8   -2.73      36.2  1.00    2400    2252.    2289.
+6 prior_sigma   3.48   0.000502  14.5  1.00    2400    2343.    2327.
+7 lprior      -11.8  -12.7      -11.1  0.999   2400    2184.    2077.
+8 lp__        -44.5  -48.3      -42.6  1.00    2400    2322.    2310.
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `x*`: (the means of each group) 
+  - `xcontrol`: the expected value of $y$ in the "control" group is 
+    20.372 (95% credibility interval is
+    between 15.262 and 
+    24.158)
+  - `xmedium`: the expected value of $y$ in the "control" group is 
+    18.7 (95% credibility interval is
+    between 14.437 and 
+    23.124)
+  - `xhigh`: the expected value of $y$ in the "control" group is 
+    11.053 (95% credibility interval is
+    between 7.039 and 
+    15.421)
+- sigma is estimated to be 4.41
+
+##### As draws
+
+As yet a more flexible alternative, if we first extract the full
+posterior draws (with `as_draws_df()`), we can then use the various
+`tidyverse` functions to focus on just the most ecologically
+interpretable parameters before summarising.
+
+In the following, I will use `select()` with a regex (regular
+expression) to match only the columns that:
+
+- start with (`^`) "b_" followed by any amount of (`*`) any character
+  (`.`)
+- start with (`^`) "sigma"
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2b.brm2 |>
+    brms::as_draws_df() |>
+    dplyr::select(matches("^b_.*|^sigma")) |>
+    posterior::summarise_draws(
+        median,
+        HDInterval::hdi,
+        rhat,
+        length,
+        ess_bulk, ess_tail
+    )
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Warning: Dropping 'draws_df' class as required metadata was removed.
+```
+:::
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 4 × 8
+  variable   median lower upper  rhat length ess_bulk ess_tail
+  <chr>       <num> <num> <num> <num>  <num>    <num>    <num>
+1 b_xcontrol  20.4  15.3  24.2   1.00   2400    2568.    2322.
+2 b_xmedium   18.7  14.4  23.1   1.00   2400    2279.    2404.
+3 b_xhigh     11.1   7.04 15.4   1.00   2400    2048.    2214.
+4 sigma        4.19  2.57  6.66  1.00   2400    2292.    2230.
+```
+:::
+:::
+
+
+**Conclusions**: 
+
+- in the initial block of information, we are reminded on the formula
+  as well as chain fitting characteristics. We are also informed that
+  the total number of post-warmup MCMC samples is 2400.
+- the `Rhat` values for each parameter are >1.01 confirming
+  convergence of the parameter estimates across the chains
+- `Bulk_ESS`: effective sample sizes for the bulk of the posterior
+  range are a high fraction (< 0.5) of the total number of draws. This
+  suggests that the sampling was reasonably efficient and therefore
+  likely to be reliable
+- `Tail_ESS`: effective sample sizes of estimates in the tail of the
+  posterior. The tails (more extreme regions of the posterior) are
+  where the sampler is most likely to get stuck (have divergent
+  transitions etc). The fraction of effective samples from this region
+  is relatively high implying that the sampler did not get stuck in
+  such areas that are unsupported by data.
+- `x*`: (the means of each group) 
+  - `xcontrol`: the expected value of $y$ in the "control" group is 
+    20.372 (95% credibility interval is
+    between 15.262 and 
+    24.158)
+  - `xmedium`: the expected value of $y$ in the "control" group is 
+    18.7 (95% credibility interval is
+    between 14.437 and 
+    23.124)
+  - `xhigh`: the expected value of $y$ in the "control" group is 
+    11.053 (95% credibility interval is
+    between 7.039 and 
+    15.421)
+- sigma is estimated to be 4.41
+
+##### Density plots (via `gather_draws`)
+
+The `gather_draws()` function performs the equivalent of an
+`as_draws_df()` followed by a `pivot_longer()` in order to return the
+full posteriors in long format where they are more suitable for
+graphing.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2b.brm2 |> get_variables()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ [1] "b_xcontrol"    "b_xmedium"     "b_xhigh"       "sigma"        
+ [5] "prior_b"       "prior_sigma"   "lprior"        "lp__"         
+ [9] "accept_stat__" "treedepth__"   "stepsize__"    "divergent__"  
+[13] "n_leapfrog__"  "energy__"     
+```
+:::
+
+```{.r .cell-code}
+dat2b.brm2 |>
+    gather_draws(`b_x.*`, `sigma`, regex = TRUE) |>
+    ggplot() +
+    geom_histogram(aes(x = .value)) +
+    facet_wrap(~.variable, scales = "free")
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws2b-1.png){width=768}
+:::
+:::
+
+
+Alternatively, there are various other representations supported by
+the `ggdist` package.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2b.brm2 |>
+  gather_draws(`b_x.*`, regex = TRUE) |>
+  ggplot() +
+  stat_halfeye(aes(x = .value, y = .variable))
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/gather_draws2b2-1.png){width=480}
+:::
+:::
+
+
+##### R²
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2b.brm2 |>
+    bayes_R2(summary = FALSE) |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+          y      ymin      ymax .width .point .interval
+1 0.5604107 0.1933809 0.7254727   0.95 median      hdci
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- 56.041% of the total variability in $y$ can be
+  explained by its relationship to $x$
+- we are 95% confident that the strength of this relationship is
+  between 19.338% and 72.547%
+ 
+
+:::::
+
+:::::::
+
+::::
+
+# Predictions
+
+Whilst linear models are useful for estimating effects (relative
+differences), because they are low dimensional (only focus on a small
+number of covariates) they are not good at absolute predictions.
+Nevertheless, predicting values from linear models provides the basis
+for investigating/estimating additional effects and generating various
+graphics to visualise the estimates.
+
+There are a large number of candidate routines for performing
+prediction. We will go through some of these. It is worth noting that
+in this context prediction is technically the act of estimating what
+we expect to get if we were to collect a **single** new observation
+from a particular population (e.g. a specific level of fertilizer
+concentration). Often this is not what we want. Often we want the
+**fitted** values - estimates of what we expect to get if we were to
+collect **multiple** new observations and average them.
+
+So while fitted values represent the expected underlying processes
+occurring in the system, predicted values represent our expectations
+from sampling from such processes.
+
+| Package         | Function              | Description                                                                                                | Summarise with  |
+| ---             | ---                   | ------                                                                                                     | ---             |
+| `emmeans`       | `emmeans`             | Estimated marginal means from which posteriors can be drawn (via `tidy_draws` or `gather_emmeans_draws()`)                              | `median_hdci()` |
+| `rstantools`    | `posterior_predict`   | Draw from the posterior of a prediction (includes sigma) - _predicts single observations_                  | `summarise_draws()`    |
+| `rstantools`    | `posterior_linpred`   | Draw from the posterior of the fitted values (**on the link scale**) - _predicts average observations_     | `summarise_draws()`    |
+| `rstantools`    | `posterior_epred`     | Draw from the posterior of the fitted values (**on the response scale**) - _predicts average observations_ | `summarise_draws()`    |
+| `tidybayes`     | `predicted_draws`     | Extract the posterior of _prediction_ values                                                               | `median_hdci()` |
+| `tidybayes`     | `epred_draws`         | Extract the posterior of _expected_ values                                                                 | `median_hdci()` |
+| ~~`tidybayes`~~ | ~~`fitted_draws`~~    | ~~Extract the posterior of _fitted_ values~~                                                               | `median_hdci()` |
+| `tidybayes`     | `add_predicted_draws` | Adds draws from the posterior of _predictions_ to a data frame (of prediction data)                        | `median_hdci()` |
+| `tidybayes`     | `add_fitted_draws`    | Adds draws from the posterior of _fitted_ values to a data frame (of prediction data)                      | `median_hdci()` |
+
+: {.primary .bordered .sm .paramsTable tbl-colwidths="[20, 20, 50, 10]"}
+
+
+For simple models prediction is essentially taking the model formula
+complete with parameter (coefficient) estimates and solving for new
+values of the predictor. To explore this, we will use the fitted model
+to predict Yield for a Fertilizer concentration of 110.
+
+We will therefore start by establishing this prediction domain as a
+data frame to use across all of the prediction routines.
+
+
+
+:::: {.panel-tabset}
+
+### Example 1 (Gaussian data)
+
+::::::: {.panel-tabset}
+
+#### Raw predictor
+
+In each case, we will predict $y$ when $x$ is 2.5 and 5
+
+Note, for a Gaussian model `emmeans`, `posterior_epred` and
+`posterior_linpred` will all yield the same outputs.
+`posterior_predict` will yield wider credible intervals as it is
+predicting for individual observations rather than predicting means of
+large samples. 
+
+::::: {.panel-tabset}
+
+##### Estimated marginal means
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |> emmeans(~x, at = list(x = c(2.5, 5)))
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+   x emmean lower.HPD upper.HPD
+ 2.5   14.6      7.56      21.2
+ 5.0   25.6     21.03      30.5
+
+Point estimate displayed: median 
+HPD interval probability: 0.95 
+```
+:::
+
+```{.r .cell-code}
+# OR with more control over the way posteriors are summarised
+dat1a.brm2 |>
+    emmeans(~x, at = list(x = c(2.5, 5))) |>
+    gather_emmeans_draws() |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 7
+      x .value .lower .upper .width .point .interval
+  <dbl>  <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>    
+1   2.5   14.6   7.56   21.2   0.95 median hdci     
+2   5     25.6  21.0    30.5   0.95 median hdci     
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.emmeans <- dat1a.brm2 |>
+    emmeans(~x, at = list(x = c(2.5, 5))) |>
+    as.data.frame()
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of 2.5 is
+  14.616
+- the predicted (estimated) mean $y$ associated with an $x$ of 5 is
+  25.643
+- 95% HPD intervals also given
+
+##### Posterior predictions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    posterior_predict(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 4
+  variable median lower upper
+  <chr>     <num> <num> <num>
+1 ...1       14.4 -1.68  30.3
+2 ...2       25.4  9.77  40.5
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1a.brm2 |>
+    add_predicted_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable    median lower upper
+  <dbl> <int> <chr>        <dbl> <dbl> <dbl>
+1   2.5     1 .prediction   14.9 -1.25  32.2
+2   5       2 .prediction   25.6 10.7   41.3
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.pred <- dat1a.brm2 |>
+    posterior_predict(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of 2.5 is
+  14.923
+- the predicted (estimated) mean $y$ associated with an $x$ of 5 is
+  25.726
+- 95% HPD intervals also given
+
+
+##### Posterior expected values
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    posterior_epred(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 4
+  variable median lower upper
+  <chr>     <num> <num> <num>
+1 ...1       14.6  7.56  21.2
+2 ...2       25.6 21.0   30.5
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1a.brm2 |>
+    add_epred_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable median lower upper
+  <dbl> <int> <chr>     <dbl> <dbl> <dbl>
+1   2.5     1 .epred     14.6  7.56  21.2
+2   5       2 .epred     25.6 21.0   30.5
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.epred <- dat1a.brm2 |>
+    posterior_epred(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the fitted mean $y$ associated with an $x$ of 2.5 is
+  14.616
+- the fitted mean $y$ associated with an $x$ of 5 is
+  25.643
+- 95% HPD intervals also given
+
+##### Posterior linear predictions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    posterior_linpred(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 4
+  variable median lower upper
+  <chr>     <num> <num> <num>
+1 ...1       14.6  7.56  21.2
+2 ...2       25.6 21.0   30.5
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1a.brm2 |>
+    add_linpred_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable median lower upper
+  <dbl> <int> <chr>     <dbl> <dbl> <dbl>
+1   2.5     1 .linpred   14.6  7.56  21.2
+2   5       2 .linpred   25.6 21.0   30.5
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.linpred <- dat1a.brm2 |>
+    posterior_linpred(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the fitted mean $y$ associated with an $x$ of 2.5 is
+  14.616
+- the fitted mean $y$ associated with an $x$ of 5 is
+  25.643
+- 95% HPD intervals also given
+
+:::::
+
+#### Centered predictor
+
+In each case, we will predict $y$ when $x$ is 2.5 and 5
+
+Note, for a Gaussian model `emmeans`, `posterior_epred` and
+`posterior_linpred` will all yield the same outputs.
+`posterior_predict` will yield wider credible intervals as it is
+predicting for individual observations rather than predicting means of
+large samples. 
+
+::::: {.panel-tabset}
+
+##### Estimated marginal means
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |> emmeans(~x, at = list(x = c(2.5, 5)))
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+   x emmean lower.HPD upper.HPD
+ 2.5   14.6      7.83      21.4
+ 5.0   25.6     21.02      30.4
+
+Point estimate displayed: median 
+HPD interval probability: 0.95 
+```
+:::
+
+```{.r .cell-code}
+# OR with more control over the way posteriors are summarised
+dat1b.brm2 |>
+    emmeans(~x, at = list(x = c(2.5, 5))) |>
+    gather_emmeans_draws() |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 7
+      x .value .lower .upper .width .point .interval
+  <dbl>  <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>    
+1   2.5   14.6   7.83   21.4   0.95 median hdci     
+2   5     25.6  21.0    30.4   0.95 median hdci     
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.emmeans <- dat1b.brm2 |>
+    emmeans(~x, at = list(x = c(2.5, 5))) |>
+    as.data.frame()
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of 2.5 is
+  14.64
+- the predicted (estimated) mean $y$ associated with an $x$ of 5 is
+  25.638
+- 95% HPD intervals also given
+
+##### Posterior predictions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+    posterior_predict(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 4
+  variable median lower upper
+  <chr>     <num> <num> <num>
+1 ...1       14.8 -1.90  31.9
+2 ...2       25.9  9.61  42.0
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1b.brm2 |>
+    add_predicted_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable    median lower upper
+  <dbl> <int> <chr>        <dbl> <dbl> <dbl>
+1   2.5     1 .prediction   14.5 -2.09  31.6
+2   5       2 .prediction   25.5  9.80  41.0
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.pred <- dat1b.brm2 |>
+    posterior_predict(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of 2.5 is
+  14.523
+- the predicted (estimated) mean $y$ associated with an $x$ of 5 is
+  25.576
+- 95% HPD intervals also given
+
+
+##### Posterior expected values
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+    posterior_epred(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 4
+  variable median lower upper
+  <chr>     <num> <num> <num>
+1 ...1       14.6  7.83  21.4
+2 ...2       25.6 21.0   30.4
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1b.brm2 |>
+    add_epred_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable median lower upper
+  <dbl> <int> <chr>     <dbl> <dbl> <dbl>
+1   2.5     1 .epred     14.6  7.83  21.4
+2   5       2 .epred     25.6 21.0   30.4
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.epred <- dat1b.brm2 |>
+    posterior_epred(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the fitted mean $y$ associated with an $x$ of 2.5 is
+  14.64
+- the fitted mean $y$ associated with an $x$ of 5 is
+  25.638
+- 95% HPD intervals also given
+
+##### Posterior linear predictions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+    posterior_linpred(newdata = data.frame(x = c(2.5, 5))) |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+         y     ymin     ymax .width .point .interval
+1 21.27529  7.83108 21.01818   0.95 median      hdci
+2 21.27529 21.36341 30.36846   0.95 median      hdci
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1b.brm2 |>
+    add_linpred_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable median lower upper
+  <dbl> <int> <chr>     <dbl> <dbl> <dbl>
+1   2.5     1 .linpred   14.6  7.83  21.4
+2   5       2 .linpred   25.6 21.0   30.4
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.linpred <- dat1b.brm2 |>
+    posterior_linpred(newdata = data.frame(x = c(2.5, 5))) |>
+    median_hdci()
+```
+:::
+
+
+**Conclusions**:
+
+- the fitted mean $y$ associated with an $x$ of 2.5 is
+  7.831
+- the fitted mean $y$ associated with an $x$ of 5 is
+  21.363
+- 95% HPD intervals also given
+
+:::::
+
+#### Standardised predictor
+
+In each case, we will predict $y$ when $x$ is 2.5 and 5
+
+Note, for a Gaussian model `emmeans`, `posterior_epred` and
+`posterior_linpred` will all yield the same outputs.
+`posterior_predict` will yield wider credible intervals as it is
+predicting for individual observations rather than predicting means of
+large samples. 
+
+::::: {.panel-tabset}
+
+##### Estimated marginal means
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |> emmeans(~x, at = list(x = c(2.5, 5)))
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+   x emmean lower.HPD upper.HPD
+ 2.5   14.5      8.04      21.6
+ 5.0   25.7     21.39      30.6
+
+Point estimate displayed: median 
+HPD interval probability: 0.95 
+```
+:::
+
+```{.r .cell-code}
+# OR with more control over the way posteriors are summarised
+dat1c.brm2 |>
+    emmeans(~x, at = list(x = c(2.5, 5))) |>
+    gather_emmeans_draws() |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 7
+      x .value .lower .upper .width .point .interval
+  <dbl>  <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>    
+1   2.5   14.5   8.04   21.6   0.95 median hdci     
+2   5     25.7  21.4    30.6   0.95 median hdci     
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.emmeans <- dat1c.brm2 |>
+    emmeans(~x, at = list(x = c(2.5, 5))) |>
+    as.data.frame()
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of 2.5 is
+  14.547
+- the predicted (estimated) mean $y$ associated with an $x$ of 5 is
+  25.68
+- 95% HPD intervals also given
+
+##### Posterior predictions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+    posterior_predict(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 4
+  variable median  lower upper
+  <chr>     <num>  <num> <num>
+1 ...1       14.5 -0.462  32.2
+2 ...2       25.4 10.8    41.0
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1c.brm2 |>
+    add_predicted_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable    median lower upper
+  <dbl> <int> <chr>        <dbl> <dbl> <dbl>
+1   2.5     1 .prediction   14.8 -1.13  31.3
+2   5       2 .prediction   25.6  9.50  40.7
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.pred <- dat1c.brm2 |>
+    posterior_predict(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of 2.5 is
+  14.354
+- the predicted (estimated) mean $y$ associated with an $x$ of 5 is
+  25.619
+- 95% HPD intervals also given
+
+
+##### Posterior expected values
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+    posterior_epred(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 4
+  variable median lower upper
+  <chr>     <num> <num> <num>
+1 ...1       14.5  8.04  21.6
+2 ...2       25.7 21.4   30.6
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1c.brm2 |>
+    add_epred_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable median lower upper
+  <dbl> <int> <chr>     <dbl> <dbl> <dbl>
+1   2.5     1 .epred     14.5  8.04  21.6
+2   5       2 .epred     25.7 21.4   30.6
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.epred <- dat1c.brm2 |>
+    posterior_epred(newdata = data.frame(x = c(2.5, 5))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the fitted mean $y$ associated with an $x$ of 2.5 is
+  14.547
+- the fitted mean $y$ associated with an $x$ of 5 is
+  25.68
+- 95% HPD intervals also given
+
+##### Posterior linear predictions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+    posterior_linpred(newdata = data.frame(x = c(2.5, 5))) |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+        y      ymin     ymax .width .point .interval
+1 21.3463  8.036758 21.38688   0.95 median      hdci
+2 21.3463 21.649128 30.59153   0.95 median      hdci
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat1c.brm2 |>
+    add_linpred_draws(newdata = data.frame(x = c(2.5, 5))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 6
+# Groups:   x, .row [2]
+      x  .row variable median lower upper
+  <dbl> <int> <chr>     <dbl> <dbl> <dbl>
+1   2.5     1 .linpred   14.5  8.04  21.6
+2   5       2 .linpred   25.7 21.4   30.6
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.linpred <- dat1c.brm2 |>
+    posterior_linpred(newdata = data.frame(x = c(2.5, 5))) |>
+    median_hdci()
+```
+:::
+
+
+**Conclusions**:
+
+- the fitted mean $y$ associated with an $x$ of 2.5 is
+  8.037
+- the fitted mean $y$ associated with an $x$ of 5 is
+  21.649
+- 95% HPD intervals also given
+
+:::::
+:::::::
+
+### Example 2 (categorical predictor)
+
+::::::: {.panel-tabset}
+
+#### Treatment contrasts
+
+In each case, we will predict $y$ when $x$ is "control", "medium" and "high"
+
+Note, for a Gaussian model `emmeans`, `posterior_epred` and
+`posterior_linpred` will all yield the same outputs.
+`posterior_predict` will yield wider credible intervals as it is
+predicting for individual observations rather than predicting means of
+large samples. 
+
+::::: {.panel-tabset}
+
+##### Estimated marginal means
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |> emmeans(~x)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ x       emmean lower.HPD upper.HPD
+ control   20.8     17.29      24.8
+ medium    20.1     16.22      24.3
+ high      12.1      8.42      16.8
+
+Point estimate displayed: median 
+HPD interval probability: 0.95 
+```
+:::
+
+```{.r .cell-code}
+# OR with more control over the way posteriors are summarised
+dat2a.brm2 |>
+    emmeans(~x) |>
+    gather_emmeans_draws() |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 7
+  x       .value .lower .upper .width .point .interval
+  <fct>    <dbl>  <dbl>  <dbl>  <dbl> <chr>  <chr>    
+1 control   20.8  17.3    24.8   0.95 median hdci     
+2 medium    20.1  16.2    24.3   0.95 median hdci     
+3 high      12.1   8.42   16.8   0.95 median hdci     
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.emmeans <- dat2a.brm2 |>
+    emmeans(~x) |>
+    as.data.frame()
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "control" is 20.83
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "medium" is 20.054
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "high" is 12.089
+- 95% HPD intervals also given
+
+##### Posterior predictions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+  posterior_predict(newdata = data.frame(x =
+          c("control", "medium", "high"))) |>
+  summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 4
+  variable median lower upper
+  <chr>     <num> <num> <num>
+1 ...1       20.7 11.1   31.0
+2 ...2       20.0  9.55  29.8
+3 ...3       12.1  2.46  22.2
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat2a.brm2 |>
+    add_predicted_draws(newdata = data.frame(x = c("control", "medium", "high"))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 6
+# Groups:   x, .row [3]
+  x        .row variable    median lower upper
+  <chr>   <int> <chr>        <dbl> <dbl> <dbl>
+1 control     1 .prediction   21.0 10.8   30.9
+2 high        3 .prediction   12.3  2.72  22.5
+3 medium      2 .prediction   20.1 10.5   31.0
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.pred <- dat2a.brm2 |>
+    posterior_predict(newdata = data.frame(x = c("control", "medium", "high"))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "control" is 20.809
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "medium" is 20.013
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "high" is 12.049
+- 95% HPD intervals also given
+
+##### Posterior expected values
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    posterior_epred(newdata = data.frame(x = c("control", "medium", "high"))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 4
+  variable median lower upper
+  <chr>     <num> <num> <num>
+1 ...1       20.8 17.3   24.8
+2 ...2       20.1 16.2   24.3
+3 ...3       12.1  8.42  16.8
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat2a.brm2 |>
+    add_epred_draws(newdata = data.frame(x = c("control", "medium", "high"))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 6
+# Groups:   x, .row [3]
+  x        .row variable median lower upper
+  <chr>   <int> <chr>     <dbl> <dbl> <dbl>
+1 control     1 .epred     20.8 17.3   24.8
+2 high        3 .epred     12.1  8.42  16.8
+3 medium      2 .epred     20.1 16.2   24.3
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.epred <- dat2a.brm2 |>
+    posterior_epred(newdata = data.frame(x = c("control", "medium", "high"))) |>
+    summarise_draws(median, HDInterval::hdi)
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "control" is 20.83
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "medium" is 20.054
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "high" is 12.089
+- 95% HPD intervals also given
+
+##### Posterior linear predictions
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    posterior_linpred(newdata = data.frame(x = c("control", "medium", "high"))) |>
+    median_hdci()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+         y     ymin     ymax .width .point .interval
+1 19.13895 17.28960 24.29639   0.95 median      hdci
+2 19.13895 24.83550  8.42360   0.95 median      hdci
+3 19.13895 16.22186 16.84118   0.95 median      hdci
+```
+:::
+
+```{.r .cell-code}
+# Or for even more control and ability to add other summaries
+dat2a.brm2 |>
+    add_linpred_draws(newdata = data.frame(x = c("control", "medium", "high"))) |>
+    dplyr::select(-.chain) |> # need to exclude this field as it interfers with as_draws_df()
+    summarise_draws(
+      median,
+      HDInterval::hdi
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 6
+# Groups:   x, .row [3]
+  x        .row variable median lower upper
+  <chr>   <int> <chr>     <dbl> <dbl> <dbl>
+1 control     1 .linpred   20.8 17.3   24.8
+2 high        3 .linpred   12.1  8.42  16.8
+3 medium      2 .linpred   20.1 16.2   24.3
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.linpred <- dat2a.brm2 |>
+    posterior_linpred(newdata = data.frame(x = c("control", "medium", "high"))) |>
+    median_hdci()
+```
+:::
+
+
+**Conclusions**:
+
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "control" is 17.29
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "medium" is 24.836
+- the predicted (estimated) mean $y$ associated with an $x$ of
+  "high" is 16.222
+- 95% HPD intervals also given
+:::::
+
+:::::::
+
+::::
+
+# Further investigations
+
+Since we have the entire posterior, we are able to make probability
+statements. We simply count up the number of MCMC sample draws that
+satisfy a condition (e.g represent a slope greater than 0) and then
+divide by the total number of MCMC samples.
+
+:::: {.panel-tabset}
+
+### Example 1 (Gaussian data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Specific hypotheses
+
+Now that we have the full posteriors, we are free to use these to
+garner evidence on a range of hypotheses. To demonstrate, we will
+consider the following hypotheses:
+
+1. a change in $x$ is associated with an increase in $y$
+2. a doubling of $x$ (from 2.5 to 5) is associated with an increase in $y$ of > 50%
+
+::: {.panel-tabset .nav-pills}
+##### 1. Positive relationship
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |> hypothesis("x > 0")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+Hypothesis Tests for class b:
+  Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob Star
+1    (x) > 0     4.38      0.82        3     5.67        Inf         1    *
+---
+'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+'*': For one-sided hypotheses, the posterior probability exceeds 95%;
+for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+Posterior probabilities of point hypotheses assume equal prior probabilities.
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a_hyp <- dat1a.brm2 |>
+    hypothesis("x > 0") |>
+    _[["hypothesis"]]
+```
+:::
+
+
+**Conclusions**:
+
+- the parameter (`b_x`) minus 0 is 4.383
+- `Evid.Ratio`: the ratio of evidence for the hypothesis vs the
+  evidence against it.  In this case, the evidence ratio is 
+  \infty{} - `Inf` is because the divisor was 0 
+  (no evidence against the hypothesis).
+- `Post.Prob`: the probability of the hypothesis is 1
+- there is very high evidence for this hypothesis
+
+Alternatively, we could use `gather_draws` to achieve a similar
+outcome.
+
+In the following, in addition to median and HPD intervals, we will
+calculate the probability that the slope (`b_x`) is greater than 0. To
+calculate such a probability, we could simply count up the number of
+posterior `b_x` values that are greater than zero and then divide by
+the total number of posterior `b_x` values. In R, we could do this as
+`sum(b_x > 0)/length(b_x)` (where `b_x > 0` will return either a 1 for
+each case it is true and a 0 when it is false, and thus summing is
+like counting). Dividing a sum by its length equates to a mean and
+thus we can achieve the probability by calcualing the mean of `b_x >
+0`.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+  gather_draws(b_x) |>
+  summarise_draws(median,
+    HDInterval::hdi,
+    P = ~mean(. > 0)
+  )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 1 × 6
+# Groups:   .variable [1]
+  .variable variable median lower upper     P
+  <chr>     <chr>     <dbl> <dbl> <dbl> <dbl>
+1 b_x       .value     4.42  2.70  6.04     1
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a_hyp2 <- dat1a.brm2 |>
+    gather_draws(b_x) |>
+    summarise_draws(median,
+        HDInterval::hdi,
+        P = ~mean(. > 0)
+    )
+```
+:::
+
+::: {.callout-tip}
+
+The `summarise_draws()` function expects a set of one or more summary
+or diagnostic functions (such as `median` etc). These can be supplied
+either as the name of the function (as in the case for `median` in the
+example above) or if more arguments or information is required by the
+function, the function can be written out in full. in this case, the
+function must be proceeded with a `~` and the variable is denoted a
+`.` (such as in `P = ~mean(. > 0)` above).
+
+:::
+
+**Conclusions**:
+
+- the parameter (`b_x`) minus 0 is 4.416
+- `P`: the probability of the hypothesis is \infty{}
+- there is very high evidence for this hypothesis
+
+
+
+##### 2. >50% increase when $x$ doubles
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    emmeans::emmeans(~x, at = list(x = c(2.5, 5))) |>
+    gather_emmeans_draws() |>
+    ungroup() |>
+    group_by(.draw) |>
+  summarise(ES = 100 * diff(.value) / .value[1]) |>
+  hypothesis("ES > 50")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+Hypothesis Tests for class :
+     Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob Star
+1 (ES)-(50) > 0    36.25     220.2   -12.06    94.27       6.34      0.86     
+---
+'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+'*': For one-sided hypotheses, the posterior probability exceeds 95%;
+for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+Posterior probabilities of point hypotheses assume equal prior probabilities.
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the difference between the percentage change in estimated $y$ as $x$
+  increases from 2.5 to 5 and 50% is 36.252
+- the evidence ratio in support of the hypothesis that the percentage
+  change exceeds 50% is 6.339
+- the probability that the change in $y$ exceeds 50% is 
+  0.864
+- the evidence for such a change is very weak
+  
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.brm2 |>
+  emmeans::emmeans(~x, at = list(x = c(2.5, 5))) |>
+  gather_emmeans_draws() |>
+  ungroup() |>
+  group_by(.draw) |>
+  summarise(ES = 100 * diff(.value) / .value[1]) |>
+  summarise_draws(
+    mean, median,
+    HDInterval::hdi,
+    P = ~ mean(. > 50)
+  )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 1 × 6
+  variable  mean median lower upper     P
+  <chr>    <num>  <num> <num> <num> <num>
+1 ES        86.3   75.5  22.7  150. 0.864
+```
+:::
+:::
+
+::: {.cell}
+::: {.cell-output .cell-output-stderr}
+```
+Warning: `as_data_frame()` was deprecated in tibble 2.0.0.
+ℹ Please use `as_tibble()` (with slightly different semantics) to convert to a
+  tibble, or `as.data.frame()` to convert to a data frame.
+```
+:::
+:::
+
+
+**Conclusions**:
+
+- the percentage change in estimated $y$ as $x$
+  increases from 2.5 to 5 is 86.252
+- the probability that the change in $y$ exceeds 50% is 
+  0.864
+- the evidence for such a change is very weak
+
+
+:::
+
+
+##### ROPE
+
+The procedure highlighted above for calculating excedence
+probabilities evaluates the degree of evidence for a effect in a
+particular direction. However, there are other instances where there
+is a desire to evaluate the evidence that something has change (either
+increased or decreased). Such purposes are similar to the Frequentist
+pursuit of testing a null hypothesis (e.g. effect = 0).
+
+The Region of Practical Equivalence (ROPE) evaluates evidence that an
+effect is "practically equivalent" to a value (e.g. 0) by calculating
+the proportion of effects that are within a nominated range.
+@Kruschke-2018-270 argued that for standardized parameters, the range
+of -0.1 to 0.1 would envelop a negligible effect based on @Cohen-1988.
+@Kruschke-2018-270 also suggested that this range could be extended to
+non-standardized parameters by multiplying by the standard deviation
+of the response. Accordingly, calculating the proportion of posterior
+density within this ROPE could act as a form of "null-hypothesis"
+testing in a Bayesian framework.
+
+- if the HDI of the focal parameter falls completely **outside** the
+  ROPE, there is strong evidence that there **is** an effect
+- if the HDI of the focal parameter falls completely **inside** the
+  ROPE, there is strong evidence that there **is not** an effect
+- otherwise there is not clear evidence either way
+
+::: {.callout-note}
+
+ROPE and equivalence tests are of most use when you decide that there
+is not enough evidence to support an hypothesis that there is an
+effect. Such a "non-significant" result may be because there genuinely
+is not effect OR you do not have enough power to detect the effect.
+Performing an equivalence test provides a mechanism to tease these two
+appart.
+
+I provide the following example purely to illustrate how such a test
+would be performed. In this case, as we have already demonstrated
+strong evidence for an effect, the equivalence test does not yield any
+additional insights.
+:::
+
+
+::: {.cell}
+
+```{.r .cell-code}
+## Calculate ROPE range manually
+ROPE <- c(-0.1, 0.1) * with(dat, sd(y))
+## OR calculate ROPE range via rope_range function
+ROPE <- bayestestR::rope_range(dat1a.brm2)
+
+dat1a.brm2 |> bayestestR::equivalence_test(parameters = "b_x", range = ROPE, ci_method = "HDI")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# Test for Practical Equivalence
+
+  ROPE: [-1.50 1.50]
+
+Parameter |       H0 | inside ROPE |     95% HDI
+------------------------------------------------
+x         | Rejected |      0.00 % | [2.60 5.95]
+```
+:::
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    bayestestR::equivalence_test(parameters = "b_x", range = ROPE, ci_method = "HDI") |>
+    plot()
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Picking joint bandwidth of 0.131
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/rope1a_1-1.png){width=480}
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the percentage of the HPD for the slope that is inside the ROPE is
+  0
+- there is strong evidence for an effect
+
+OR using the `rope` function.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+## Calculate ROPE range manually
+dat1a.brm2 |> bayestestR::rope(parameters = "x", range = ROPE, ci_method = "HDI")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# Proportion of samples inside the ROPE [-1.50, 1.50]:
+
+Parameter | inside ROPE
+-----------------------
+x         |      0.00 %
+```
+:::
+
+```{.r .cell-code}
+dat1a.brm2 |>
+    bayestestR::rope(parameters = "x", range = ROPE, ci_method = "HDI") |>
+    plot()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/rope1a_2-1.png){width=480}
+:::
+:::
+
+
+The above demonstration, was applied to the simple comparison that the
+slope was not equal to 0, however, it can similarly be applied to any
+hypothesis (although typically only if there is no evidence of an
+effect)
+
+:::::
+
+#### Centered predictor
+::::: {.panel-tabset}
+
+##### Specific hypotheses
+
+Now that we have the full posteriors, we are free to use these to
+garner evidence on a range of hypotheses. To demonstrate, we will
+consider the following hypotheses:
+
+1. a change in $x$ is associated with an increase in $y$
+2. a doubling of $x$ (from 2.5 to 5) is associated with an increase in $y$ of > 50%
+
+::: {.panel-tabset .nav-pills}
+###### 1. Positive relationship
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |> get_variables()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ [1] "b_Intercept"          "b_scalexscaleEQFALSE" "sigma"               
+ [4] "prior_Intercept"      "prior_b"              "prior_sigma"         
+ [7] "lprior"               "lp__"                 "accept_stat__"       
+[10] "treedepth__"          "stepsize__"           "divergent__"         
+[13] "n_leapfrog__"         "energy__"            
+```
+:::
+
+```{.r .cell-code}
+dat1b.brm2 |> hypothesis("scalexscaleEQFALSE > 0")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+Hypothesis Tests for class b:
+                Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio
+1 (scalexscaleEQFALSE) > 0     4.39      0.83     3.03     5.65       2399
+  Post.Prob Star
+1         1    *
+---
+'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+'*': For one-sided hypotheses, the posterior probability exceeds 95%;
+for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+Posterior probabilities of point hypotheses assume equal prior probabilities.
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b_hyp <- dat1b.brm2 |>
+    hypothesis("scalexscaleEQFALSE > 0") |>
+    _[["hypothesis"]]
+```
+:::
+
+
+**Conclusions**:
+
+- the parameter (`b_scalexscaledEQFALSE`) minus 0 is 4.389
+- `Evid.Ratio`: the ratio of evidence for the hypothesis vs the
+  evidence against it.  In this case, the evidence ratio is 
+  2399 - `Inf` is because the divisor was 0 
+  (no evidence against the hypothesis).
+- `Post.Prob`: the probability of the hypothesis is 1
+- there is very high evidence for this hypothesis
+
+Alternatively, we could use `gather_draws` to achieve a similar
+outcome.
+
+In the following, in addition to median and HPD intervals, we will
+calculate the probability that the slope (`b_x`) is greater than 0. To
+calculate such a probability, we could simply count up the number of
+posterior `b_x` values that are greater than zero and then divide by
+the total number of posterior `b_x` values. In R, we could do this as
+`sum(b_x > 0)/length(b_x)` (where `b_x > 0` will return either a 1 for
+each case it is true and a 0 when it is false, and thus summing is
+like counting). Dividing a sum by its length equates to a mean and
+thus we can achieve the probability by calcualing the mean of `b_x >
+0`.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+  gather_draws(`b_.*x.*`, regex = TRUE) |>
+  summarise_draws(median,
+    HDInterval::hdi,
+    P = ~mean(. > 0)
+  )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 1 × 6
+# Groups:   .variable [1]
+  .variable            variable median lower upper     P
+  <chr>                <chr>     <dbl> <dbl> <dbl> <dbl>
+1 b_scalexscaleEQFALSE .value     4.43  2.85  6.14  1.00
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b_hyp2 <- dat1b.brm2 |>
+    gather_draws(`b_.*x.*`, regex = TRUE) |>
+    summarise_draws(median,
+        HDInterval::hdi,
+        P = ~mean(. > 0)
+    )
+```
+:::
+
+::: {.callout-tip}
+
+The `summarise_draws()` function expects a set of one or more summary
+or diagnostic functions (such as `median` etc). These can be supplied
+either as the name of the function (as in the case for `median` in the
+example above) or if more arguments or information is required by the
+function, the function can be written out in full. in this case, the
+function must be proceeded with a `~` and the variable is denoted a
+`.` (such as in `P = ~mean(. > 0)` above).
+
+:::
+
+**Conclusions**:
+
+- the parameter (`b_scalexscaleEQFALSE`) minus 0 is 4.432
+- `P`: the probability of the hypothesis is 2399
+- there is very high evidence for this hypothesis
+
+
+
+###### 2. >50% increase when $x$ doubles
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+    emmeans::emmeans(~x, at = list(x = c(2.5, 5))) |>
+    gather_emmeans_draws() |>
+    ungroup() |>
+    group_by(.draw) |>
+  summarise(ES = 100 * diff(.value) / .value[1]) |>
+  hypothesis("ES > 50")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+Hypothesis Tests for class :
+     Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob Star
+1 (ES)-(50) > 0    29.42    132.12   -10.84    92.81       6.34      0.86     
+---
+'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+'*': For one-sided hypotheses, the posterior probability exceeds 95%;
+for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+Posterior probabilities of point hypotheses assume equal prior probabilities.
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the difference between the percentage change in estimated $y$ as $x$
+  increases from 2.5 to 5 and 50% is 29.421
+- the evidence ratio in support of the hypothesis that the percentage
+  change exceeds 50% is 6.339
+- the probability that the change in $y$ exceeds 50% is 
+  0.864
+- the evidence for such a change is very weak
+  
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.brm2 |>
+  emmeans::emmeans(~x, at = list(x = c(2.5, 5))) |>
+  gather_emmeans_draws() |>
+  ungroup() |>
+  group_by(.draw) |>
+  summarise(ES = 100 * diff(.value) / .value[1]) |>
+  summarise_draws(
+    mean, median,
+    HDInterval::hdi,
+    P = ~ mean(. > 50)
+  )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 1 × 6
+  variable  mean median lower upper     P
+  <chr>    <num>  <num> <num> <num> <num>
+1 ES        79.4   75.4  26.1  152. 0.864
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the percentage change in estimated $y$ as $x$
+  increases from 2.5 to 5 is 79.421
+- the probability that the change in $y$ exceeds 50% is 
+  0.864
+- the evidence for such a change is very weak
+
+
+:::
+
+
+##### ROPE
+
+The procedure highlighted above for calculating excedence
+probabilities evaluates the degree of evidence for a effect in a
+particular direction. However, there are other instances where there
+is a desire to evaluate the evidence that something has change (either
+increased or decreased). Such purposes are similar to the Frequentist
+pursuit of testing a null hypothesis (e.g. effect = 0).
+
+The Region of Practical Equivalence (ROPE) evaluates evidence that an
+effect is "practically equivalent" to a value (e.g. 0) by calculating
+the proportion of effects that are within a nominated range.
+@Kruschke-2018-270 argued that for standardized parameters, the range
+of -0.1 to 0.1 would envelop a negligible effect based on @Cohen-1988.
+@Kruschke-2018-270 also suggested that this range could be extended to
+non-standardized parameters by multiplying by the standard deviation
+of the response. Accordingly, calculating the proportion of posterior
+density within this ROPE could act as a form of "null-hypothesis"
+testing in a Bayesian framework.
+
+- if the HDI of the focal parameter falls completely **outside** the
+  ROPE, there is strong evidence that there **is** an effect
+- if the HDI of the focal parameter falls completely **inside** the
+  ROPE, there is strong evidence that there **is not** an effect
+- otherwise there is not clear evidence either way
+
+::: {.callout-note}
+
+ROPE and equivalence tests are of most use when you decide that there
+is not enough evidence to support an hypothesis that there is an
+effect. Such a "non-significant" result may be because there genuinely
+is not effect OR you do not have enough power to detect the effect.
+Performing an equivalence test provides a mechanism to tease these two
+appart.
+
+I provide the following example purely to illustrate how such a test
+would be performed. In this case, as we have already demonstrated
+strong evidence for an effect, the equivalence test does not yield any
+additional insights.
+:::
+
+
+::: {.cell}
+
+```{.r .cell-code}
+## Calculate ROPE range manually
+ROPE <- c(-0.1, 0.1) * with(dat, sd(y))
+## OR calculate ROPE range via rope_range function
+ROPE <- bayestestR::rope_range(dat1b.brm2)
+
+dat1b.brm2 |> bayestestR::equivalence_test(parameters = "b_.*x.*", range = ROPE, ci_method = "HDI")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# Test for Practical Equivalence
+
+  ROPE: [-1.50 1.50]
+
+Parameter          |       H0 | inside ROPE |     95% HDI
+---------------------------------------------------------
+scalexscaleEQFALSE | Rejected |      0.00 % | [2.67 5.99]
+```
+:::
+
+```{.r .cell-code}
+dat1b.brm2 |>
+    bayestestR::equivalence_test(parameters = "b_.*x.*", range = ROPE, ci_method = "HDI") |>
+    plot()
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Picking joint bandwidth of 0.132
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/rope1b_1-1.png){width=480}
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the percentage of the HPD for the slope that is inside the ROPE is
+  0
+- there is strong evidence for an effect
+
+OR using the `rope` function.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+## Calculate ROPE range manually
+dat1b.brm2 |> bayestestR::rope(parameters = "x", range = ROPE, ci_method = "HDI")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# Proportion of samples inside the ROPE [-1.50, 1.50]:
+
+Parameter          | inside ROPE
+--------------------------------
+scalexscaleEQFALSE |      0.00 %
+```
+:::
+
+```{.r .cell-code}
+dat1b.brm2 |>
+    bayestestR::rope(parameters = "x", range = ROPE, ci_method = "HDI") |>
+    plot()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/rope1b_2-1.png){width=480}
+:::
+:::
+
+
+The above demonstration, was applied to the simple comparison that the
+slope was not equal to 0, however, it can similarly be applied to any
+hypothesis (although typically only if there is no evidence of an
+effect)
+
+:::::
+
+#### Standardised predictor
+::::: {.panel-tabset}
+
+##### Specific hypotheses
+
+Now that we have the full posteriors, we are free to use these to
+garner evidence on a range of hypotheses. To demonstrate, we will
+consider the following hypotheses:
+
+1. a change in $x$ is associated with an increase in $y$
+2. a doubling of $x$ (from 2.5 to 5) is associated with an increase in $y$ of > 50%
+
+::: {.panel-tabset .nav-pills}
+###### 1. Positive relationship
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |> get_variables()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ [1] "b_Intercept"     "b_scalex"        "sigma"           "prior_Intercept"
+ [5] "prior_b"         "prior_sigma"     "lprior"          "lp__"           
+ [9] "accept_stat__"   "treedepth__"     "stepsize__"      "divergent__"    
+[13] "n_leapfrog__"    "energy__"       
+```
+:::
+
+```{.r .cell-code}
+dat1c.brm2 |> hypothesis("scalex > 0")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+Hypothesis Tests for class b:
+    Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob Star
+1 (scalex) > 0    13.49       2.5      9.6    17.31       2399         1    *
+---
+'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+'*': For one-sided hypotheses, the posterior probability exceeds 95%;
+for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+Posterior probabilities of point hypotheses assume equal prior probabilities.
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c_hyp <- dat1c.brm2 |>
+    hypothesis("scalex > 0") |>
+    _[["hypothesis"]]
+```
+:::
+
+
+**Conclusions**:
+
+- the parameter (`b_scalex`) minus 0 is 13.493
+- `Evid.Ratio`: the ratio of evidence for the hypothesis vs the
+  evidence against it.  In this case, the evidence ratio is 
+  2399 - `Inf` is because the divisor was 0 
+  (no evidence against the hypothesis).
+- `Post.Prob`: the probability of the hypothesis is 1
+- there is very high evidence for this hypothesis
+
+Alternatively, we could use `gather_draws` to achieve a similar
+outcome.
+
+In the following, in addition to median and HPD intervals, we will
+calculate the probability that the slope (`b_x`) is greater than 0. To
+calculate such a probability, we could simply count up the number of
+posterior `b_x` values that are greater than zero and then divide by
+the total number of posterior `b_x` values. In R, we could do this as
+`sum(b_x > 0)/length(b_x)` (where `b_x > 0` will return either a 1 for
+each case it is true and a 0 when it is false, and thus summing is
+like counting). Dividing a sum by its length equates to a mean and
+thus we can achieve the probability by calcualing the mean of `b_x >
+0`.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+  gather_draws(`b_.*x`, regex = TRUE) |>
+  summarise_draws(median,
+    HDInterval::hdi,
+    P = ~mean(. > 0)
+  )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 1 × 6
+# Groups:   .variable [1]
+  .variable variable median lower upper     P
+  <chr>     <chr>     <dbl> <dbl> <dbl> <dbl>
+1 b_scalex  .value     13.5  8.73  18.6  1.00
+```
+:::
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c_hyp2 <- dat1c.brm2 |>
+    gather_draws(`b_.*x`, regex = TRUE) |>
+    summarise_draws(median,
+        HDInterval::hdi,
+        P = ~mean(. > 0)
+    )
+```
+:::
+
+::: {.callout-tip}
+
+The `summarise_draws()` function expects a set of one or more summary
+or diagnostic functions (such as `median` etc). These can be supplied
+either as the name of the function (as in the case for `median` in the
+example above) or if more arguments or information is required by the
+function, the function can be written out in full. in this case, the
+function must be proceeded with a `~` and the variable is denoted a
+`.` (such as in `P = ~mean(. > 0)` above).
+
+:::
+
+**Conclusions**:
+
+- the parameter (`b_scalex`) minus 0 is 13.521
+- `P`: the probability of the hypothesis is 2399
+- there is very high evidence for this hypothesis
+
+
+
+###### 2. >50% increase when $x$ doubles
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+    emmeans::emmeans(~x, at = list(x = c(2.5, 5))) |>
+    gather_emmeans_draws() |>
+    ungroup() |>
+    group_by(.draw) |>
+  summarise(ES = 100 * diff(.value) / .value[1]) |>
+  hypothesis("ES > 50")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+Hypothesis Tests for class :
+     Hypothesis Estimate Est.Error CI.Lower CI.Upper Evid.Ratio Post.Prob Star
+1 (ES)-(50) > 0    14.83    870.24    -9.42   101.91       6.72      0.87     
+---
+'CI': 90%-CI for one-sided and 95%-CI for two-sided hypotheses.
+'*': For one-sided hypotheses, the posterior probability exceeds 95%;
+for two-sided hypotheses, the value tested against lies outside the 95%-CI.
+Posterior probabilities of point hypotheses assume equal prior probabilities.
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the difference between the percentage change in estimated $y$ as $x$
+  increases from 2.5 to 5 and 50% is 14.826
+- the evidence ratio in support of the hypothesis that the percentage
+  change exceeds 50% is 6.717
+- the probability that the change in $y$ exceeds 50% is 
+  0.87
+- the evidence for such a change is very weak
+  
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.brm2 |>
+  emmeans::emmeans(~x, at = list(x = c(2.5, 5))) |>
+  gather_emmeans_draws() |>
+  ungroup() |>
+  group_by(.draw) |>
+  summarise(ES = 100 * diff(.value) / .value[1]) |>
+  summarise_draws(
+    mean, median,
+    HDInterval::hdi,
+    P = ~ mean(. > 50)
+  )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 1 × 6
+  variable  mean median lower upper     P
+  <chr>    <num>  <num> <num> <num> <num>
+1 ES        64.8   77.1  25.9  159. 0.870
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the percentage change in estimated $y$ as $x$
+  increases from 2.5 to 5 is 64.826
+- the probability that the change in $y$ exceeds 50% is 
+  0.87
+- the evidence for such a change is very weak
+
+
+:::
+
+
+##### ROPE
+
+The procedure highlighted above for calculating excedence
+probabilities evaluates the degree of evidence for a effect in a
+particular direction. However, there are other instances where there
+is a desire to evaluate the evidence that something has change (either
+increased or decreased). Such purposes are similar to the Frequentist
+pursuit of testing a null hypothesis (e.g. effect = 0).
+
+The Region of Practical Equivalence (ROPE) evaluates evidence that an
+effect is "practically equivalent" to a value (e.g. 0) by calculating
+the proportion of effects that are within a nominated range.
+@Kruschke-2018-270 argued that for standardized parameters, the range
+of -0.1 to 0.1 would envelop a negligible effect based on @Cohen-1988.
+@Kruschke-2018-270 also suggested that this range could be extended to
+non-standardized parameters by multiplying by the standard deviation
+of the response. Accordingly, calculating the proportion of posterior
+density within this ROPE could act as a form of "null-hypothesis"
+testing in a Bayesian framework.
+
+- if the HDI of the focal parameter falls completely **outside** the
+  ROPE, there is strong evidence that there **is** an effect
+- if the HDI of the focal parameter falls completely **inside** the
+  ROPE, there is strong evidence that there **is not** an effect
+- otherwise there is not clear evidence either way
+
+::: {.callout-note}
+
+ROPE and equivalence tests are of most use when you decide that there
+is not enough evidence to support an hypothesis that there is an
+effect. Such a "non-significant" result may be because there genuinely
+is not effect OR you do not have enough power to detect the effect.
+Performing an equivalence test provides a mechanism to tease these two
+appart.
+
+I provide the following example purely to illustrate how such a test
+would be performed. In this case, as we have already demonstrated
+strong evidence for an effect, the equivalence test does not yield any
+additional insights.
+:::
+
+
+::: {.cell}
+
+```{.r .cell-code}
+## Calculate ROPE range manually
+ROPE <- c(-0.1, 0.1) * with(dat, sd(y))
+## OR calculate ROPE range via rope_range function
+ROPE <- bayestestR::rope_range(dat1c.brm2)
+
+dat1c.brm2 |> bayestestR::equivalence_test(parameters = "b_.*x.*", range = ROPE, ci_method = "HDI")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# Test for Practical Equivalence
+
+  ROPE: [-1.50 1.50]
+
+Parameter |       H0 | inside ROPE |      95% HDI
+-------------------------------------------------
+scalex    | Rejected |      0.00 % | [8.46 18.42]
+```
+:::
+
+```{.r .cell-code}
+dat1c.brm2 |>
+    bayestestR::equivalence_test(parameters = "b_.*x.*", range = ROPE, ci_method = "HDI") |>
+    plot()
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Picking joint bandwidth of 0.385
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/rope1c_1-1.png){width=480}
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the percentage of the HPD for the slope that is inside the ROPE is
+  0
+- there is strong evidence for an effect
+
+OR using the `rope` function.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+## Calculate ROPE range manually
+dat1c.brm2 |> bayestestR::rope(parameters = "x", range = ROPE, ci_method = "HDI")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# Proportion of samples inside the ROPE [-1.50, 1.50]:
+
+Parameter | inside ROPE
+-----------------------
+scalex    |      0.00 %
+```
+:::
+
+```{.r .cell-code}
+dat1c.brm2 |>
+    bayestestR::rope(parameters = "x", range = ROPE, ci_method = "HDI") |>
+    plot()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/rope1c_2-1.png){width=480}
+:::
+:::
+
+
+The above demonstration, was applied to the simple comparison that the
+slope was not equal to 0, however, it can similarly be applied to any
+hypothesis (although typically only if there is no evidence of an
+effect)
+
+:::::
+
+:::::::
+
+### Example 2 (categorical predictor)
+
+::::::: {.panel-tabset}
+#### Treatment contrasts
+::::: {.panel-tabset}
+
+##### Specific hypotheses
+
+Now that we have the full posteriors, we are free to use these to
+garner evidence on a range of hypotheses. To demonstrate, we will
+consider the following hypotheses:
+
+1. all pairwise comparisons (compare each level of $x$ to each other
+2. define a specific set of contrasts that include comparing the
+   average of medium and high treatments to the control treatment.
+
+::: {.panel-tabset .nav-pills}
+
+###### 1. pairwise contrasts
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    emmeans(~x) |>
+    pairs()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ contrast         estimate lower.HPD upper.HPD
+ control - medium    0.823     -4.96      6.08
+ control - high      8.753      3.00     14.95
+ medium - high       7.966      1.78     14.13
+
+Point estimate displayed: median 
+HPD interval probability: 0.95 
+```
+:::
+:::
+
+
+Or if we want the full posteriors... This option allows us to
+calculate exceedence probabilities. That is, we can calculate the
+proportion of contrast posteriors that exceed a specific value (as a
+hypothesis). In this case, we will calculate two exceedence
+probabilities:
+
+1. probability that the effect is negative (e.g. proportion of
+   probabilities that are less than 0)
+2. probability that the effect is positive (e.g. proportion of
+   probabilities that are greater than 0)
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    emmeans(~x) |>
+    pairs() |>
+    gather_emmeans_draws() |>
+    dplyr::select(-.chain) |> 
+    summarise_draws(median,
+        HDInterval::hdi,
+        Pl = ~ mean(.x < 0),
+        Pg = ~ mean(.x > 0)
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 7
+# Groups:   contrast [3]
+  contrast         variable median lower upper      Pl    Pg
+  <chr>            <chr>     <dbl> <dbl> <dbl>   <dbl> <dbl>
+1 control - high   .value    8.75   3.00 14.9  0.00375 0.996
+2 control - medium .value    0.823 -4.96  6.08 0.392   0.608
+3 medium - high    .value    7.97   1.78 14.1  0.01    0.99 
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the difference in $y$ between "control" and "medium" is 
+  0.82, however there is no evidence of this
+  effect (exceedence probability)
+- the difference in $y$ between "control" and "high" is
+  8.75, and there is very strong evidence for this effect
+- the difference in $y$ between "medium" and "high" is
+  7.97, and there is very strong evidence for this effect
+
+It is also possible to express the magnitude of effect in percentage
+change. The trick is to put the emmeans parameters onto a logarithmic
+scale so that the pairwise comparisons (which are a subtraction)
+effectively are treated as divisions (due to log laws).
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    emmeans(~x) |>
+    regrid(transform = "log") |>
+    pairs() |>
+    regrid()
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ contrast       ratio lower.HPD upper.HPD
+ control/medium  1.04     0.765      1.33
+ control/high    1.72     1.036      2.51
+ medium/high     1.66     1.021      2.44
+
+Point estimate displayed: median 
+HPD interval probability: 0.95 
+```
+:::
+:::
+
+
+::: {.collout-info}
+
+The estimates are expressed as fractional changes. A "ratio" of 1
+indicates parity, since if you multiply something by 1, it does not
+change. A value of 1.5, indicates a 50% increase and a value of 0.5
+indicates a 50% decline.
+
+To calculate percentage change from a fractional value, subtract 1 and
+multiply the result by 100. E.g.
+
+
+::: {.cell}
+
+```{.r .cell-code}
+(1.19 - 1) * 100
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+[1] 19
+```
+:::
+:::
+
+
+:::
+
+If we get the full posteriors, we can also explore whether the change
+exceeds some ecologically important change (such as 20%)
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+  emmeans(~x) |>
+  regrid(transform = "log") |>
+  pairs() |>
+  regrid() |> 
+  gather_emmeans_draws() |>
+  dplyr::select(-.chain) |>
+  summarise_draws(median,
+    HDInterval::hdi,
+    Pl = ~ mean(.x < 1),
+    Pg = ~ mean(.x > 1),
+    Pl50 = ~ mean(.x < 0.8),
+    Pg50 = ~ mean(.x > 1.2)
+  )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 3 × 9
+# Groups:   contrast [3]
+  contrast       variable median lower upper      Pl    Pg    Pl50  Pg50
+  <chr>          <chr>     <dbl> <dbl> <dbl>   <dbl> <dbl>   <dbl> <dbl>
+1 control/high   .value     1.72 1.04   2.51 0.00375 0.996 0       0.961
+2 control/medium .value     1.04 0.765  1.33 0.392   0.608 0.0346  0.146
+3 medium/high    .value     1.66 1.02   2.44 0.01    0.99  0.00125 0.943
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- the response $y$ is 72.14%
+  higher in the control group over the high group.
+- there is strong evidence (P = 1) of the
+  above
+- there is also strong evidence (P = 1)
+  that $y$ is at least 20% higher in the control group over the high
+  group
+- the response $y$ is 4.099%
+  higher in the control group over the medium group.
+- there is no evidence (P = 0.608) of the
+  above
+- there is no evidence (P = 0.146) that $y$
+  is at least 20% higher in the control group over the medium group
+- the response $y$ is 65.805%
+  higher in the medium group over the high group.
+- there is strong evidence (P = 0.99) of
+  the above
+- there is no evidence (P = 0.943) that $y$
+  is at least 20% higher in the medium group over the high group
+
+
+###### 2. planned contrasts
+
+
+::: {.cell}
+
+```{.r .cell-code}
+cmat <- cbind(
+  "Contrast vs Medium/High" = c(1, -0.5, -0.5),
+  "Medium vs High" = c(0, 1, -1)
+)
+dat2a.brm2 |>
+    emmeans(~x) |>
+    contrast(method = list(x = cmat))
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+ contrast                  estimate lower.HPD upper.HPD
+ x.Contrast vs Medium/High     4.73    -0.218      9.56
+ x.Medium vs High              7.97     1.781     14.13
+
+Point estimate displayed: median 
+HPD interval probability: 0.95 
+```
+:::
+:::
+
+
+Or with full posteriors and exceedance probabilities...
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    emmeans(~x) |>
+    contrast(method = list(x = cmat)) |> 
+    gather_emmeans_draws() |>
+    dplyr::select(-.chain) |> 
+    summarise_draws(median,
+        HDInterval::hdi,
+        Pl = ~ mean(.x < 0),
+        Pg = ~ mean(.x > 0)
+    )
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# A tibble: 2 × 7
+# Groups:   contrast [2]
+  contrast                  variable median  lower upper     Pl    Pg
+  <chr>                     <chr>     <dbl>  <dbl> <dbl>  <dbl> <dbl>
+1 x.Contrast vs Medium/High .value     4.73 -0.218  9.56 0.0362 0.964
+2 x.Medium vs High          .value     7.97  1.78  14.1  0.01   0.99 
+```
+:::
+:::
+
+::: {.cell}
+
+:::
+
+
+**Conclusions**:
+
+- on average, $y$ is 4.732 higher in the
+  "control" group than the "mediun" and "high" groups.
+- the evidence for this effect is very strong 0.964
+
+
+:::
+
+##### ROPE
+
+We have already seen that there is no evidence of a difference in $y$
+between the "control" and "medium" groups. This could be because
+either there is not enough power to detect the difference or that the
+populations are not different. It would be nice to be able to gain
+some insights into which of these is most likely. And we can. If we
+establish the range of values that represent an insubstantial effect,
+we can then quantify the proportion of the posterior that falls inside
+this Region of Practical Equivalence (ROPE).
+
+Conventionally, the ROPE represents within 10% - that is, if the
+effect is less than 10% change, then we might consider it
+insubstantial.
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+## Calculate ROPE range manually
+ROPE <- c(-0.1, 0.1) * with(dat2, sd(y))
+## OR calculate ROPE range via rope_range function
+ROPE <- bayestestR::rope_range(dat2a.brm2)
+
+dat2a.brm2 |> bayestestR::equivalence_test(parameters = "b_x", range = ROPE, ci_method = "HDI")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# Test for Practical Equivalence
+
+  ROPE: [-0.60 0.60]
+
+Parameter |        H0 | inside ROPE |        95% HDI
+----------------------------------------------------
+xmedium   | Undecided |     16.93 % | [ -6.08  4.96]
+xhigh     |  Rejected |      0.00 % | [-14.48 -2.24]
+```
+:::
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    bayestestR::equivalence_test(parameters = "b_x", range = ROPE, ci_method = "HDI") |>
+    plot()
+```
+
+::: {.cell-output .cell-output-stderr}
+```
+Picking joint bandwidth of 0.484
+```
+:::
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/rope2a_1-1.png){width=480}
+:::
+:::
+
+
+**Conclusions**:
+
+- there is insufficient evidence to conclude that there is a
+  difference in $y$ between "control" and "medium" groups
+- we cannot conclude that there is evidence of no effect
+
+
+::: {.cell}
+
+:::
+
+::: {.cell}
+
+```{.r .cell-code}
+## Calculate ROPE range manually
+dat2a.brm2 |> bayestestR::rope(parameters = "x", range = ROPE, ci_method = "HDI")
+```
+
+::: {.cell-output .cell-output-stdout}
+```
+# Proportion of samples inside the ROPE [-0.60, 0.60]:
+
+Parameter | inside ROPE
+-----------------------
+xmedium   |     16.92 %
+xhigh     |      0.00 %
+```
+:::
+
+```{.r .cell-code}
+dat2a.brm2 |>
+    bayestestR::rope(parameters = "x", range = ROPE, ci_method = "HDI") |>
+    plot()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/rope2a_2-1.png){width=480}
+:::
+:::
 
 
 
 
+:::::
+:::::::
+::::
 
+# Summary plots
+
+:::: {.panel-tabset}
+
+### Example 1 (Gaussian data)
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Partial plot
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1a.grid <- list(x = modelr::seq_range(dat$x, n = 100))
+dat1a.brm2 |>
+    emmeans(~x, at = dat1a.grid) |>
+    as.data.frame() |>
+    ggplot(aes(y = emmean, x = x)) +
+    geom_ribbon(aes(ymin = lower.HPD, ymax = upper.HPD), fill = "orange", alpha = 0.3) +
+    geom_point(data = dat, aes(y = y)) +
+    geom_line() +
+    theme_classic()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/summary_plot1a-1.png){width=480}
+:::
+:::
+
+
+As a spaghetti plot
+
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/summary_plot1a_2_d5f5aa4433c93fe0d9df1e4f6f8345e7'}
+
+```{.r .cell-code}
+dat1a.grid <- list(x = modelr::seq_range(dat$x, n = 100))
+dat1a.brm2 |>
+    emmeans(~x, at = dat1a.grid) |>
+    gather_emmeans_draws() |> 
+    ggplot(aes(y = .value, x = x)) +
+    geom_line(aes(group=.draw),  colour = 'orange', alpha=0.01) +
+    geom_point(data = dat, aes(y = y)) +
+    theme_classic()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/summary_plot1a_2-1.png){width=480}
+:::
+:::
+
+
+
+:::::
+
+#### Centered predictor
+::::: {.panel-tabset}
+
+##### Partial plot
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1b.grid <- list(x = modelr::seq_range(dat$x, n = 100))
+dat1b.brm2 |>
+    emmeans(~x, at = dat1b.grid) |>
+    as.data.frame() |>
+    ggplot(aes(y = emmean, x = x)) +
+    geom_ribbon(aes(ymin = lower.HPD, ymax = upper.HPD), fill = "orange", alpha = 0.3) +
+    geom_point(data = dat, aes(y = y)) +
+    geom_line() +
+    theme_classic()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/summary_plot1b-1.png){width=480}
+:::
+:::
+
+
+As a spaghetti plot
+
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/summary_plot1b_2_7c4cf3720e7388ae94f57492ba98e128'}
+
+```{.r .cell-code}
+dat1b.grid <- list(x = modelr::seq_range(dat$x, n = 100))
+dat1b.brm2 |>
+    emmeans(~x, at = dat1b.grid) |>
+    gather_emmeans_draws() |> 
+    ggplot(aes(y = .value, x = x)) +
+    geom_line(aes(group=.draw),  colour = 'orange', alpha=0.01) +
+    geom_point(data = dat, aes(y = y)) +
+    theme_classic()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/summary_plot1b_2-1.png){width=480}
+:::
+:::
+
+
+
+:::::
+
+#### Standardised predictor
+::::: {.panel-tabset}
+
+##### Partial plot
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat1c.grid <- list(x = modelr::seq_range(dat$x, n = 100))
+dat1c.brm2 |>
+    emmeans(~x, at = dat1c.grid) |>
+    as.data.frame() |>
+    ggplot(aes(y = emmean, x = x)) +
+    geom_ribbon(aes(ymin = lower.HPD, ymax = upper.HPD), fill = "orange", alpha = 0.3) +
+    geom_point(data = dat, aes(y = y)) +
+    geom_line() +
+    theme_classic()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/summary_plot1c-1.png){width=480}
+:::
+:::
+
+
+As a spaghetti plot
+
+
+::: {.cell hash='35_bayesian_linear_models_cache/html/summary_plot1c_2_e2d29fb33073759c798dfa408914f8bc'}
+
+```{.r .cell-code}
+dat1c.grid <- list(x = modelr::seq_range(dat$x, n = 100))
+dat1c.brm2 |>
+    emmeans(~x, at = dat1c.grid) |>
+    gather_emmeans_draws() |> 
+    ggplot(aes(y = .value, x = x)) +
+    geom_line(aes(group=.draw),  colour = 'orange', alpha=0.01) +
+    geom_point(data = dat, aes(y = y)) +
+    theme_classic()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/summary_plot1c_2-1.png){width=480}
+:::
+:::
+
+
+
+:::::
+
+:::::::
+
+### Example 2 (categorical predictor)
+
+::::::: {.panel-tabset}
+#### Treatment contrasts
+::::: {.panel-tabset}
+
+##### Partial plot
+
+
+::: {.cell}
+
+```{.r .cell-code}
+dat2a.brm2 |>
+  emmeans(~x) |>
+  as.data.frame() |>
+  ggplot(aes(y = emmean, x = x)) +
+  geom_pointrange(aes(ymin = lower.HPD, ymax = upper.HPD)) +
+  theme_classic()
+```
+
+::: {.cell-output-display}
+![](35_bayesian_linear_models_files/figure-html/summary_plot2a-1.png){width=480}
+:::
+:::
+
+
+:::::
+
+:::::::
+
+::::
 
 
 # References
