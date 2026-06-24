@@ -5599,6 +5599,656 @@ dat3c.brm2$fit |> stan_ess()
 
 ::::
 
+# Model validation
+
+Model validation involves exploring the model diagnostics and fit to
+ensure that the model is broadly appropriate for the data. As such,
+exploration of the residuals should be routine.
+
+For more complex models (those that contain multiple effects, it is
+also advisable to plot the residuals against each of the individual
+predictors. For sampling designs that involve sample collection over
+space or time, it is also a good idea to explore whether there are any
+temporal or spatial patterns in the residuals.
+
+There are numerous situations (e.g. when applying specific
+variance-covariance structures to a model) where raw residuals do not
+reflect the interior workings of the model. Typically, this is because
+they do not take into account the variance-covariance matrix or assume
+a very simple variance-covariance matrix. Since the purpose of
+exploring residuals is to evaluate the model, for these cases, it is
+arguably better to draw conclusions based on standardized (or
+studentized) residuals.
+
+Unfortunately the definitions of standardised and studentised
+residuals appears to vary and the two terms get used interchangeably.
+I will adopt the following definitions:
+
+Standardized residuals
+: the raw residuals divided by the **true** standard deviation of the
+  residuals (which of course is rarely known).
+
+Studentized residuals
+: the raw residuals divided by the standard deviation of the
+  residuals. Note that **externally studentised** residuals are
+  calculated by dividing the raw residuals by a unique standard
+  deviation for each observation that is calculated from regressions
+  having left each successive observation out.
+
+Pearson residuals
+: the raw residuals divided by the standard deviation of the response
+  variable.
+
+The mark of a good model is being able to predict well. In an ideal
+world, we would have sufficiently large sample size as to permit us to
+hold a fraction (such as 25%) back thereby allowing us to train the
+model on 75% of the data and then see how well the model can predict
+the withheld 25%. Unfortunately, such a luxury is still rare in
+ecology.
+
+The next best option is to see how well the model can predict the
+observed data. Models tend to struggle most with the extremes of
+trends and have particular issues when the extremes approach logical
+boundaries (such as zero for count data and standard deviations). We
+can use the fitted model to generate random predicted observations and
+then explore some properties of these compared to the actual observed
+data.
+
+
+| Package   | Description       | function                     | rstanarm                                               | brms                                               |
+|-----------|-------------------|------------------------------|-------------------------------------------------------|----------------------------------------------------|
+| bayesplot | Density overlay   | `ppc_dens_overlay`           | `pp_check(mod, plotfun='dens_overlay')`               | `pp_check(mod, type='dens_overlay')`               |
+|           | Obs vs Pred error | `ppc_error_scatter_avg`      | `pp_check(mod, plotfun='error_scatter_avg')`          | `pp_check(mod, type='error_scatter_avg')`          |
+|           | Pred error vs x   | `ppc_error_scatter_avg_vs_x` | `pp_check(mod, x=, plotfun='error_scatter_avg_vs_x')` | `pp_check(mod, x=, type='error_scatter_avg_vs_x')` |
+|           | Preds vs x        | `ppc_intervals`              | `pp_check(mod, x=, plotfun='intervals')`              | `pp_check(mod, x=, type='intervals')`              |
+|           | Partial plot       | `ppc_ribbon`                 | `pp_check(mod, x=, plotfun='ribbon')`                 | `pp_check(mod, x=, type='ribbon')`                 |
+|           |                   |                              |                                                       |                                                    |
+
+: {.primary .bordered .sm .paramsTable tbl-colwidths="[10,10, 20, 30, 30]"}
+
+
+:::: {.callout-tip collapse="true"}
+
+## More PPC modules (functions) available
+
+```{r modelValidation_5a, results='markdown', eval=TRUE, mhidden=TRUE, fig.width=6, fig.height=4}
+available_ppc()
+```
+
+::::
+
+### Example 1 (Gaussian data)
+
+::: {.callout-note}
+
+Bayesian samplers involve many calls to randomisation functions. As a
+result, the estimates will vary slightly each time the routines are
+run. You should expect that the outputs that you obtain will differ
+slightly from those that I am displaying. Nevertheless, the main
+conclusions should remain robust across subsequent runs.
+
+:::
+
+::::::: {.panel-tabset}
+#### Raw predictor
+::::: {.panel-tabset}
+
+##### Simple residual plots
+
+```{r}
+#| label: modelValidation_resid1a
+#| fig-width: 4
+#| fig-height: 4
+resid <- resid(dat1a.brm2)[, "Estimate"]
+fit <- fitted(dat1a.brm2)[, "Estimate"]
+ggplot() +
+  geom_point(data = NULL, aes(y = resid, x = fit))
+```
+
+We should also plot the residuals against each of the predictor
+variables (as well as any other important unmodelled predictors -
+particularly time and space if relevant and available).
+
+```{r}
+#| label: modelValidation_resid21a
+#| fig-width: 4
+#| fig-height: 4
+resid <- resid(dat1a.brm2)[, "Estimate"]
+ggplot() +
+  geom_point(data = NULL, aes(y = resid, x = dat$x))
+```
+
+**Conclusions**:
+
+- there does not appear to be any pattern in the residuals
+
+##### Posterior probability checks
+
+Post predictive checks provide additional diagnostics about the fit of
+the model. Specifically, they provide a comparison between predictions
+drawn from the model and the observed data used to train the model.
+
+
+**Density overlay**
+
+These are plots of the density distribution of the observed data
+(black line) overlayed on top of 50 density distributions generated
+from draws from the model (light blue). Ideally, the 50 realisations
+should be roughly consistent with the observed data.
+
+```{r}
+#| label: modelValidation_ppdensity1a
+#| fig-width: 4
+#| fig-height: 3
+dat1a.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
+```
+
+**Conclusions**:
+
+- the model draws appear to be consistent with the observed data
+
+**Error scatter**
+
+These are plots of the observed values against the average residuals.
+Similar to a residual plot, we do not want to see any patterns in this
+plot.
+
+```{r}
+#| label: modelValidation_pperror1a
+#| fig-width: 3
+#| fig-height: 3
+dat1a.brm2 |> pp_check(type = 'error_scatter_avg')
+```
+
+**Conclusions**:
+
+- there is no obvious pattern in the residuals.
+
+**Intervals**
+
+These are plots of the observed data overlayed on top of posterior
+predictions associated with each level of the predictor. Ideally, the
+observed data should all fall within the predictive intervals.
+
+```{r}
+#| label: modelValidation_ppintervals1a
+#| fig-width: 4
+#| fig-height: 3
+dat1a.brm2 |> pp_check(type = 'intervals', x = "x")
+```
+
+**Conclusions**:
+
+- the posterior predictions are not inconsistent with the observed
+  data
+
+**Ribbon**
+
+These are just an alternative way of expressing the interval plot.
+
+```{r}
+#| label: modelValidation_ppribbon1a
+#| fig-width: 4
+#| fig-height: 3
+dat1a.brm2 |> pp_check(type = 'ribbon', x = "x")
+```
+
+**Conclusions**:
+
+- the posterior predictions are not inconsistent with the observed
+  data
+
+:::: {.callout-tip collapse="true"}
+
+####### Using `shiny` to explore a wide range of MCMC and validation diagnostics
+
+The `shinystan` package allows the full suite of MCMC diagnostics and posterior
+predictive checks to be accessed via a web interface.
+
+```{r modelValidation5g, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+library(shinystan)
+launch_shinystan(dat1a.brm2)
+```
+
+::::
+
+##### DHARMa (simulated) residuals
+
+DHARMa residuals provide very useful diagnostics. Unfortunately, we
+cannot directly use the `simulateResiduals()` function to generate the
+simulated residuals. However, if we are willing to calculate some of
+the components yourself, we can still obtain the simulated residuals
+from the fitted stan model.
+
+We need to supply:
+
+- simulated (predicted) responses associated with each observation.
+- observed values
+- fitted (predicted) responses (averaged) associated with each
+  observation
+
+```{r}
+#| label: modelValidation_DHARMa1a
+#| fig-width: 15
+#| fig-height: 5
+#| out-width: 8in
+#| cache: true
+dat1a.resids <- make_brms_dharma_res(dat1a.brm2, integerResponse = FALSE)
+wrap_elements(~ testUniformity(dat1a.resids)) +
+    wrap_elements(~ plotResiduals(dat1a.resids)) +
+    wrap_elements(~ testDispersion(dat1a.resids)) +
+    plot_layout(nrow = 1)
+```
+
+:::: {.callout-note}
+
+If you are using Rstudio (particularly with a quarto document), the above code may produce a graphic that is too large for the currently available device.  The document should still render without problems, it is just the live display within Rstudio that cannot accommodate the figure.
+
+To address this, you can either:
+
+- break the multi-panel figure up into four separate figures by
+  removing the outer `wrap_elements()` and `plot_layout()` functions.
+- copy the above code into the console and view in a larger graphics
+  device
+::::
+
+**Conclusions**:
+
+- the Q-Q plot looks reasonable (points broadly follow the angled
+  line)
+- there are no flagged issues with the
+  - KS test: conformity to the nominated distribution (family)
+  - Dispersion test: would not normally expect this to be an issue for
+    a Gaussian family unless there are other issues with the residuals
+  - Outlier test: the influence of each observation
+- there does not appear to be any patterns in the residuals - each of
+  the three quantile trends are considered flat and centered around
+  1/3, 1/2 and 2/3
+- the observed dispersion is well within the simulated range
+  indicating that there is no issue with dispersion (again this is
+  expected for a Gaussian model)
+
+:::::
+
+**Conclusions**:
+- there is no evidence of a lack of fit
+- the model is likely to be reliable
+
+#### Centered predictor
+
+::::: {.panel-tabset}
+
+##### Simple residual plots
+
+```{r}
+#| label: modelValidation_resid1b
+#| fig-width: 4
+#| fig-height: 4
+resid <- resid(dat1b.brm2)[, "Estimate"]
+fit <- fitted(dat1b.brm2)[, "Estimate"]
+ggplot() +
+  geom_point(data = NULL, aes(y = resid, x = fit))
+```
+
+We should also plot the residuals against each of the predictor
+variables (as well as any other important unmodelled predictors -
+particularly time and space if relevant and available).
+
+```{r}
+#| label: modelValidation_resid21b
+#| fig-width: 4
+#| fig-height: 4
+resid <- resid(dat1b.brm2)[, "Estimate"]
+ggplot() +
+  geom_point(data = NULL, aes(y = resid, x = dat$x))
+```
+
+**Conclusions**:
+
+- there does not appear to be any pattern in the residuals
+
+##### Posterior probability checks
+
+Post predictive checks provide additional diagnostics about the fit of
+the model. Specifically, they provide a comparison between predictions
+drawn from the model and the observed data used to train the model.
+
+
+**Density overlay**
+
+These are plots of the density distribution of the observed data
+(black line) overlayed on top of 50 density distributions generated
+from draws from the model (light blue). Ideally, the 50 realisations
+should be roughly consistent with the observed data.
+
+```{r}
+#| label: modelValidation_ppdensity1b
+#| fig-width: 4
+#| fig-height: 3
+dat1b.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
+```
+
+**Conclusions**:
+
+- the model draws appear to be consistent with the observed data
+
+**Error scatter**
+
+These are plots of the observed values against the average residuals.
+Similar to a residual plot, we do not want to see any patterns in this
+plot.
+
+```{r}
+#| label: modelValidation_pperror1b
+#| fig-width: 3
+#| fig-height: 3
+dat1b.brm2 |> pp_check(type = 'error_scatter_avg')
+```
+
+**Conclusions**:
+
+- there is no obvious pattern in the residuals.
+
+**Intervals**
+
+These are plots of the observed data overlayed on top of posterior
+predictions associated with each level of the predictor. Ideally, the
+observed data should all fall within the predictive intervals.
+
+```{r}
+#| label: modelValidation_ppintervals1b
+#| fig-width: 4
+#| fig-height: 3
+dat1b.brm2 |> pp_check(type = 'intervals', x = "x")
+```
+
+**Conclusions**:
+
+- the posterior predictions are not inconsistent with the observed
+  data
+
+**Ribbon**
+
+These are just an alternative way of expressing the interval plot.
+
+```{r}
+#| label: modelValidation_ppribbon1b
+#| fig-width: 4
+#| fig-height: 3
+dat1b.brm2 |> pp_check(type = 'ribbon', x = "x")
+```
+
+**Conclusions**:
+
+- the posterior predictions are not inconsistent with the observed
+  data
+
+:::: {.callout-tip collapse="true"}
+
+###### Using `shiny` to explore a wide range of MCMC and validation diagnostics
+
+The `shinystan` package allows the full suite of MCMC diagnostics and posterior
+predictive checks to be accessed via a web interface.
+
+```{r modelValidation5g1b, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+library(shinystan)
+launch_shinystan(dat1b.brm2)
+```
+
+::::
+
+##### DHARMa (simulated) residuals
+
+DHARMa residuals provide very useful diagnostics. Unfortunately, we
+cannot directly use the `simulateResiduals()` function to generate the
+simulated residuals. However, if we are willing to calculate some of
+the components yourself, we can still obtain the simulated residuals
+from the fitted stan model.
+
+We need to supply:
+
+- simulated (predicted) responses associated with each observation.
+- observed values
+- fitted (predicted) responses (averaged) associated with each
+  observation
+
+```{r}
+#| label: modelValidation_DHARMa1b
+#| fig-width: 15
+#| fig-height: 5
+#| out-width: 8in
+#| cache: true
+dat1b.resids <- make_brms_dharma_res(dat1b.brm2, integerResponse = FALSE)
+wrap_elements(~ testUniformity(dat1b.resids)) +
+    wrap_elements(~ plotResiduals(dat1b.resids)) +
+    wrap_elements(~ testDispersion(dat1b.resids)) +
+    plot_layout(nrow = 1)
+```
+
+:::: {.callout-note}
+
+If you are using Rstudio (particularly with a quarto document), the above code may produce a graphic that is too large for the currently available device.  The document should still render without problems, it is just the live display within Rstudio that cannot accommodate the figure.
+
+To address this, you can either:
+
+- break the multi-panel figure up into four separate figures by
+  removing the outer `wrap_elements()` and `plot_layout()` functions.
+- copy the above code into the console and view in a larger graphics
+  device
+::::
+
+**Conclusions**:
+
+- the Q-Q plot looks reasonable (points broadly follow the angled
+  line)
+- there are no flagged issues with the
+  - KS test: conformity to the nominated distribution (family)
+  - Dispersion test: would not normally expect this to be an issue for
+    a Gaussian family unless there are other issues with the residuals
+  - Outlier test: the influence of each observation
+- there does not appear to be any patterns in the residuals - each of
+  the three quantile trends are considered flat and centered around
+  1/3, 1/2 and 2/3
+- the observed dispersion is well within the simulated range
+  indicating that there is no issue with dispersion (again this is
+  expected for a Gaussian model)
+
+:::::
+
+**Conclusions**:
+- there is no evidence of a lack of fit
+- the model is likely to be reliable
+#### Standardised predictor
+
+::::: {.panel-tabset}
+
+##### Simple residual plots
+
+```{r}
+#| label: modelValidation_resid1c
+#| fig-width: 4
+#| fig-height: 4
+resid <- resid(dat1c.brm2)[, "Estimate"]
+fit <- fitted(dat1c.brm2)[, "Estimate"]
+ggplot() +
+  geom_point(data = NULL, aes(y = resid, x = fit))
+```
+
+We should also plot the residuals against each of the predictor
+variables (as well as any other important unmodelled predictors -
+particularly time and space if relevant and available).
+
+```{r}
+#| label: modelValidation_resid21c
+#| fig-width: 4
+#| fig-height: 4
+resid <- resid(dat1c.brm2)[, "Estimate"]
+ggplot() +
+  geom_point(data = NULL, aes(y = resid, x = dat$x))
+```
+
+**Conclusions**:
+
+- there does not appear to be any pattern in the residuals
+
+##### Posterior probability checks
+
+Post predictive checks provide additional diagnostics about the fit of
+the model. Specifically, they provide a comparison between predictions
+drawn from the model and the observed data used to train the model.
+
+
+**Density overlay**
+
+These are plots of the density distribution of the observed data
+(black line) overlayed on top of 50 density distributions generated
+from draws from the model (light blue). Ideally, the 50 realisations
+should be roughly consistent with the observed data.
+
+```{r}
+#| label: modelValidation_ppdensity1c
+#| fig-width: 4
+#| fig-height: 3
+dat1c.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
+```
+
+**Conclusions**:
+
+- the model draws appear to be consistent with the observed data
+
+**Error scatter**
+
+These are plots of the observed values against the average residuals.
+Similar to a residual plot, we do not want to see any patterns in this
+plot.
+
+```{r}
+#| label: modelValidation_pperror1c
+#| fig-width: 3
+#| fig-height: 3
+dat1c.brm2 |> pp_check(type = 'error_scatter_avg')
+```
+
+**Conclusions**:
+
+- there is no obvious pattern in the residuals.
+
+**Intervals**
+
+These are plots of the observed data overlayed on top of posterior
+predictions associated with each level of the predictor. Ideally, the
+observed data should all fall within the predictive intervals.
+
+```{r}
+#| label: modelValidation_ppintervals1c
+#| fig-width: 4
+#| fig-height: 3
+dat1c.brm2 |> pp_check(type = 'intervals', x = "x")
+```
+
+**Conclusions**:
+
+- the posterior predictions are not inconsistent with the observed
+  data
+
+**Ribbon**
+
+These are just an alternative way of expressing the interval plot.
+
+```{r}
+#| label: modelValidation_ppribbon1c
+#| fig-width: 4
+#| fig-height: 3
+dat1c.brm2 |> pp_check(type = 'ribbon', x = "x")
+```
+
+**Conclusions**:
+
+- the posterior predictions are not inconsistent with the observed
+  data
+
+:::: {.callout-tip collapse="true"}
+
+###### Using `shiny` to explore a wide range of MCMC and validation diagnostics
+
+The `shinystan` package allows the full suite of MCMC diagnostics and posterior
+predictive checks to be accessed via a web interface.
+
+```{r modelValidation5g1c, results='markdown', eval=FALSE, mhidden=TRUE, fig.width=6, fig.height=4}
+library(shinystan)
+launch_shinystan(dat1c.brm2)
+```
+
+::::
+
+##### DHARMa (simulated) residuals
+
+DHARMa residuals provide very useful diagnostics. Unfortunately, we
+cannot directly use the `simulateResiduals()` function to generate the
+simulated residuals. However, if we are willing to calculate some of
+the components yourself, we can still obtain the simulated residuals
+from the fitted stan model.
+
+We need to supply:
+
+- simulated (predicted) responses associated with each observation.
+- observed values
+- fitted (predicted) responses (averaged) associated with each
+  observation
+
+```{r}
+#| label: modelValidation_DHARMa1c
+#| fig-width: 15
+#| fig-height: 5
+#| out-width: 8in
+#| cache: true
+dat1c.resids <- make_brms_dharma_res(dat1c.brm2, integerResponse = FALSE)
+wrap_elements(~ testUniformity(dat1c.resids)) +
+    wrap_elements(~ plotResiduals(dat1c.resids)) +
+    wrap_elements(~ testDispersion(dat1c.resids)) +
+    plot_layout(nrow = 1)
+```
+
+:::: {.callout-note}
+
+If you are using Rstudio (particularly with a quarto document), the above code may produce a graphic that is too large for the currently available device.  The document should still render without problems, it is just the live display within Rstudio that cannot accommodate the figure.
+
+To address this, you can either:
+
+- break the multi-panel figure up into four separate figures by
+  removing the outer `wrap_elements()` and `plot_layout()` functions.
+- copy the above code into the console and view in a larger graphics
+  device
+::::
+
+**Conclusions**:
+
+- the Q-Q plot looks reasonable (points broadly follow the angled
+  line)
+- there are no flagged issues with the
+  - KS test: conformity to the nominated distribution (family)
+  - Dispersion test: would not normally expect this to be an issue for
+    a Gaussian family unless there are other issues with the residuals
+  - Outlier test: the influence of each observation
+- there does not appear to be any patterns in the residuals - each of
+  the three quantile trends are considered flat and centered around
+  1/3, 1/2 and 2/3
+- the observed dispersion is well within the simulated range
+  indicating that there is no issue with dispersion (again this is
+  expected for a Gaussian model)
+
+:::::
+
+**Conclusions**:
+- there is no evidence of a lack of fit
+- the model is likely to be reliable
+
+:::::::
+
+
+
+
+
 
 # References
 
