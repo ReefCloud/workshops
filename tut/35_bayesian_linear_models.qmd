@@ -5944,6 +5944,7 @@ plot.
 
 ```{r}
 #| label: modelValidation_pperror1b
+#| eval: false
 #| fig-width: 3
 #| fig-height: 3
 dat1b.brm2 |> pp_check(type = 'error_scatter_avg')
@@ -5961,6 +5962,7 @@ observed data should all fall within the predictive intervals.
 
 ```{r}
 #| label: modelValidation_ppintervals1b
+#| eval: false
 #| fig-width: 4
 #| fig-height: 3
 dat1b.brm2 |> pp_check(type = 'intervals', x = "x")
@@ -5977,6 +5979,7 @@ These are just an alternative way of expressing the interval plot.
 
 ```{r}
 #| label: modelValidation_ppribbon1b
+#| eval: false
 #| fig-width: 4
 #| fig-height: 3
 dat1b.brm2 |> pp_check(type = 'ribbon', x = "x")
