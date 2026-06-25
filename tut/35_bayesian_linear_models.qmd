@@ -6021,6 +6021,7 @@ We need to supply:
 
 ```{r}
 #| label: modelValidation_DHARMa1b
+#| eval: false
 #| fig-width: 15
 #| fig-height: 5
 #| out-width: 8in
