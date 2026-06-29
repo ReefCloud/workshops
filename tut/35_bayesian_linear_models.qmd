@@ -5925,44 +5925,6 @@ These are plots of the density distribution of the observed data
 from draws from the model (light blue). Ideally, the 50 realisations
 should be roughly consistent with the observed data.
 
-```{r}
-#| label: modelValidation_ppdensity1b
-#| fig-width: 4
-#| fig-height: 3
-dat1b.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
-```
-
-**Conclusions**:
-
-- the model draws appear to be consistent with the observed data
-
-**Error scatter**
-
-These are plots of the observed values against the average residuals.
-Similar to a residual plot, we do not want to see any patterns in this
-plot.
-
-```{r}
-#| label: modelValidation_pperror1b
-#| eval: false
-#| fig-width: 3
-#| fig-height: 3
-#dat1b.brm2 |> pp_check(type = 'error_scatter_avg')
-```
-
-**Conclusions**:
-
-- there is no obvious pattern in the residuals.
-
-**Intervals**
-
-These are plots of the observed data overlayed on top of posterior
-predictions associated with each level of the predictor. Ideally, the
-observed data should all fall within the predictive intervals.
-
-
-
-
 # References
 
 
