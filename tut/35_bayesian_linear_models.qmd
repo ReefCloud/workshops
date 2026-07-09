@@ -5708,4 +5708,20 @@ fit <- fitted(dat1a.brm2)[, "Estimate"]
 ggplot() +
   geom_point(data = NULL, aes(y = resid, x = fit))
 ```
+We should also plot the residuals against each of the predictor
+variables (as well as any other important unmodelled predictors -
+particularly time and space if relevant and available).
+
+```{r}
+#| label: modelValidation_resid21a
+#| fig-width: 4
+#| fig-height: 4
+resid <- resid(dat1a.brm2)[, "Estimate"]
+ggplot() +
+  geom_point(data = NULL, aes(y = resid, x = dat$x))
+```
+
+**Conclusions**:
+
+- there does not appear to be any pattern in the residuals
 
