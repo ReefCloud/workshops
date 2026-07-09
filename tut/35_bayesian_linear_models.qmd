@@ -5725,3 +5725,29 @@ ggplot() +
 
 - there does not appear to be any pattern in the residuals
 
+##### Posterior probability checks
+
+Post predictive checks provide additional diagnostics about the fit of
+the model. Specifically, they provide a comparison between predictions
+drawn from the model and the observed data used to train the model.
+
+
+**Density overlay**
+
+These are plots of the density distribution of the observed data
+(black line) overlayed on top of 50 density distributions generated
+from draws from the model (light blue). Ideally, the 50 realisations
+should be roughly consistent with the observed data.
+
+```{r}
+#| label: modelValidation_ppdensity1a
+#| fig-width: 4
+#| fig-height: 3
+dat1a.brm2 |> pp_check(type = 'dens_overlay', ndraws = 100)
+```
+
+**Conclusions**:
+
+- the model draws appear to be consistent with the observed data
+
+
